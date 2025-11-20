@@ -27,6 +27,22 @@ const MoneyDisplay = ({ value, className }: { value: number, className?: string 
   return <span className={cn("text-emerald-600 font-semibold", className)}>{formatted}</span>;
 };
 
+const PercentDisplay = ({ value }: { value: number }) => {
+  const formatted = new Intl.NumberFormat('tr-TR', {
+    style: 'percent',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+  return <span className="text-blue-600 font-medium">{formatted}</span>;
+};
+
+const AnalysisBox = ({ label, value }: { label: string, value: number }) => (
+  <div className="text-xs text-center py-1 px-2 rounded border border-slate-100 bg-slate-50">
+    <p className="font-semibold text-slate-600 m-0">{label}</p>
+    <PercentDisplay value={value} />
+  </div>
+);
+
 const formatNumber = (value: number) => {
   return new Intl.NumberFormat('tr-TR', {
     maximumFractionDigits: 0,
@@ -125,6 +141,12 @@ export default function Simulator() {
     const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;
     const netKar = faaliyetKar - vergi;
 
+    // Margins
+    const marginBrut = netSatisHasilati !== 0 ? brutKar / netSatisHasilati : 0;
+    const marginFaaliyet = netSatisHasilati !== 0 ? faaliyetKar / netSatisHasilati : 0;
+    const marginNet = netSatisHasilati !== 0 ? netKar / netSatisHasilati : 0;
+    const marginIade = brutSatisHasilatiKDVHariç !== 0 ? iadeTutariNet / brutSatisHasilatiKDVHariç : 0;
+
     // VAT Analysis
     const satisKDVTutari = satis.vat * (adet - iadeKaybiAdet);
     const alisKDV = maliyet.vat * adet;
@@ -179,6 +201,10 @@ export default function Simulator() {
       faaliyetKar,
       vergi,
       netKar,
+      marginBrut,
+      marginFaaliyet,
+      marginNet,
+      marginIade,
       satisKDVTutari,
       alisKDV,
       komisyonKDV,
@@ -221,40 +247,63 @@ export default function Simulator() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="adet" className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
-                  <Input id="adet" className="h-9 text-sm" type="number" step="1" value={values.adet} onChange={(e) => handleChange('adet', e.target.value)} />
+                  <div className="relative">
+                    <Input id="adet" className="h-9 text-sm" type="number" step="1" value={values.adet} onChange={(e) => handleChange('adet', e.target.value)} />
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="satisFiyat" className="text-xs font-medium text-slate-600">Birim Satış (₺)</Label>
-                  <Input id="satisFiyat" className="h-9 text-sm" type="number" step="0.01" value={values.satisFiyat} onChange={(e) => handleChange('satisFiyat', e.target.value)} />
+                  <div className="relative">
+                    <Input id="satisFiyat" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.satisFiyat} onChange={(e) => handleChange('satisFiyat', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="birimMaliyet" className="text-xs font-medium text-slate-600">Birim Maliyet (₺)</Label>
-                  <Input id="birimMaliyet" className="h-9 text-sm" type="number" step="0.01" value={values.birimMaliyet} onChange={(e) => handleChange('birimMaliyet', e.target.value)} />
+                  <div className="relative">
+                    <Input id="birimMaliyet" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.birimMaliyet} onChange={(e) => handleChange('birimMaliyet', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="kargo" className="text-xs font-medium text-slate-600">Ort. Kargo (₺)</Label>
-                  <Input id="kargo" className="h-9 text-sm" type="number" step="0.01" value={values.kargo} onChange={(e) => handleChange('kargo', e.target.value)} />
+                  <div className="relative">
+                    <Input id="kargo" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.kargo} onChange={(e) => handleChange('kargo', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="komisyon" className="text-xs font-medium text-slate-600">Komisyon %</Label>
-                  <Input id="komisyon" className="h-9 text-sm" type="number" step="0.1" value={values.komisyon} onChange={(e) => handleChange('komisyon', e.target.value)} />
+                  <div className="relative">
+                    <Input id="komisyon" className="h-9 text-sm pr-6" type="number" step="0.1" value={values.komisyon} onChange={(e) => handleChange('komisyon', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="kdvOrani" className="text-xs font-medium text-slate-600">KDV %</Label>
-                  <Input id="kdvOrani" className="h-9 text-sm" type="number" step="1" value={values.kdvOrani} onChange={(e) => handleChange('kdvOrani', e.target.value)} />
+                  <div className="relative">
+                    <Input id="kdvOrani" className="h-9 text-sm pr-6" type="number" step="1" value={values.kdvOrani} onChange={(e) => handleChange('kdvOrani', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="iadeOrani" className="text-xs font-medium text-slate-600">İade %</Label>
-                  <Input id="iadeOrani" className="h-9 text-sm" type="number" step="0.1" value={values.iadeOrani} onChange={(e) => handleChange('iadeOrani', e.target.value)} />
+                  <div className="relative">
+                    <Input id="iadeOrani" className="h-9 text-sm pr-6" type="number" step="0.1" value={values.iadeOrani} onChange={(e) => handleChange('iadeOrani', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                  </div>
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="gelirVergisi" className="text-xs font-medium text-slate-600">Gelir/Kurumlar Vergisi (%)</Label>
-                <Input id="gelirVergisi" className="h-9 text-sm" type="number" step="1" value={values.gelirVergisi} onChange={(e) => handleChange('gelirVergisi', e.target.value)} />
+                <div className="relative">
+                  <Input id="gelirVergisi" className="h-9 text-sm pr-6" type="number" step="1" value={values.gelirVergisi} onChange={(e) => handleChange('gelirVergisi', e.target.value)} />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -265,31 +314,47 @@ export default function Simulator() {
                 <Building2 className="w-4 h-4" />
                 Sabit Giderler (Aylık)
               </CardTitle>
+              <CardDescription className="text-xs mt-1">(KDV %20 Oranından Düşülecektir)</CardDescription>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="personel" className="text-xs font-medium text-slate-600">Personel (₺)</Label>
-                  <Input id="personel" className="h-9 text-sm" type="number" step="0.01" value={values.personel} onChange={(e) => handleChange('personel', e.target.value)} />
+                  <div className="relative">
+                    <Input id="personel" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.personel} onChange={(e) => handleChange('personel', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="depo" className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
-                  <Input id="depo" className="h-9 text-sm" type="number" step="0.01" value={values.depo} onChange={(e) => handleChange('depo', e.target.value)} />
+                  <div className="relative">
+                    <Input id="depo" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.depo} onChange={(e) => handleChange('depo', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="muhasebe" className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
-                  <Input id="muhasebe" className="h-9 text-sm" type="number" step="0.01" value={values.muhasebe} onChange={(e) => handleChange('muhasebe', e.target.value)} />
+                  <div className="relative">
+                    <Input id="muhasebe" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.muhasebe} onChange={(e) => handleChange('muhasebe', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="pazarlama" className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
-                  <Input id="pazarlama" className="h-9 text-sm" type="number" step="0.01" value={values.pazarlama} onChange={(e) => handleChange('pazarlama', e.target.value)} />
+                  <div className="relative">
+                    <Input id="pazarlama" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.pazarlama} onChange={(e) => handleChange('pazarlama', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="digerGiderler" className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
-                <Input id="digerGiderler" className="h-9 text-sm" type="number" step="0.01" value={values.digerGiderler} onChange={(e) => handleChange('digerGiderler', e.target.value)} />
+                <div className="relative">
+                  <Input id="digerGiderler" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.digerGiderler} onChange={(e) => handleChange('digerGiderler', e.target.value)} />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -304,7 +369,10 @@ export default function Simulator() {
             <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="hedefKarTL" className="text-xs font-medium text-slate-600">Hedef Net Kâr (₺)</Label>
-                <Input id="hedefKarTL" className="h-9 text-sm" type="number" step="0.01" value={values.hedefKarTL} onChange={(e) => handleChange('hedefKarTL', e.target.value)} />
+                <div className="relative">
+                  <Input id="hedefKarTL" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.hedefKarTL} onChange={(e) => handleChange('hedefKarTL', e.target.value)} />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -323,6 +391,13 @@ export default function Simulator() {
                       Aylık Kâr/Zarar Tablosu
                     </CardTitle>
                     <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">(₺, KDV Hariç Net Tutarlar)</span>
+                  </div>
+                  {/* Margin Analysis Grid */}
+                  <div className="grid grid-cols-4 gap-2 mt-3">
+                    <AnalysisBox label="Kâr Marjı (Brüt)" value={results.marginBrut} />
+                    <AnalysisBox label="Kâr Marjı (Faaliyet)" value={results.marginFaaliyet} />
+                    <AnalysisBox label="Kâr Marjı (Net)" value={results.marginNet} />
+                    <AnalysisBox label="İade Oranı (Tutar)" value={results.marginIade} />
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">

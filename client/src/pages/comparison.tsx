@@ -13,7 +13,11 @@ const GIDER_KDV_ORANI_SABIT = 20;
 const STOPAJ_RATE = 0.01;
 
 // Helper Components
-const MoneyDisplay = ({ value, className }: { value: number, className?: string }) => {
+const MoneyDisplay = ({ value, className, showLossAsNegative = false }: { value: number, className?: string, showLossAsNegative?: boolean }) => {
+  if (value < 0 && showLossAsNegative) {
+    return <span className={cn("text-red-600 font-semibold text-lg", className)}>-</span>;
+  }
+
   const absValue = Math.abs(value);
   const formatted = new Intl.NumberFormat('tr-TR', {
     style: 'currency',
@@ -560,8 +564,8 @@ export default function ComparisonSimulator() {
                         })}
                         <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t-2 border-green-200">
                           <TableCell className="font-bold text-green-900 text-[1.1em] py-4">NET KÂR / ZARAR</TableCell>
-                          <TableCell className="text-right font-bold text-green-900 text-[1.1em] py-4"><MoneyDisplay value={result1.netKar} className="text-green-900" /></TableCell>
-                          <TableCell className="text-right font-bold text-green-900 text-[1.1em] py-4"><MoneyDisplay value={result2.netKar} className="text-green-900" /></TableCell>
+                          <TableCell className="text-right font-bold text-[1.1em] py-4"><MoneyDisplay value={result1.netKar} showLossAsNegative={true} /></TableCell>
+                          <TableCell className="text-right font-bold text-[1.1em] py-4"><MoneyDisplay value={result2.netKar} showLossAsNegative={true} /></TableCell>
                           <TableCell className="text-right font-bold py-4"><DiffDisplay value={result2.netKar - result1.netKar} /></TableCell>
                         </TableRow>
                       </TableBody>
@@ -596,13 +600,13 @@ export default function ComparisonSimulator() {
                               <TableCell className="text-right py-2.5">
                                 {metric.isInt ? 
                                   `${Math.ceil(val1)} Adet` : 
-                                  <MoneyDisplay value={val1} className="text-slate-700" />
+                                  <MoneyDisplay value={val1} className="text-slate-700" showLossAsNegative={metric.key === 'netKarBirim'} />
                                 }
                               </TableCell>
                               <TableCell className="text-right py-2.5">
                                 {metric.isInt ? 
                                   `${Math.ceil(val2)} Adet` : 
-                                  <MoneyDisplay value={val2} className="text-slate-700" />
+                                  <MoneyDisplay value={val2} className="text-slate-700" showLossAsNegative={metric.key === 'netKarBirim'} />
                                 }
                               </TableCell>
                               <TableCell className="text-right py-2.5">

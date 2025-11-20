@@ -467,10 +467,26 @@ export default function Simulator() {
         </div>
 
         {/* Right Column: Outputs */}
-        <div className="grid grid-rows-[auto_1fr] gap-6 h-full">
+        <div className="grid grid-rows-[auto_auto_1fr] gap-6 h-full">
           {results ? (
             <>
-              {/* P&L Table - Top Row */}
+              {/* KPI Block - Top */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                  <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Başabaş Noktası (Adet)</h4>
+                  <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.bepAdet))} Adet</p>
+                </div>
+                <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                  <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr Adedi</h4>
+                  <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
+                </div>
+                <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                  <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Birim Fiyat</h4>
+                  <p className="text-[1.5em] font-bold text-blue-600 m-1">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
+                </div>
+              </div>
+
+              {/* P&L Table - Below KPIs */}
               <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
                 <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
                   <div className="flex items-center justify-between">
@@ -617,25 +633,8 @@ export default function Simulator() {
                   </CardContent>
                 </Card>
 
-                {/* KPI & Unit Economics */}
-                <div className="space-y-6">
-                  {/* KPI Group */}
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center">
-                      <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Başabaş Noktası (Adet)</h4>
-                      <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.bepAdet))} Adet</p>
-                    </div>
-                    <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center">
-                      <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr İçin Gerekli Adet</h4>
-                      <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
-                    </div>
-                    <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center">
-                      <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr İçin Birim Fiyat (KDV Dahil)</h4>
-                      <p className="text-[1.5em] font-bold text-blue-600 m-1">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
-                    </div>
-                  </div>
-
-                  {/* Unit Economics Table with Integrated Breakdown */}
+                {/* Unit Economics - Birim Ekonomisi */}
+                <div>
                   <div>
                      <h2 className="text-[1.3em] font-semibold text-blue-600 flex items-center gap-2 mb-3 border-b-2 border-[#e0e0e0] pb-2">
                         <PieChart className="w-5 h-5" />

@@ -216,7 +216,30 @@ export default function Simulator() {
       bepAdet = (low + high) / 2;
     }
 
-    const hedefAdet = katkiPayiBirim > 0 ? (sabitGiderlerToplamNet + hedefKarTL) / katkiPayiBirim : 0;
+    // Binary search to find target quantity (where netKar = hedefKarTL)
+    let hedefAdet = 0;
+    if (katkiPayiBirim > 0) {
+      let low = 0;
+      let high = (sabitGiderlerToplamNet + hedefKarTL) / katkiPayiBirim * 2; // Upper bound estimate
+      
+      for (let i = 0; i < 50; i++) {
+        const mid = (low + high) / 2;
+        const netKarAtMid = calculateNetKarForQuantity(mid);
+        
+        if (Math.abs(netKarAtMid - hedefKarTL) < 0.01) {
+          hedefAdet = mid;
+          break;
+        }
+        
+        if (netKarAtMid < hedefKarTL) {
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+      
+      hedefAdet = (low + high) / 2;
+    }
 
     // Target Price Calculation
     const hedefKarNet = hedefKarTL / (1 - gelirVergisiYuzde);

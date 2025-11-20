@@ -3,21 +3,28 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calculator, TrendingUp, DollarSign, Percent, Package, Building2, PieChart } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Percent, Package, Building2, PieChart, Scale, Target } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
 const GIDER_KDV_ORANI_SABIT = 20;
 const STOPAJ_RATE = 0.01;
 
-// Utility Functions
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('tr-TR', {
+// Utility Components & Functions
+const MoneyDisplay = ({ value, className }: { value: number, className?: string }) => {
+  const absValue = Math.abs(value);
+  const formatted = new Intl.NumberFormat('tr-TR', {
     style: 'currency',
     currency: 'TRY',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(absValue);
+
+  if (value < 0) {
+    return <span className={cn("text-red-600 font-semibold", className)}>({formatted})</span>;
+  }
+  return <span className={cn("text-emerald-600 font-semibold", className)}>{formatted}</span>;
 };
 
 const formatNumber = (value: number) => {
@@ -192,297 +199,312 @@ export default function Simulator() {
   }, [values]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 font-sans text-slate-900">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="min-h-screen bg-[#eef3f6] p-4 md:p-6 font-sans text-slate-900">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         
         {/* Left Column: Inputs */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="flex items-center space-x-2 mb-2">
+        <div className="space-y-4 h-full overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex items-center space-x-2 mb-1">
             <Calculator className="w-6 h-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-slate-800">E-Ticaret Simülatörü</h1>
+            <h1 className="text-xl font-bold text-slate-800">Finansal Simülatör</h1>
           </div>
 
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-blue-500" />
+          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
                 Satış ve Birim Verileri
               </CardTitle>
-              <CardDescription>KDV dahil tutarları giriniz.</CardDescription>
+              <CardDescription className="text-xs mt-1">*Parasal Girdiler KDV Dahil.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="adet">Satış Adedi (Ay)</Label>
-                  <Input id="adet" type="number" step="1" value={values.adet} onChange={(e) => handleChange('adet', e.target.value)} />
+            <CardContent className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="adet" className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
+                  <Input id="adet" className="h-9 text-sm" type="number" step="1" value={values.adet} onChange={(e) => handleChange('adet', e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="satisFiyat">Satış Fiyatı (₺)</Label>
-                  <Input id="satisFiyat" type="number" step="0.01" value={values.satisFiyat} onChange={(e) => handleChange('satisFiyat', e.target.value)} />
+                <div className="space-y-1.5">
+                  <Label htmlFor="satisFiyat" className="text-xs font-medium text-slate-600">Birim Satış (₺)</Label>
+                  <Input id="satisFiyat" className="h-9 text-sm" type="number" step="0.01" value={values.satisFiyat} onChange={(e) => handleChange('satisFiyat', e.target.value)} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="birimMaliyet">Birim Maliyet (₺)</Label>
-                  <Input id="birimMaliyet" type="number" step="0.01" value={values.birimMaliyet} onChange={(e) => handleChange('birimMaliyet', e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="birimMaliyet" className="text-xs font-medium text-slate-600">Birim Maliyet (₺)</Label>
+                  <Input id="birimMaliyet" className="h-9 text-sm" type="number" step="0.01" value={values.birimMaliyet} onChange={(e) => handleChange('birimMaliyet', e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="kargo">Ort. Kargo (₺)</Label>
-                  <Input id="kargo" type="number" step="0.01" value={values.kargo} onChange={(e) => handleChange('kargo', e.target.value)} />
+                <div className="space-y-1.5">
+                  <Label htmlFor="kargo" className="text-xs font-medium text-slate-600">Ort. Kargo (₺)</Label>
+                  <Input id="kargo" className="h-9 text-sm" type="number" step="0.01" value={values.kargo} onChange={(e) => handleChange('kargo', e.target.value)} />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-2">
-                  <Label htmlFor="komisyon" className="text-xs">Komisyon %</Label>
-                  <Input id="komisyon" type="number" step="0.1" value={values.komisyon} onChange={(e) => handleChange('komisyon', e.target.value)} />
+                <div className="space-y-1.5">
+                  <Label htmlFor="komisyon" className="text-xs font-medium text-slate-600">Komisyon %</Label>
+                  <Input id="komisyon" className="h-9 text-sm" type="number" step="0.1" value={values.komisyon} onChange={(e) => handleChange('komisyon', e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="kdvOrani" className="text-xs">KDV %</Label>
-                  <Input id="kdvOrani" type="number" step="1" value={values.kdvOrani} onChange={(e) => handleChange('kdvOrani', e.target.value)} />
+                <div className="space-y-1.5">
+                  <Label htmlFor="kdvOrani" className="text-xs font-medium text-slate-600">KDV %</Label>
+                  <Input id="kdvOrani" className="h-9 text-sm" type="number" step="1" value={values.kdvOrani} onChange={(e) => handleChange('kdvOrani', e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="iadeOrani" className="text-xs">İade %</Label>
-                  <Input id="iadeOrani" type="number" step="0.1" value={values.iadeOrani} onChange={(e) => handleChange('iadeOrani', e.target.value)} />
+                <div className="space-y-1.5">
+                  <Label htmlFor="iadeOrani" className="text-xs font-medium text-slate-600">İade %</Label>
+                  <Input id="iadeOrani" className="h-9 text-sm" type="number" step="0.1" value={values.iadeOrani} onChange={(e) => handleChange('iadeOrani', e.target.value)} />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="gelirVergisi">Gelir/Kurumlar Vergisi Oranı (%)</Label>
-                <Input id="gelirVergisi" type="number" step="1" value={values.gelirVergisi} onChange={(e) => handleChange('gelirVergisi', e.target.value)} />
+              <div className="space-y-1.5">
+                <Label htmlFor="gelirVergisi" className="text-xs font-medium text-slate-600">Gelir/Kurumlar Vergisi (%)</Label>
+                <Input id="gelirVergisi" className="h-9 text-sm" type="number" step="1" value={values.gelirVergisi} onChange={(e) => handleChange('gelirVergisi', e.target.value)} />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-amber-500" />
+          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
                 Sabit Giderler (Aylık)
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="personel">Personel (₺)</Label>
-                  <Input id="personel" type="number" step="0.01" value={values.personel} onChange={(e) => handleChange('personel', e.target.value)} />
+            <CardContent className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="personel" className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                  <Input id="personel" className="h-9 text-sm" type="number" step="0.01" value={values.personel} onChange={(e) => handleChange('personel', e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="depo">Depo / Kira (₺)</Label>
-                  <Input id="depo" type="number" step="0.01" value={values.depo} onChange={(e) => handleChange('depo', e.target.value)} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="muhasebe">Muhasebe (₺)</Label>
-                  <Input id="muhasebe" type="number" step="0.01" value={values.muhasebe} onChange={(e) => handleChange('muhasebe', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="pazarlama">Pazarlama (₺)</Label>
-                  <Input id="pazarlama" type="number" step="0.01" value={values.pazarlama} onChange={(e) => handleChange('pazarlama', e.target.value)} />
+                <div className="space-y-1.5">
+                  <Label htmlFor="depo" className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
+                  <Input id="depo" className="h-9 text-sm" type="number" step="0.01" value={values.depo} onChange={(e) => handleChange('depo', e.target.value)} />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="digerGiderler">Diğer Giderler (₺)</Label>
-                <Input id="digerGiderler" type="number" step="0.01" value={values.digerGiderler} onChange={(e) => handleChange('digerGiderler', e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="muhasebe" className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                  <Input id="muhasebe" className="h-9 text-sm" type="number" step="0.01" value={values.muhasebe} onChange={(e) => handleChange('muhasebe', e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pazarlama" className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                  <Input id="pazarlama" className="h-9 text-sm" type="number" step="0.01" value={values.pazarlama} onChange={(e) => handleChange('pazarlama', e.target.value)} />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="digerGiderler" className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                <Input id="digerGiderler" className="h-9 text-sm" type="number" step="0.01" value={values.digerGiderler} onChange={(e) => handleChange('digerGiderler', e.target.value)} />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-600" />
+          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                <Target className="w-4 h-4" />
                 Hedefler
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="hedefKarTL">Hedef Net Kâr (₺)</Label>
-                  <Input id="hedefKarTL" type="number" step="0.01" value={values.hedefKarTL} onChange={(e) => handleChange('hedefKarTL', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="hedefKarYuzde">Hedef Kâr %</Label>
-                  <Input id="hedefKarYuzde" type="number" step="0.1" value={values.hedefKarYuzde} onChange={(e) => handleChange('hedefKarYuzde', e.target.value)} />
-                </div>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="hedefKarTL" className="text-xs font-medium text-slate-600">Hedef Net Kâr (₺)</Label>
+                <Input id="hedefKarTL" className="h-9 text-sm" type="number" step="0.01" value={values.hedefKarTL} onChange={(e) => handleChange('hedefKarTL', e.target.value)} />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Right Column: Outputs */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="grid grid-rows-[auto_1fr] gap-6 h-full">
           {results ? (
             <>
-              {/* P&L Table */}
-              <Card className="border-slate-200 shadow-md overflow-hidden">
-                <CardHeader className="bg-white border-b border-slate-100 pb-4">
+              {/* P&L Table - Top Row */}
+              <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden">
+                <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <PieChart className="w-5 h-5 text-indigo-600" />
+                    <CardTitle className="text-[1.3em] font-semibold text-blue-600 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
                       Aylık Kâr/Zarar Tablosu
                     </CardTitle>
-                    <span className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded">KDV Hariç Net Tutarlar</span>
+                    <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">(₺, KDV Hariç Net Tutarlar)</span>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium text-slate-600">Brüt Satış Hasılatı</TableCell>
-                        <TableCell className="text-right font-medium">{formatCurrency(results.brutSatisHasilatiKDVHariç)}</TableCell>
+                    <TableBody className="text-[0.9em]">
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 font-medium text-slate-700">Brüt Satış Hasılatı</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-medium"><MoneyDisplay value={results.brutSatisHasilatiKDVHariç} className="text-emerald-600" /></TableCell>
                       </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium text-red-500">(-) İade Tutarı</TableCell>
-                        <TableCell className="text-right text-red-500">{formatCurrency(results.iadeTutariNet)}</TableCell>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 font-medium text-red-500">(-) İade Tutarı</TableCell>
+                        <TableCell className="py-2 pr-6 text-right"><MoneyDisplay value={results.iadeTutariNet} className="text-red-500" /></TableCell>
                       </TableRow>
-                      <TableRow className="bg-slate-50">
-                        <TableCell className="font-bold text-slate-800">= Net Satış Hasılatı</TableCell>
-                        <TableCell className="text-right font-bold text-slate-800">{formatCurrency(results.netSatisHasilati)}</TableCell>
+                      <TableRow className="bg-slate-100 hover:bg-slate-100">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-800">= Net Satış Hasılatı</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-800"><MoneyDisplay value={results.netSatisHasilati} className="text-slate-800" /></TableCell>
                       </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium text-red-500">(-) Satılan Malın Maliyeti</TableCell>
-                        <TableCell className="text-right text-red-500">{formatCurrency(results.smToplam)}</TableCell>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 font-medium text-red-500">(-) Satılan Malın Maliyeti (SM)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right"><MoneyDisplay value={results.smToplam} className="text-red-500" /></TableCell>
                       </TableRow>
-                      <TableRow className="bg-slate-100">
-                        <TableCell className="font-bold text-slate-900">= Brüt Kâr</TableCell>
-                        <TableCell className="text-right font-bold text-slate-900">{formatCurrency(results.brutKar)}</TableCell>
+                      <TableRow className="bg-slate-100 hover:bg-slate-100">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-900">= Brüt Kâr</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-900"><MoneyDisplay value={results.brutKar} className="text-slate-900" /></TableCell>
                       </TableRow>
                       
                       {/* Expenses Breakdown */}
-                      <TableRow>
-                        <TableCell colSpan={2} className="bg-slate-50 text-xs font-semibold text-slate-500 text-center py-1 uppercase tracking-wider">Faaliyet Giderleri Detayı</TableCell>
+                      <TableRow className="hover:bg-transparent">
+                        <TableCell colSpan={2} className="bg-[#f1f1f1] text-xs font-bold text-slate-600 text-center py-1.5 uppercase tracking-wider">Faaliyet Giderleri Detayı (KDV Hariç)</TableCell>
                       </TableRow>
-                      <TableRow className="text-sm">
-                        <TableCell className="pl-8 text-slate-600">Pazaryeri Komisyonu</TableCell>
-                        <TableCell className="text-right text-slate-600">{formatCurrency(results.komisyonToplam)}</TableCell>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Pazaryeri Komisyonu (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600"><MoneyDisplay value={results.komisyonToplam} className="text-slate-600" /></TableCell>
                       </TableRow>
-                      <TableRow className="text-sm">
-                        <TableCell className="pl-8 text-slate-600">Kargo Gideri</TableCell>
-                        <TableCell className="text-right text-slate-600">{formatCurrency(results.kargoToplam)}</TableCell>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Kargo Gideri (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600"><MoneyDisplay value={results.kargoToplam} className="text-slate-600" /></TableCell>
                       </TableRow>
-                      <TableRow className="text-sm">
-                        <TableCell className="pl-8 text-slate-600">Platform Hizmet Bedeli</TableCell>
-                        <TableCell className="text-right text-slate-600">{formatCurrency(results.platformFeeToplam)}</TableCell>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Platform Hizmet Bedeli (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600"><MoneyDisplay value={results.platformFeeToplam} className="text-slate-600" /></TableCell>
                       </TableRow>
-                      <TableRow className="text-sm">
-                        <TableCell className="pl-8 text-slate-600">Stopaj Gideri</TableCell>
-                        <TableCell className="text-right text-slate-600">{formatCurrency(results.stopajToplam)}</TableCell>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Stopaj Gideri (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600"><MoneyDisplay value={results.stopajToplam} className="text-slate-600" /></TableCell>
                       </TableRow>
-                      <TableRow className="text-sm border-b-2 border-slate-100">
-                        <TableCell className="pl-8 text-slate-600">Toplam Sabit Giderler</TableCell>
-                        <TableCell className="text-right text-slate-600">{formatCurrency(results.sabitGiderlerToplamNet)}</TableCell>
-                      </TableRow>
-
-                      <TableRow className="bg-slate-50">
-                        <TableCell className="font-bold text-red-600">(-) Toplam Faaliyet Giderleri</TableCell>
-                        <TableCell className="text-right font-bold text-red-600">{formatCurrency(results.faaliyetGiderleriToplam)}</TableCell>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Toplam Sabit Giderler</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600"><MoneyDisplay value={results.sabitGiderlerToplamNet} className="text-slate-600" /></TableCell>
                       </TableRow>
 
-                      <TableRow className="bg-slate-100">
-                        <TableCell className="font-bold text-slate-800">= Faaliyet Kârı (EBIT)</TableCell>
-                        <TableCell className="text-right font-bold text-slate-800">{formatCurrency(results.faaliyetKar)}</TableCell>
+                      <TableRow className="bg-slate-100 hover:bg-slate-100">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-700">(-) Toplam Faaliyet Giderleri</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-700"><MoneyDisplay value={results.faaliyetGiderleriToplam} className="text-slate-700" /></TableCell>
                       </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium text-red-500">(-) Gelir/Kurumlar Vergisi</TableCell>
-                        <TableCell className="text-right text-red-500">{formatCurrency(results.vergi)}</TableCell>
+
+                      <TableRow className="bg-slate-100 hover:bg-slate-100 border-t border-slate-200">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-800">= Faaliyet Kârı (EBIT)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-800"><MoneyDisplay value={results.faaliyetKar} className="text-slate-800" /></TableCell>
                       </TableRow>
-                      <TableRow className="bg-green-50 border-t-2 border-green-100">
-                        <TableCell className="text-lg font-bold text-green-800">NET KÂR / ZARAR</TableCell>
-                        <TableCell className="text-lg font-bold text-right text-green-800">{formatCurrency(results.netKar)}</TableCell>
+                      <TableRow className="hover:bg-transparent">
+                        <TableCell className="py-2 pl-6 font-medium text-red-500">(-) Gelir/Kurumlar Vergisi</TableCell>
+                        <TableCell className="py-2 pr-6 text-right"><MoneyDisplay value={results.vergi} className="text-red-500" /></TableCell>
+                      </TableRow>
+                      <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
+                        <TableCell className="py-3 pl-6 text-[1.1em] font-bold text-green-900">NET KÂR / ZARAR</TableCell>
+                        <TableCell className="py-3 pr-6 text-[1.1em] font-bold text-right text-green-900"><MoneyDisplay value={results.netKar} className="text-green-900" /></TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Bottom Row: Split Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6">
                 {/* Tax Analysis */}
-                <Card className="border-slate-200 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Percent className="w-4 h-4 text-orange-500" />
-                      Vergi Analizi (KDV)
+                <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden h-fit">
+                  <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                    <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                      <Scale className="w-5 h-5" />
+                      Vergi Analizi (Detaylı)
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <Table>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell className="py-2 font-medium">Satış KDV (Hesaplanan)</TableCell>
-                          <TableCell className="py-2 text-right font-medium">{formatCurrency(results.satisKDVTutari)}</TableCell>
+                      <TableBody className="text-[0.9em]">
+                        <TableRow className="hover:bg-transparent border-b border-slate-50">
+                          <TableCell className="py-2 pl-5 font-medium">Satış KDV&apos;si (Hesaplanan)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right font-medium"><MoneyDisplay value={results.satisKDVTutari} className="text-slate-700" /></TableCell>
                         </TableRow>
-                        <TableRow>
-                          <TableCell className="py-2 text-green-600">(-) İndirilebilir KDV Toplamı</TableCell>
-                          <TableCell className="py-2 text-right text-green-600">{formatCurrency(results.indirilebilirKDVToplam)}</TableCell>
+                        <TableRow className="hover:bg-transparent">
+                          <TableCell colSpan={2} className="bg-slate-100 text-center py-1.5 font-bold text-slate-700">İndirilebilir KDV Detayı</TableCell>
                         </TableRow>
-                        <TableRow className="bg-orange-50">
-                          <TableCell className="py-3 font-bold text-orange-800">Ödenecek KDV</TableCell>
-                          <TableCell className="py-3 text-right font-bold text-orange-800">{formatCurrency(results.odenecekKDV)}</TableCell>
+                        <TableRow className="hover:bg-transparent border-b border-slate-50">
+                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Alış KDV (SM)</TableCell>
+                          <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.alisKDV} className="text-slate-600" /></TableCell>
                         </TableRow>
-                        {results.devredenKDV > 0 && (
-                          <TableRow className="bg-yellow-50">
-                            <TableCell className="py-2 font-medium text-yellow-800">Devreden KDV</TableCell>
-                            <TableCell className="py-2 text-right font-bold text-yellow-800">{formatCurrency(results.devredenKDV)}</TableCell>
-                          </TableRow>
-                        )}
+                        <TableRow className="hover:bg-transparent border-b border-slate-50">
+                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Komisyon KDV</TableCell>
+                          <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.komisyonKDV} className="text-slate-600" /></TableCell>
+                        </TableRow>
+                        <TableRow className="hover:bg-transparent border-b border-slate-50">
+                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Kargo KDV</TableCell>
+                          <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.kargoKDVTutari} className="text-slate-600" /></TableCell>
+                        </TableRow>
+                        <TableRow className="hover:bg-transparent border-b border-slate-50">
+                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Platform Hiz. KDV</TableCell>
+                          <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.platformFeeKDV} className="text-slate-600" /></TableCell>
+                        </TableRow>
+                        <TableRow className="hover:bg-transparent border-b border-slate-50">
+                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Sabit Giderler KDV</TableCell>
+                          <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.sabitGiderlerKDVToplam} className="text-slate-600" /></TableCell>
+                        </TableRow>
+                        
+                        <TableRow className="bg-slate-100 hover:bg-slate-100 border-t border-slate-200">
+                          <TableCell className="py-2 pl-5 font-bold text-slate-800">Toplam İndirilebilir KDV</TableCell>
+                          <TableCell className="py-2 pr-5 text-right font-bold text-slate-800"><MoneyDisplay value={results.indirilebilirKDVToplam} className="text-slate-800" /></TableCell>
+                        </TableRow>
+                        <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
+                          <TableCell className="py-3 pl-5 font-bold text-green-900">Ödenecek KDV Tutarı</TableCell>
+                          <TableCell className="py-3 pr-5 text-right font-bold text-green-900"><MoneyDisplay value={results.odenecekKDV} className="text-green-900" /></TableCell>
+                        </TableRow>
+                        <TableRow className="bg-[#fff3cd] hover:bg-[#fff3cd] border-t border-yellow-200">
+                          <TableCell className="py-3 pl-5 font-bold text-[#856404]">Biriken (Devreden) KDV</TableCell>
+                          <TableCell className="py-3 pr-5 text-right font-bold text-[#856404]"><MoneyDisplay value={results.devredenKDV} className="text-[#856404]" /></TableCell>
+                        </TableRow>
                       </TableBody>
                     </Table>
                   </CardContent>
                 </Card>
 
-                {/* KPI Cards */}
-                <div className="space-y-4">
-                  <Card className="bg-blue-50 border-blue-100 shadow-none">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="text-sm font-medium text-blue-600 uppercase tracking-wide">Başabaş Noktası</h4>
-                      <p className="text-3xl font-bold text-blue-900 mt-1">{formatNumber(Math.ceil(results.bepAdet))} <span className="text-base font-normal text-blue-700">Adet</span></p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-purple-50 border-purple-100 shadow-none">
-                    <CardContent className="p-4 text-center">
-                      <h4 className="text-sm font-medium text-purple-600 uppercase tracking-wide">Hedef Kâr İçin Gerekli Satış</h4>
-                      <p className="text-3xl font-bold text-purple-900 mt-1">{formatNumber(Math.ceil(results.hedefAdet))} <span className="text-base font-normal text-purple-700">Adet</span></p>
-                    </CardContent>
-                  </Card>
+                {/* KPI & Unit Economics */}
+                <div className="space-y-6">
+                  {/* KPI Group */}
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center">
+                      <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Başabaş Noktası (Adet)</h4>
+                      <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.bepAdet))} Adet</p>
+                    </div>
+                    <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center">
+                      <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr İçin Gerekli Adet</h4>
+                      <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
+                    </div>
+                  </div>
+
+                  {/* Unit Economics Table */}
+                  <div>
+                     <h2 className="text-[1.3em] font-semibold text-blue-600 flex items-center gap-2 mb-3 border-b-2 border-[#e0e0e0] pb-2">
+                        <PieChart className="w-5 h-5" />
+                        Birim Ekonomisi
+                      </h2>
+                      <Card className="border-0 shadow-none p-0">
+                        <CardContent className="p-0">
+                          <Table>
+                             <TableBody className="text-[0.9em]">
+                                <TableRow className="hover:bg-transparent border-b border-slate-100">
+                                  <TableCell className="py-2 pl-2 font-medium text-slate-700">Birim Satış Fiyatı (KDV Hariç)</TableCell>
+                                  <TableCell className="py-2 pr-2 text-right"><MoneyDisplay value={results.satisNet} className="text-slate-700" /></TableCell>
+                                </TableRow>
+                                <TableRow className="bg-slate-100 hover:bg-slate-100">
+                                  <TableCell className="py-2 pl-2 font-bold text-slate-800">Hedef Kâr İçin Birim Fiyat (KDV Dahil)</TableCell>
+                                  <TableCell className="py-2 pr-2 text-right font-bold text-slate-800"><MoneyDisplay value={results.hedefFiyatKDVIncl} className="text-slate-800" /></TableCell>
+                                </TableRow>
+                                <TableRow className="hover:bg-transparent border-b border-slate-100">
+                                  <TableCell className="py-2 pl-2 font-medium text-red-500">Birim Maliyetler Toplamı (KDV Hariç)</TableCell>
+                                  <TableCell className="py-2 pr-2 text-right"><MoneyDisplay value={results.birimToplamMaliyet} className="text-red-500" /></TableCell>
+                                </TableRow>
+                                <TableRow className="bg-slate-100 hover:bg-slate-100">
+                                  <TableCell className="py-2 pl-2 font-bold text-slate-800">Birim Katkı Payı</TableCell>
+                                  <TableCell className="py-2 pr-2 text-right font-bold text-slate-800"><MoneyDisplay value={results.katkiPayiBirim} className="text-slate-800" /></TableCell>
+                                </TableRow>
+                                <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
+                                  <TableCell className="py-2 pl-2 font-bold text-green-900">Net Kâr / Birim</TableCell>
+                                  <TableCell className="py-2 pr-2 text-right font-bold text-green-900"><MoneyDisplay value={results.netKarBirim} className="text-green-900" /></TableCell>
+                                </TableRow>
+                             </TableBody>
+                          </Table>
+                        </CardContent>
+                      </Card>
+                  </div>
                 </div>
               </div>
-
-              {/* Unit Economics */}
-              <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Package className="w-4 h-4 text-slate-500" />
-                    Birim Ekonomisi
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="py-2 font-medium">Birim Satış Fiyatı (KDV Hariç)</TableCell>
-                        <TableCell className="py-2 text-right">{formatCurrency(results.satisNet)}</TableCell>
-                      </TableRow>
-                      <TableRow className="bg-purple-50">
-                        <TableCell className="py-2 font-bold text-purple-900">Hedef Kâr İçin Gerekli Fiyat (KDV Dahil)</TableCell>
-                        <TableCell className="py-2 text-right font-bold text-purple-900">{formatCurrency(results.hedefFiyatKDVIncl)}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="py-2 font-medium text-red-500">Birim Maliyetler Toplamı</TableCell>
-                        <TableCell className="py-2 text-right text-red-500">{formatCurrency(results.birimToplamMaliyet)}</TableCell>
-                      </TableRow>
-                      <TableRow className="bg-slate-50">
-                        <TableCell className="py-2 font-bold">Birim Katkı Payı</TableCell>
-                        <TableCell className="py-2 text-right font-bold">{formatCurrency(results.katkiPayiBirim)}</TableCell>
-                      </TableRow>
-                      <TableRow className="bg-green-50">
-                        <TableCell className="py-2 font-bold text-green-800">Net Kâr / Birim</TableCell>
-                        <TableCell className="py-2 text-right font-bold text-green-800">{formatCurrency(results.netKarBirim)}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
             </>
           ) : (
             <div className="h-full flex items-center justify-center text-slate-400">

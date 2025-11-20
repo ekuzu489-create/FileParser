@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Ticaret Finansal Simülatörü - Kıyaslama</title>
+    <style>
+        /* Genel Stil ve Temel Ayarlar */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef3f6;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px; /* Genişletildi */
+            height: 100vh;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 700px 1fr; /* Sol Giriş Alanı: 700px, Sağ Çıktı Alanı */
+            gap: 15px;
+            padding: 15px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: hidden; 
+            padding-right: 5px;
+        }
+        .right-column {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 15px;
+        }
+
+        /* Sekme Stilleri */
+        .tab-controls {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .tab-button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        .tab-button.active {
+            background-color: #007bff;
+            color: white;
+            border-bottom: 2px solid #007bff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Kart ve Input Stilleri */
+        .card {
+            background-color: #fff;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+            margin-top: 0;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* Kıyaslama Tablosu Stilleri */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: right;
+        }
+        .comparison-table th:first-child {
+            text-align: left;
+            background-color: #f8f9fa;
+            width: 30%;
+        }
+        .comparison-table thead th {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+        .comparison-table tbody tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+        .comparison-table tfoot th, .comparison-table tfoot td {
+            font-weight: bold;
+            background-color: #d1e7dd;
+        }
+        .diff-pos { color: #28a745; font-weight: bold; }
+        .diff-neg { color: #dc3545; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="left-column">
+        <div class="card" style="padding: 0;">
+            <div class="tab-controls">
+                <button class="tab-button active" onclick="openScenario(event, 'scenario1')">Senaryo 1 (Mevcut)</button>
+                <button class="tab-button" onclick="openScenario(event, 'scenario2')">Senaryo 2 (Kıyaslama)</button>
+            </div>
+            
+            <div id="scenario1" class="tab-content active" style="padding: 18px;">
+                <p style="font-size: 0.8em; color: #6c757d;">Mevcut iş modelinizin parametrelerini girin.</p>
+                <div id="inputs-container-1"></div>
+            </div>
+
+            <div id="scenario2" class="tab-content" style="padding: 18px;">
+                <p style="font-size: 0.8em; color: #6c757d;">Kıyaslamak istediğiniz yeni satış/maliyet varsayımlarını girin.</p>
+                <div id="inputs-container-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-column">
+        <div class="card" style="grid-row: 1 / span 2; overflow-y: auto;">
+            <h2>📊 Senaryo Kıyaslama ve Karşılaştırma</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Metrikler</th>
+                        <th>Senaryo 1</th>
+                        <th>Senaryo 2</th>
+                        <th>Fark (S2 - S1)</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-body">
+                    </tbody>
+                <tfoot>
+                    <tr class="final-row">
+                        <th>NET KÂR / ZARAR</th>
+                        <td id="comp-netKar1"></td>
+                        <td id="comp-netKar2"></td>
+                        <td id="comp-netKarDiff"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <h2 style="margin-top: 25px;">📉 Birim Ekonomisi Kıyaslaması</h2>
+            <table class="comparison-table">
+                 <thead>
+                    <tr>
+                        <th style="width: 30%;">Birim Metrikler</th>
+                        <th>Senaryo 1</th>
+                        <th>Senaryo 2</th>
+                        <th>Fark (S2 - S1)</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-unit-body">
+                     </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Zorunlu Sabitler
+    const PLATFORM_FEE_KDV_INCL = 10.19;
+    const GIDER_KDV_ORANI_SABIT = 20; 
+    const STOPAJ_RATE = 0.01; // %1 Stopaj oranı
+
+    // --- GÜVENLİK VE FORMATLAMA FONKSİYONLARI ---
+    const getNum = (id, scenario) => {
+        const value = document.getElementById(`${id}-${scenario}`).value;
+        const num = parseFloat(value.replace(',', '.')) || 0;
+        return num;
+    };
+
+    const formatTL = (number) => {
+        const formatted = Math.abs(number).toFixed(2).replace('.', ',');
+        if (number < 0) {
+            return `<span class="negative-value">(₺${formatted})</span>`;
+        } else {
+            return `<span class="positive-value">₺${formatted}</span>`;
+        }
+    };
+
+    const formatDiff = (diff) => {
+        const formatted = Math.abs(diff).toFixed(2).replace('.', ',');
+        if (diff > 0) {
+            return `<span class="diff-pos">↑ ₺${formatted}</span>`;
+        } else if (diff < 0) {
+            return `<span class="diff-neg">↓ (₺${formatted})</span>`;
+        } else {
+            return `₺0,00`;
+        }
+    };
+
+    const formatPercent = (number) => {
+        return (number * 100).toFixed(2).replace('.', ',') + '%';
+    };
+    
+    const formatKDVIncl = (netAmount, vatRate) => {
+        const rateDecimal = vatRate / 100;
+        const total = netAmount * (1 + rateDecimal);
+        return total;
+    };
+
+    const solveVAT = (amountKDVIncl, vatRate) => {
+        const rateDecimal = vatRate / 100;
+        if (vatRate === 0 || amountKDVIncl === 0) {
+            return { net: amountKDVIncl, vat: 0 };
+        }
+        const net = amountKDVIncl / (1 + rateDecimal);
+        const vat = amountKDVIncl - net;
+        return { net, vat };
+    };
+
+    // --- HTML INPUT OLUŞTURUCU ---
+    // Bu fonksiyon, her iki senaryo için aynı input setini oluşturur.
+    const createInputs = (scenario) => {
+        const defaults = {
+            adet: 500, satisFiyat: 999.99, birimMaliyet: 312.98, kargo: 85.44, komisyon: 21, kdvOrani: 20, iadeOrani: 8, gelirVergisi: 25,
+            personel: 17082, depo: 5000, muhasebe: 4800, pazarlama: 10000, digerGiderler: 2000, hedefKarTL: 50000
+        };
+
+        const inputsHtml = `
+            <div class="card" style="box-shadow: none; padding: 0;">
+                <h2>Satış ve Birim Verileri</h2>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label for="adet-${scenario}">Tahmini Satış Adedi</label>
+                        <input type="number" id="adet-${scenario}" value="${defaults.adet}" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="satisFiyat-${scenario}">Birim Satış Fiyatı (KDV Dahil, ₺)</label>
+                        <input type="number" id="satisFiyat-${scenario}" value="${defaults.satisFiyat}" oninput="calculate()">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label for="birimMaliyet-${scenario}">Birim Maliyet (KDV Dahil, ₺)</label>
+                        <input type="number" id="birimMaliyet-${scenario}" value="${defaults.birimMaliyet}" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="kargo-${scenario}">Ort. Kargo Gideri (KDV Dahil, ₺)</label>
+                        <input type="number" id="kargo-${scenario}" value="${defaults.kargo}" oninput="calculate()">
+                    </div>
+                </div>
+                <div class="grid-3">
+                    <div class="input-group">
+                        <label for="komisyon-${scenario}">Komisyon (%)</label>
+                        <input type="number" id="komisyon-${scenario}" value="${defaults.komisyon}" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="kdvOrani-${scenario}">KDV Oranı (%)</label>
+                        <input type="number" id="kdvOrani-${scenario}" value="${defaults.kdvOrani}" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="iadeOrani-${scenario}">İade Oranı (%)</label>
+                        <input type="number" id="iadeOrani-${scenario}" value="${defaults.iadeOrani}" oninput="calculate()">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="gelirVergisi-${scenario}">Gelir/Kurumlar Vergisi Oranı (%)</label>
+                    <input type="number" id="gelirVergisi-${scenario}" value="${defaults.gelirVergisi}" oninput="calculate()">
+                </div>
+            </div>
+            
+            <div class="card" style="box-shadow: none; padding: 0;">
+                <h2>Sabit Giderler (Aylık - KDV Dahil)</h2>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label for="personel-${scenario}">Personel (₺)</label>
+                        <input type="number" id="personel-${scenario}" value="${defaults.personel}" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="depo-${scenario}">Depo / Kira (₺)</label>
+                        <input type="number" id="depo-${scenario}" value="${defaults.depo}" oninput="calculate()">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label for="muhasebe-${scenario}">Muhasebe / Yazılım (₺)</label>
+                        <input type="number" id="muhasebe-${scenario}" value="${defaults.muhasebe}" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label for="pazarlama-${scenario}">Pazarlama / Reklam (₺)</label>
+                        <input type="number" id="pazarlama-${scenario}" value="${defaults.pazarlama}" oninput="calculate()">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="digerGiderler-${scenario}">Diğer Giderler (₺)</label>
+                    <input type="number" id="digerGiderler-${scenario}" value="${defaults.digerGiderler}" oninput="calculate()">
+                </div>
+            </div>
+
+            <div class="card" style="box-shadow: none; padding: 0;">
+                <h2>Hedefler</h2>
+                <div class="input-group">
+                    <label for="hedefKarTL-${scenario}">Hedef Net Kâr (₺)</label>
+                    <input type="number" id="hedefKarTL-${scenario}" value="${defaults.hedefKarTL}" oninput="calculate()">
+                </div>
+            </div>
+        `;
+        document.getElementById(`inputs-container-${scenario}`).innerHTML = inputsHtml;
+    };
+
+    // --- Finansal Hesaplama Motoru ---
+    const runAnalysis = (scenario) => {
+        // --- 1. Girdileri Al ---
+        const adet = getNum('adet', scenario);
+        if (adet === 0) return { netKar: 0, faaliyetKar: 0, brutKar: 0, netSatisHasilati: 0, bepAdet: 0, netKarBirim: 0, odenecekKDV: 0 }; // Hata önleme
+
+        const satisFiyatKDV = getNum('satisFiyat', scenario);
+        const birimMaliyetKDV = getNum('birimMaliyet', scenario);
+        const kargoKDV = getNum('kargo', scenario);
+        const komisyonYuzde = getNum('komisyon', scenario) / 100;
+        const genelKdvOrani = getNum('kdvOrani', scenario); 
+        const iadeOrani = getNum('iadeOrani', scenario) / 100;
+        const gelirVergisiYuzde = getNum('gelirVergisi', scenario) / 100;
+        const hedefKarTL = getNum('hedefKarTL', scenario);
+
+        const personelKDV = getNum('personel', scenario);
+        const depoKDV = getNum('depo', scenario);
+        const muhasebeKDV = getNum('muhasebe', scenario);
+        const pazarlamaKDV = getNum('pazarlama', scenario);
+        const digerGiderlerKDV = getNum('digerGiderler', scenario);
+
+        // --- 2. KDV Çözümleme ---
+        const satis = solveVAT(satisFiyatKDV, genelKdvOrani);
+        const maliyet = solveVAT(birimMaliyetKDV, genelKdvOrani);
+        const kargo = solveVAT(kargoKDV, GIDER_KDV_ORANI_SABIT);
+        const platformFee = solveVAT(PLATFORM_FEE_KDV_INCL, GIDER_KDV_ORANI_SABIT);
+        
+        const personelNet = personelKDV; 
+        const depo = solveVAT(depoKDV, GIDER_KDV_ORANI_SABIT);
+        const muhasebe = solveVAT(muhasebeKDV, GIDER_KDV_ORANI_SABIT);
+        const pazarlama = solveVAT(pazarlamaKDV, GIDER_KDV_ORANI_SABIT);
+        const digerGiderler = solveVAT(digerGiderlerKDV, GIDER_KDV_ORANI_SABIT);
+
+        // --- 3. Gelir, Brüt Kâr (KDV Hariç) ---
+        const brutSatisHasilatiKDVHariç = satis.net * adet;
+        const iadeKaybiAdet = adet * iadeOrani;
+        const iadeTutariNet = iadeKaybiAdet * satis.net;
+        const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet; 
+        const smToplam = maliyet.net * adet;
+        const brutKar = netSatisHasilati - smToplam; 
+
+        // --- 4. Faaliyet Giderleri (KDV Hariç) ---
+        const komisyonToplam = netSatisHasilati * komisyonYuzde;
+        const kargoToplam = kargo.net * adet;
+        const platformFeeToplam = platformFee.net * adet;
+        const stopajBirim = satis.net * STOPAJ_RATE;
+        const stopajToplam = stopajBirim * adet;
+
+        const sabitGiderlerToplamNet = personelNet + depo.net + muhasebe.net + pazarlama.net + digerGiderler.net;
+        
+        const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
+
+        // --- 5. Kâr ---
+        const faaliyetKar = brutKar - faaliyetGiderleriToplam; 
+        const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;
+        const netKar = faaliyetKar - vergi; 
+
+        // --- 6. Ödenecek KDV Hesaplaması ---
+        const satisKDVTutari = satis.vat * (adet - iadeKaybiAdet);
+        const alisKDV = maliyet.vat * adet; 
+        const kargoKDVTutari = kargo.vat * adet;
+        const platformFeeKDV = platformFee.vat * adet;
+        const komisyonKDV = komisyonToplam * (GIDER_KDV_ORANI_SABIT / 100); 
+        const sabitGiderlerKDVToplam = depo.vat + muhasebe.vat + pazarlama.vat + digerGiderler.vat;
+
+        const indirilebilirKDVToplam = alisKDV + komisyonKDV + kargoKDVTutari + platformFeeKDV + sabitGiderlerKDVToplam;
+        const odenecekKDVBrut = satisKDVTutari - indirilebilirKDVToplam;
+        const odenecekKDV = odenecekKDVBrut > 0 ? odenecekKDVBrut : 0;
+        
+        // --- 7. Birim Ekonomisi ve BEP ---
+        const birimToplamMaliyet = faaliyetGiderleriToplam / adet + smToplam / adet;
+        const birimKomisyon = komisyonToplam / adet;
+        const birimDeğişkenMaliyetlerTop = maliyet.net + birimKomisyon + kargo.net + platformFee.net + stopajBirim;
+        const katkiPayiBirim = satis.net - birimDeğişkenMaliyetlerTop;
+        const bepAdet = katkiPayiBirim > 0 ? sabitGiderlerToplamNet / katkiPayiBirim : 0;
+        
+        return {
+            netKar: netKar,
+            faaliyetKar: faaliyetKar,
+            brutKar: brutKar,
+            netSatisHasilati: netSatisHasilati,
+            odenecekKDV: odenecekKDV,
+            faaliyetGiderleriToplam: faaliyetGiderleriToplam,
+            netKarBirim: netKar / adet,
+            katkiPayiBirim: katkiPayiBirim,
+            bepAdet: bepAdet
+        };
+    };
+
+    // --- Kıyaslama ve Raporlama ---
+    const calculate = () => {
+        const result1 = runAnalysis('1');
+        const result2 = runAnalysis('2');
+
+        const metrics = [
+            { label: 'Net Satış Hasılatı', key: 'netSatisHasilati' },
+            { label: 'Brüt Kâr', key: 'brutKar' },
+            { label: 'Faaliyet Kârı (EBIT)', key: 'faaliyetKar' },
+            { label: 'Toplam Faaliyet Giderleri', key: 'faaliyetGiderleriToplam' },
+            { label: 'Ödenecek KDV', key: 'odenecekKDV' },
+        ];
+
+        let tbodyHtml = '';
+        metrics.forEach(metric => {
+            const val1 = result1[metric.key];
+            const val2 = result2[metric.key];
+            const diff = val2 - val1;
+            tbodyHtml += `
+                <tr>
+                    <th>${metric.label}</th>
+                    <td>${formatTL(val1)}</td>
+                    <td>${formatTL(val2)}</td>
+                    <td>${formatDiff(diff)}</td>
+                </tr>
+            `;
+        });
+        
+        const unitMetrics = [
+            { label: 'Net Kâr / Birim', key: 'netKarBirim' },
+            { label: 'Birim Katkı Payı', key: 'katkiPayiBirim' },
+            { label: 'Başabaş Noktası (Adet)', key: 'bepAdet', isInt: true },
+        ];
+        
+        let unitBodyHtml = '';
+        unitMetrics.forEach(metric => {
+            const val1 = metric.isInt ? Math.ceil(result1[metric.key]) : result1[metric.key];
+            const val2 = metric.isInt ? Math.ceil(result2[metric.key]) : result2[metric.key];
+            const diff = val2 - val1;
+            
+            unitBodyHtml += `
+                <tr>
+                    <th>${metric.label}</th>
+                    <td>${metric.isInt ? `${val1} Adet` : formatTL(val1)}</td>
+                    <td>${metric.isInt ? `${val2} Adet` : formatTL(val2)}</td>
+                    <td>${metric.isInt ? formatDiff(diff) : formatDiff(diff)}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('comparison-body').innerHTML = tbodyHtml;
+        document.getElementById('comparison-unit-body').innerHTML = unitBodyHtml;
+
+        // Footer Güncelleme
+        const netKarDiff = result2.netKar - result1.netKar;
+        document.getElementById('comp-netKar1').innerHTML = formatTL(result1.netKar);
+        document.getElementById('comp-netKar2').innerHTML = formatTL(result2.netKar);
+        document.getElementById('comp-netKarDiff').innerHTML = formatDiff(netKarDiff);
+    };
+
+    // --- Sekme Kontrolü ---
+    const openScenario = (evt, scenarioName) => {
+        const tabcontent = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            tabcontent[i].classList.remove("active");
+        }
+
+        const tablinks = document.getElementsByClassName("tab-button");
+        for (let i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+
+        document.getElementById(scenarioName).style.display = "block";
+        document.getElementById(scenarioName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+
+    // Sayfa Yüklendiğinde
+    document.addEventListener('DOMContentLoaded', () => {
+        createInputs('1');
+        createInputs('2');
+        
+        // İlk senaryoyu varsayılan olarak aktif et
+        document.getElementById('scenario1').style.display = 'block';
+
+        // İlk hesaplamayı çalıştır
+        calculate();
+    });
+</script>
+</body>
+</html>

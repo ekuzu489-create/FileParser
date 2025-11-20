@@ -612,6 +612,10 @@ export default function Simulator() {
                       <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr İçin Gerekli Adet</h4>
                       <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
                     </div>
+                    <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center">
+                      <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr İçin Birim Fiyat (KDV Dahil)</h4>
+                      <p className="text-[1.5em] font-bold text-blue-600 m-1">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
+                    </div>
                   </div>
 
                   {/* Unit Economics Table */}
@@ -627,10 +631,6 @@ export default function Simulator() {
                                 <TableRow className="hover:bg-transparent border-b border-slate-100">
                                   <TableCell className="py-2 pl-2 font-medium text-slate-700">Birim Satış Fiyatı (KDV Hariç)</TableCell>
                                   <TableCell className="py-2 pr-2 text-right"><MoneyDisplay value={results.satisNet} className="text-slate-700" /></TableCell>
-                                </TableRow>
-                                <TableRow className="bg-slate-100 hover:bg-slate-100">
-                                  <TableCell className="py-2 pl-2 font-bold text-slate-800">Hedef Kâr İçin Birim Fiyat (KDV Dahil)</TableCell>
-                                  <TableCell className="py-2 pr-2 text-right font-bold text-slate-800"><MoneyDisplay value={results.hedefFiyatKDVIncl} className="text-slate-800" /></TableCell>
                                 </TableRow>
                                 <TableRow className="hover:bg-transparent border-b border-slate-100">
                                   <TableCell className="py-2 pl-2 font-medium text-red-500">Birim Maliyetler Toplamı (KDV Hariç)</TableCell>

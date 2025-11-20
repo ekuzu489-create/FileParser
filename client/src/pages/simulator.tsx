@@ -296,7 +296,7 @@ export default function Simulator() {
   }, [values]);
 
   return (
-    <div className="min-h-screen bg-[#eef3f6] p-4 md:p-6 font-sans text-slate-900">
+    <div className="min-h-screen bg-white p-4 md:p-6 font-sans text-slate-900">
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         
         {/* Left Column: Inputs */}
@@ -306,7 +306,7 @@ export default function Simulator() {
             <h1 className="text-xl font-bold text-slate-800">Finansal Simülatör</h1>
           </div>
 
-          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
             <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
               <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
@@ -379,7 +379,7 @@ export default function Simulator() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
             <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
               <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
@@ -430,7 +430,7 @@ export default function Simulator() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
             <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
               <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
                 <Target className="w-4 h-4" />
@@ -454,7 +454,7 @@ export default function Simulator() {
           {results ? (
             <>
               {/* P&L Table - Top Row */}
-              <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden">
+              <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
                 <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-[1.3em] font-semibold text-blue-600 flex items-center gap-2">

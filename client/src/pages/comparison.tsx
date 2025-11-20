@@ -462,12 +462,12 @@ export default function ComparisonSimulator() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#eef3f6] p-4 md:p-6 font-sans text-slate-900">
+    <div className="min-h-screen bg-white p-4 md:p-6 font-sans text-slate-900">
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         
         {/* Left Column: Tabs and Inputs */}
         <div className="flex flex-col gap-4 h-full">
-          <Card className="flex-1 border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] p-0 overflow-hidden flex flex-col">
+          <Card className="flex-1 border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 overflow-hidden flex flex-col">
             <Tabs defaultValue="scenario1" className="flex-1 flex flex-col">
               <div className="px-4 pt-4 border-b border-slate-200">
                 <TabsList className="bg-slate-100 p-1 w-full grid grid-cols-2">
@@ -493,7 +493,7 @@ export default function ComparisonSimulator() {
             </Tabs>
           </Card>
           
-          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)]">
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
              <CardHeader className="pb-3 pt-4 px-4 border-b border-slate-100">
               <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
                 <Target className="w-4 h-4" />
@@ -521,7 +521,7 @@ export default function ComparisonSimulator() {
 
         {/* Right Column: Comparison Tables */}
         <div className="h-full overflow-y-auto pr-2 custom-scrollbar space-y-6">
-          <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden">
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
             <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
               <CardTitle className="text-[1.3em] font-semibold text-slate-800 flex items-center gap-2">
                 <Scale className="w-5 h-5 text-blue-600" />

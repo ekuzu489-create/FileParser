@@ -167,7 +167,55 @@ export default function Simulator() {
     const birimDegiskenMaliyetlerTop = maliyet.net + birimKomisyon + kargo.net + platformFee.net + stopajBirim;
     const katkiPayiBirim = satis.net - birimDegiskenMaliyetlerTop;
 
-    const bepAdet = katkiPayiBirim > 0 ? sabitGiderlerToplamNet / katkiPayiBirim : 0;
+    // Helper function to calculate net profit for a given quantity
+    const calculateNetKarForQuantity = (testAdet: number): number => {
+      if (testAdet <= 0) return -sabitGiderlerToplamNet;
+      
+      const testBrutSatisHasilati = satis.net * testAdet;
+      const testIadeKaybi = testAdet * iadeOrani;
+      const testIadeTutari = testIadeKaybi * satis.net;
+      const testNetSatisHasilati = testBrutSatisHasilati - testIadeTutari;
+      const testSmToplam = maliyet.net * testAdet;
+      const testBrutKar = testNetSatisHasilati - testSmToplam;
+      
+      const testKomisyonToplam = testNetSatisHasilati * komisyonYuzde;
+      const testKargoToplam = kargo.net * testAdet;
+      const testPlatformFeeToplam = platformFee.net * testAdet;
+      const testStopajToplam = satis.net * STOPAJ_RATE * testAdet;
+      
+      const testFaaliyetGiderleriToplam = testKomisyonToplam + testKargoToplam + testPlatformFeeToplam + testStopajToplam + sabitGiderlerToplamNet;
+      const testFaaliyetKar = testBrutKar - testFaaliyetGiderleriToplam;
+      const testVergi = testFaaliyetKar > 0 ? testFaaliyetKar * gelirVergisiYuzde : 0;
+      const testNetKar = testFaaliyetKar - testVergi;
+      
+      return testNetKar;
+    };
+
+    // Binary search to find actual break-even point (where netKar = 0)
+    let bepAdet = 0;
+    if (katkiPayiBirim > 0) {
+      let low = 0;
+      let high = sabitGiderlerToplamNet / katkiPayiBirim * 3; // Start search with upper bound
+      
+      for (let i = 0; i < 50; i++) {
+        const mid = (low + high) / 2;
+        const netKarAtMid = calculateNetKarForQuantity(mid);
+        
+        if (Math.abs(netKarAtMid) < 0.01) {
+          bepAdet = mid;
+          break;
+        }
+        
+        if (netKarAtMid < 0) {
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+      
+      bepAdet = (low + high) / 2;
+    }
+
     const hedefAdet = katkiPayiBirim > 0 ? (sabitGiderlerToplamNet + hedefKarTL) / katkiPayiBirim : 0;
 
     // Target Price Calculation

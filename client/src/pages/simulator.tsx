@@ -633,152 +633,150 @@ export default function Simulator() {
                   </CardContent>
                 </Card>
 
-                {/* Unit Economics - Birim Ekonomisi */}
-                <div>
-                  <div>
-                     <h2 className="text-[1.3em] font-semibold text-blue-600 flex items-center gap-2 mb-3 border-b-2 border-[#e0e0e0] pb-2">
-                        <PieChart className="w-5 h-5" />
-                        Birim Ekonomisi
-                      </h2>
-                      <Card className="border-0 shadow-none p-0">
-                        <CardContent className="p-0">
-                          {/* Summary Table */}
-                          <Table>
-                             <TableBody className="text-[0.9em]">
-                                <TableRow className="hover:bg-transparent border-b border-slate-100">
-                                  <TableCell className="py-2 pl-2 font-medium text-slate-700">Birim Satış Fiyatı (KDV Hariç)</TableCell>
-                                  <TableCell className="py-2 pr-2 text-right"><MoneyDisplay value={results.satisNet} className="text-slate-700" /></TableCell>
-                                </TableRow>
-                                <TableRow className="hover:bg-transparent border-b border-slate-100">
-                                  <TableCell className="py-2 pl-2 font-medium text-red-500">Birim Maliyetler Toplamı (KDV Hariç)</TableCell>
-                                  <TableCell className="py-2 pr-2 text-right"><MoneyDisplay value={results.birimToplamMaliyet} className="text-red-500" /></TableCell>
-                                </TableRow>
-                                <TableRow className="bg-slate-100 hover:bg-slate-100">
-                                  <TableCell className="py-2 pl-2 font-bold text-slate-800">Birim Katkı Payı</TableCell>
-                                  <TableCell className="py-2 pr-2 text-right font-bold text-slate-800"><MoneyDisplay value={results.katkiPayiBirim} className="text-slate-800" /></TableCell>
-                                </TableRow>
-                                <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
-                                  <TableCell className="py-2 pl-2 font-bold text-green-900">Net Kâr / Birim</TableCell>
-                                  <TableCell className="py-2 pr-2 text-right font-bold text-green-900"><MoneyDisplay value={results.netKarBirim} className="text-green-900" /></TableCell>
-                                </TableRow>
-                             </TableBody>
-                          </Table>
+                {/* Birim Ekonomisi - Unit Economics Card */}
+                <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden h-fit">
+                  <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                    <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                      <PieChart className="w-5 h-5" />
+                      Birim Ekonomisi
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {/* Summary Table */}
+                    <Table>
+                      <TableBody className="text-[0.9em]">
+                        <TableRow className="hover:bg-transparent border-b border-slate-100">
+                          <TableCell className="py-2 pl-5 font-medium text-slate-700">Birim Satış Fiyatı (KDV Hariç)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.satisNet} className="text-slate-700" /></TableCell>
+                        </TableRow>
+                        <TableRow className="hover:bg-transparent border-b border-slate-100">
+                          <TableCell className="py-2 pl-5 font-medium text-red-500">Birim Maliyetler Toplamı (KDV Hariç)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimToplamMaliyet} className="text-red-500" /></TableCell>
+                        </TableRow>
+                        <TableRow className="bg-slate-100 hover:bg-slate-100">
+                          <TableCell className="py-2 pl-5 font-bold text-slate-800">Birim Katkı Payı</TableCell>
+                          <TableCell className="py-2 pr-5 text-right font-bold text-slate-800"><MoneyDisplay value={results.katkiPayiBirim} className="text-slate-800" /></TableCell>
+                        </TableRow>
+                        <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
+                          <TableCell className="py-2 pl-5 font-bold text-green-900">Net Kâr / Birim</TableCell>
+                          <TableCell className="py-2 pr-5 text-right font-bold text-green-900"><MoneyDisplay value={results.netKarBirim} className="text-green-900" /></TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
 
-                          {/* Birim Maliyet Detayı Subsection */}
-                          <div className="border-t border-slate-200 mt-3 pt-3">
-                            <div className="text-[0.9em] space-y-2">
-                              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Maliyet Detayı</h3>
-                              
-                              <div className="grid grid-cols-2 gap-2 border-b border-slate-100 pb-2 text-[0.85em]">
-                                <div className="font-medium text-slate-600">Birim Satış (KDV Hariç)</div>
-                                <div className="text-right font-bold text-blue-600"><MoneyDisplay value={results.satisNet} className="text-blue-600" /></div>
-                              </div>
+                    {/* Birim Maliyet Detayı Subsection */}
+                    <div className="border-t border-slate-200 p-5">
+                      <div className="text-[0.9em] space-y-2">
+                        <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">Maliyet Detayı</h3>
+                        
+                        <div className="grid grid-cols-2 gap-2 border-b border-slate-100 pb-2 text-[0.85em]">
+                          <div className="font-medium text-slate-600">Birim Satış (KDV Hariç)</div>
+                          <div className="text-right font-bold text-blue-600"><MoneyDisplay value={results.satisNet} className="text-blue-600" /></div>
+                        </div>
 
-                              <div className="space-y-1.5 text-[0.85em]">
-                                <div className="font-medium text-slate-600 mb-1.5">Değişken Maliyetler:</div>
-                                
-                                <div className="grid grid-cols-2 gap-1 ml-2">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-slate-600">- Satın Alma (SM)</span>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                      </TooltipTrigger>
-                                      <TooltipContent className="text-xs max-w-xs">
-                                        Birim başına ürün satın alma maliyeti
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </div>
-                                  <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimAlisMaliyet} className="text-red-600" /></div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-1 ml-2">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-slate-600">- Komisyon</span>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                      </TooltipTrigger>
-                                      <TooltipContent className="text-xs max-w-xs">
-                                        Pazaryeri komisyon oranı
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </div>
-                                  <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimKomisyonNet} className="text-red-600" /></div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-1 ml-2">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-slate-600">- Kargo</span>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                      </TooltipTrigger>
-                                      <TooltipContent className="text-xs max-w-xs">
-                                        Taşıma ve kargo maliyeti
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </div>
-                                  <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimKargoNet} className="text-red-600" /></div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-1 ml-2">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-slate-600">- Platform Hiz.</span>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                      </TooltipTrigger>
-                                      <TooltipContent className="text-xs max-w-xs">
-                                        Platform kullanım ücreti
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </div>
-                                  <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimPlatformFeeNet} className="text-red-600" /></div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-1 ml-2">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-slate-600">- Stopaj</span>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                      </TooltipTrigger>
-                                      <TooltipContent className="text-xs max-w-xs">
-                                        Stopaj vergisi (%{STOPAJ_RATE * 100})
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </div>
-                                  <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimStopajNet} className="text-red-600" /></div>
-                                </div>
-                              </div>
-
-                              <div className="space-y-1 border-t border-slate-100 pt-1.5 text-[0.85em]">
-                                <div className="font-medium text-slate-600 mb-1">Sabit Giderler & Vergiler:</div>
-                                
-                                <div className="grid grid-cols-2 gap-1 ml-2">
-                                  <span className="text-slate-600">- Sabit Giderler</span>
-                                  <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimSabitGiderler} className="text-red-600" /></div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-1 ml-2">
-                                  <span className="text-slate-600">- Vergiler</span>
-                                  <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimVergi} className="text-red-600" /></div>
-                                </div>
-                              </div>
-
-                              <div className="bg-[#d1e7dd] rounded p-1.5 mt-2 text-[0.9em]">
-                                <div className="grid grid-cols-2 gap-1 font-bold text-green-900">
-                                  <span>= Net Kâr / Birim</span>
-                                  <div className="text-right"><MoneyDisplay value={results.netKarBirim} className="text-green-900" /></div>
-                                </div>
-                              </div>
+                        <div className="space-y-1.5 text-[0.85em]">
+                          <div className="font-medium text-slate-600 mb-1.5">Değişken Maliyetler:</div>
+                          
+                          <div className="grid grid-cols-2 gap-1 ml-2">
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-600">- Satın Alma (SM)</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs max-w-xs">
+                                  Birim başına ürün satın alma maliyeti
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
+                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimAlisMaliyet} className="text-red-600" /></div>
                           </div>
-                        </CardContent>
-                      </Card>
-                  </div>
-                </div>
+
+                          <div className="grid grid-cols-2 gap-1 ml-2">
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-600">- Komisyon</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs max-w-xs">
+                                  Pazaryeri komisyon oranı
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimKomisyonNet} className="text-red-600" /></div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1 ml-2">
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-600">- Kargo</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs max-w-xs">
+                                  Taşıma ve kargo maliyeti
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimKargoNet} className="text-red-600" /></div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1 ml-2">
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-600">- Platform Hiz.</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs max-w-xs">
+                                  Platform kullanım ücreti
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimPlatformFeeNet} className="text-red-600" /></div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1 ml-2">
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-600">- Stopaj</span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs max-w-xs">
+                                  Stopaj vergisi (%{STOPAJ_RATE * 100})
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimStopajNet} className="text-red-600" /></div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1 border-t border-slate-100 pt-1.5 text-[0.85em]">
+                          <div className="font-medium text-slate-600 mb-1">Sabit Giderler & Vergiler:</div>
+                          
+                          <div className="grid grid-cols-2 gap-1 ml-2">
+                            <span className="text-slate-600">- Sabit Giderler</span>
+                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimSabitGiderler} className="text-red-600" /></div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1 ml-2">
+                            <span className="text-slate-600">- Vergiler</span>
+                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimVergi} className="text-red-600" /></div>
+                          </div>
+                        </div>
+
+                        <div className="bg-[#d1e7dd] rounded p-1.5 mt-2 text-[0.9em]">
+                          <div className="grid grid-cols-2 gap-1 font-bold text-green-900">
+                            <span>= Net Kâr / Birim</span>
+                            <div className="text-right"><MoneyDisplay value={results.netKarBirim} className="text-green-900" /></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </>
           ) : (

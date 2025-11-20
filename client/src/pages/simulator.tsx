@@ -462,9 +462,9 @@ export default function Simulator() {
                         <TableCell className="py-2 pl-6 font-medium text-red-500">(-) Gelir/Kurumlar Vergisi</TableCell>
                         <TableCell className="py-2 pr-6 text-right"><MoneyDisplay value={results.vergi} className="text-red-500" /></TableCell>
                       </TableRow>
-                      <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
-                        <TableCell className="py-3 pl-6 text-[1.1em] font-bold text-green-900">NET KÂR / ZARAR</TableCell>
-                        <TableCell className="py-3 pr-6 text-[1.1em] font-bold text-right text-green-900"><MoneyDisplay value={results.netKar} className="text-green-900" /></TableCell>
+                      <TableRow className={cn("border-t hover:opacity-90", results.netKar < 0 ? "bg-[#ffe6e6] border-red-200" : "bg-[#d1e7dd] border-green-200")}>
+                        <TableCell className={cn("py-3 pl-6 text-[1.1em] font-bold", results.netKar < 0 ? "text-red-900" : "text-green-900")}>NET KÂR / ZARAR</TableCell>
+                        <TableCell className={cn("py-3 pr-6 text-[1.1em] font-bold text-right", results.netKar < 0 ? "text-red-900" : "text-green-900")}><MoneyDisplay value={results.netKar} className={results.netKar < 0 ? "text-red-900" : "text-green-900"} /></TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>

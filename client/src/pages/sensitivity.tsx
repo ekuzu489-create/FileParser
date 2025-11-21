@@ -355,7 +355,7 @@ export default function SensitivityAnalysis() {
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
+                  <SelectContent className="z-[9999]">
                     {variableOptions.map(opt => (
                       <SelectItem key={opt.key} value={opt.key}>
                         {opt.label}
@@ -590,7 +590,7 @@ export default function SensitivityAnalysis() {
                           <SelectTrigger className="h-8 text-xs">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
+                          <SelectContent className="z-[9999]">
                             {variableOptions.map(opt => (
                               <SelectItem key={opt.key} value={opt.key}>
                                 {opt.label}

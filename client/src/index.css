@@ -298,11 +298,28 @@
  * need to be distinguished from eachother visually.
  */
 @layer utilities {
-  /* Ensure Select dropdowns always render on top */
+  /* Ensure ALL Radix UI Select dropdowns always render on top */
   [role="listbox"],
-  [role="dialog"][data-state="open"],
-  .radix-select-content {
+  [role="option"],
+  [data-radix-select-content],
+  [data-radix-select-viewport],
+  [data-radix-popover-content],
+  [data-radix-dropdown-menu-content],
+  .radix-select-content,
+  .radix-select-viewport,
+  [data-state="open"] {
     z-index: 9999 !important;
+  }
+
+  /* Extra specificity for Radix Select portal */
+  div[role="listbox"],
+  [data-radix-select-content] > * {
+    z-index: 9999 !important;
+  }
+
+  /* Ensure Select trigger area doesn't block dropdown */
+  [data-radix-select-trigger] {
+    z-index: auto;
   }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */

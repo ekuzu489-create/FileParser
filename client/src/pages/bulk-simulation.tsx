@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,28 +63,95 @@ interface BulkResult {
   profitMargin: number;
 }
 
-export default function BulkSimulation() {
-  const [bulkProducts, setBulkProducts] = useState<BulkProduct[]>([]);
-  const [results, setResults] = useState<BulkResult[]>([]);
-  
-  // Control panel state - Sabit Giderler
-  const [controlPanelValues, setControlPanelValues] = useState({
-    personel: 0,
-    depo: 0,
-    muhasebe: 0,
-    pazarlama: 0,
-    digerGiderler: 0,
-  });
+interface AggregateCalculation {
+  brutSatisHasilatiKDVHariç: number;
+  iadeTutariNet: number;
+  netSatisHasilati: number;
+  smToplam: number;
+  brutKar: number;
+  komisyonToplam: number;
+  kargoToplam: number;
+  platformFeeToplam: number;
+  stopajToplam: number;
+  sabitGiderlerToplamNet: number;
+  faaliyetGiderleriToplam: number;
+  faaliyetKar: number;
+  vergi: number;
+  netKar: number;
+  marginNet: number;
+}
 
-  // Global settings from main simulator
-  const [globalSettings, setGlobalSettings] = useState(() => {
+const DEFAULT_VARIABLE_EXPENSES = {
+  komisyon: 0,
+  kargo: 0,
+  iadeOrani: 0,
+};
+
+export default function BulkSimulation() {
+  const [bulkProducts, setBulkProducts] = useState<BulkProduct[]>(() => {
     try {
-      const saved = localStorage.getItem('simulator_form_data');
-      return saved ? JSON.parse(saved) : DEFAULT_FORM_VALUES;
+      const saved = localStorage.getItem('bulk_simulation_products');
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return DEFAULT_FORM_VALUES;
+      return [];
     }
   });
+
+  const [results, setResults] = useState<BulkResult[]>(() => {
+    try {
+      const saved = localStorage.getItem('bulk_simulation_results');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [controlPanelValues, setControlPanelValues] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bulk_simulation_fixed_expenses');
+      return saved ? JSON.parse(saved) : {
+        personel: 0,
+        depo: 0,
+        muhasebe: 0,
+        pazarlama: 0,
+        digerGiderler: 0,
+      };
+    } catch {
+      return {
+        personel: 0,
+        depo: 0,
+        muhasebe: 0,
+        pazarlama: 0,
+        digerGiderler: 0,
+      };
+    }
+  });
+
+  const [variableExpenses, setVariableExpenses] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bulk_simulation_variable_expenses');
+      return saved ? JSON.parse(saved) : DEFAULT_VARIABLE_EXPENSES;
+    } catch {
+      return DEFAULT_VARIABLE_EXPENSES;
+    }
+  });
+
+  // Persist data whenever state changes
+  useEffect(() => {
+    localStorage.setItem('bulk_simulation_products', JSON.stringify(bulkProducts));
+  }, [bulkProducts]);
+
+  useEffect(() => {
+    localStorage.setItem('bulk_simulation_results', JSON.stringify(results));
+  }, [results]);
+
+  useEffect(() => {
+    localStorage.setItem('bulk_simulation_fixed_expenses', JSON.stringify(controlPanelValues));
+  }, [controlPanelValues]);
+
+  useEffect(() => {
+    localStorage.setItem('bulk_simulation_variable_expenses', JSON.stringify(variableExpenses));
+  }, [variableExpenses]);
 
   const downloadTemplate = () => {
     const templateData = [
@@ -128,7 +195,7 @@ export default function BulkSimulation() {
         }
 
         setBulkProducts(products);
-        calculateResults(products, controlPanelValues);
+        calculateResults(products, controlPanelValues, variableExpenses);
       } catch (error) {
         alert('Dosya okuma hatası. Lütfen geçerli bir Excel dosyası yükleyin.');
         console.error(error);
@@ -137,25 +204,38 @@ export default function BulkSimulation() {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleControlPanelChange = (key: keyof typeof controlPanelValues, value: string) => {
+  const handleControlPanelChange = (key: string, value: string) => {
     const numValue = parseFloat(value) || 0;
     const updated = { ...controlPanelValues, [key]: numValue };
     setControlPanelValues(updated);
     if (bulkProducts.length > 0) {
-      calculateResults(bulkProducts, updated);
+      calculateResults(bulkProducts, updated, variableExpenses);
     }
   };
 
-  const calculateResults = (products: BulkProduct[], fixedExpenses: typeof controlPanelValues) => {
+  const handleVariableExpenseChange = (key: string, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    const updated = { ...variableExpenses, [key]: numValue };
+    setVariableExpenses(updated);
+    if (bulkProducts.length > 0) {
+      calculateResults(bulkProducts, controlPanelValues, updated);
+    }
+  };
+
+  const calculateResults = (
+    products: BulkProduct[],
+    fixedExpenses: typeof controlPanelValues,
+    varExpenses: typeof variableExpenses
+  ) => {
     const totalQuantity = products.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
+    const gelirVergisiYuzde = DEFAULT_FORM_VALUES.gelirVergisi / 100;
 
     const calculated = products.map((product) => {
-      const komisyonYuzde = globalSettings.komisyon / 100;
-      const iadeOrani = globalSettings.iadeOrani / 100;
-      const gelirVergisiYuzde = globalSettings.gelirVergisi / 100;
+      const komisyonYuzde = varExpenses.komisyon / 100;
+      const iadeOrani = varExpenses.iadeOrani / 100;
 
       // VAT breakdown
-      const kargoNetAm = globalSettings.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const kargoNetAm = varExpenses.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
       const depoNetAm = fixedExpenses.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
       const muhasebeNetAm = fixedExpenses.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
       const pazarlamaNetAm = fixedExpenses.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
@@ -221,16 +301,79 @@ export default function BulkSimulation() {
     setResults(calculated);
   };
 
-  // Aggregated totals from Excel
+  // Calculate aggregate P&L
+  const aggregateCalc = useMemo((): AggregateCalculation | null => {
+    if (bulkProducts.length === 0) return null;
+
+    const totalQuantity = bulkProducts.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
+    const gelirVergisiYuzde = DEFAULT_FORM_VALUES.gelirVergisi / 100;
+    const komisyonYuzde = variableExpenses.komisyon / 100;
+    const iadeOrani = variableExpenses.iadeOrani / 100;
+
+    const kargoNetAm = variableExpenses.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const depoNetAm = controlPanelValues.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const muhasebeNetAm = controlPanelValues.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const pazarlamaNetAm = controlPanelValues.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const digerGiderlerNetAm = controlPanelValues.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
+
+    let brutSatisHasilatiKDVHariç = 0;
+    let iadeTutariNet = 0;
+    let smToplam = 0;
+    let komisyonToplam = 0;
+    let kargoToplam = 0;
+    let platformFeeToplam = 0;
+    let stopajToplam = 0;
+
+    bulkProducts.forEach((product) => {
+      const brutBirim = product.totalSalesRevenue / (1 + product.vatRate / 100);
+      brutSatisHasilatiKDVHariç += brutBirim;
+      iadeTutariNet += brutBirim * iadeOrani * product.totalSalesQuantity;
+      smToplam += product.totalCost;
+
+      const netSatisProduct = brutBirim - (brutBirim * iadeOrani * product.totalSalesQuantity);
+      komisyonToplam += netSatisProduct * komisyonYuzde;
+      kargoToplam += kargoNetAm * product.totalSalesQuantity;
+      platformFeeToplam += platformFeeNet * product.totalSalesQuantity;
+      stopajToplam += (brutBirim / product.totalSalesQuantity) * STOPAJ_RATE * product.totalSalesQuantity;
+    });
+
+    const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
+    const brutKar = netSatisHasilati - smToplam;
+
+    const sabitGiderlerToplamNet = controlPanelValues.personel + depoNetAm + muhasebeNetAm + pazarlamaNetAm + digerGiderlerNetAm;
+    const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
+    const faaliyetKar = brutKar - faaliyetGiderleriToplam;
+    const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;
+    const netKar = faaliyetKar - vergi;
+    const marginNet = netSatisHasilati > 0 ? netKar / netSatisHasilati : 0;
+
+    return {
+      brutSatisHasilatiKDVHariç,
+      iadeTutariNet,
+      netSatisHasilati,
+      smToplam,
+      brutKar,
+      komisyonToplam,
+      kargoToplam,
+      platformFeeToplam,
+      stopajToplam,
+      sabitGiderlerToplamNet,
+      faaliyetGiderleriToplam,
+      faaliyetKar,
+      vergi,
+      netKar,
+      marginNet,
+    };
+  }, [bulkProducts, controlPanelValues, variableExpenses]);
+
   const excelTotals = useMemo(() => {
     return {
       totalQuantity: bulkProducts.reduce((sum, p) => sum + p.totalSalesQuantity, 0),
       totalRevenue: bulkProducts.reduce((sum, p) => sum + p.totalSalesRevenue, 0),
-      totalCost: bulkProducts.reduce((sum, p) => sum + p.totalCost, 0),
     };
   }, [bulkProducts]);
 
-  // Aggregated results
   const resultsTotals = useMemo(() => {
     return {
       totalRevenue: results.reduce((sum, r) => sum + r.totalSalesRevenue, 0),
@@ -292,11 +435,51 @@ export default function BulkSimulation() {
           </CardContent>
         </Card>
 
-        {/* Control Panel & Summary */}
+        {/* Control Panel & P&L */}
         {bulkProducts.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
             {/* Left: Control Panel */}
             <div className="space-y-4">
+              {/* Variable Expenses */}
+              <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+                <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                  <CardTitle className="text-[1.1em] font-semibold text-blue-600">Değişken Giderler</CardTitle>
+                </CardHeader>
+                <CardContent className="p-5 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Komisyon (%)</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={variableExpenses.komisyon}
+                      onChange={(e) => handleVariableExpenseChange('komisyon', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Kargo Gideri (₺)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={variableExpenses.kargo}
+                      onChange={(e) => handleVariableExpenseChange('kargo', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">İade (%)</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={variableExpenses.iadeOrani}
+                      onChange={(e) => handleVariableExpenseChange('iadeOrani', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Fixed Expenses */}
               <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
                 <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
                   <CardTitle className="text-[1.1em] font-semibold text-blue-600">Sabit Giderler (Aylık)</CardTitle>
@@ -355,6 +538,7 @@ export default function BulkSimulation() {
                 </CardContent>
               </Card>
 
+              {/* Summary */}
               <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
                 <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
                   <CardTitle className="text-[1.1em] font-semibold text-blue-600">Satış ve Birim Verileri (Özet)</CardTitle>
@@ -368,66 +552,138 @@ export default function BulkSimulation() {
                     <p className="text-xs font-medium text-slate-600 mb-1">Toplam Satış Tutarı</p>
                     <p className="text-lg font-bold text-blue-600">{formatCurrency(excelTotals.totalRevenue)}</p>
                   </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-600 mb-1">Toplam Maliyet</p>
-                    <p className="text-lg font-bold text-blue-600">{formatCurrency(excelTotals.totalCost)}</p>
-                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Right: P&L Table */}
-            <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
-              <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
-                <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Aylık Kâr/Zarar Tablosu (Agregat)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableBody className="text-[0.9em]">
-                    <TableRow className="border-b border-slate-50">
-                      <TableCell className="py-2 pl-6 font-medium text-slate-700">Brüt Satış Hasılatı</TableCell>
-                      <TableCell className="py-2 pr-6 text-right font-medium text-emerald-600">
-                        {formatCurrency(resultsTotals.totalRevenue)}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="bg-slate-100">
-                      <TableCell className="py-2 pl-6 font-bold text-slate-800">Toplam Giderler</TableCell>
-                      <TableCell className="py-2 pr-6 text-right font-bold text-slate-800">
-                        {formatCurrency(resultsTotals.totalExpenses)}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow
-                      className={cn(
-                        'border-t',
-                        resultsTotals.totalNetProfit < 0
-                          ? 'bg-[#ffe6e6] border-red-200'
-                          : 'bg-[#d1e7dd] border-green-200'
-                      )}
-                    >
-                      <TableCell
+            {/* Right: Detailed P&L Table */}
+            {aggregateCalc && (
+              <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
+                <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
+                  <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Aylık Kâr/Zarar Tablosu (Agregat)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableBody className="text-[0.9em]">
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 font-medium text-slate-700">Brüt Satış Hasılatı</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-medium text-emerald-600">
+                          {formatCurrency(aggregateCalc.brutSatisHasilatiKDVHariç)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 font-medium text-red-500">(-) İade Tutarı</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-red-500">
+                          {formatCurrency(aggregateCalc.iadeTutariNet)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="bg-slate-100">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-800">= Net Satış Hasılatı</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-800">
+                          {formatCurrency(aggregateCalc.netSatisHasilati)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 font-medium text-red-500">(-) Satılan Malın Maliyeti (SM)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-red-500">
+                          {formatCurrency(aggregateCalc.smToplam)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="bg-slate-100">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-900">= Brüt Kâr</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-900">
+                          {formatCurrency(aggregateCalc.brutKar)}
+                        </TableCell>
+                      </TableRow>
+
+                      <TableRow>
+                        <TableCell colSpan={2} className="bg-[#f1f1f1] text-xs font-bold text-slate-600 text-center py-1.5 uppercase tracking-wider">
+                          Faaliyet Giderleri Detayı (KDV Hariç)
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Pazaryeri Komisyonu (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600">
+                          {formatCurrency(aggregateCalc.komisyonToplam)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Kargo Gideri (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600">
+                          {formatCurrency(aggregateCalc.kargoToplam)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Platform Hizmet Bedeli (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600">
+                          {formatCurrency(aggregateCalc.platformFeeToplam)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Stopaj Gideri (Değişken)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600">
+                          {formatCurrency(aggregateCalc.stopajToplam)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 text-slate-600">(-) Toplam Sabit Giderler</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-600">
+                          {formatCurrency(aggregateCalc.sabitGiderlerToplamNet)}
+                        </TableCell>
+                      </TableRow>
+
+                      <TableRow className="bg-slate-100">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-700">(-) Toplam Faaliyet Giderleri</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-700">
+                          {formatCurrency(aggregateCalc.faaliyetGiderleriToplam)}
+                        </TableCell>
+                      </TableRow>
+
+                      <TableRow className="bg-slate-100 border-t border-slate-200">
+                        <TableCell className="py-2 pl-6 font-bold text-slate-800">= Faaliyet Kârı (EBIT)</TableCell>
+                        <TableCell className="py-2 pr-6 text-right font-bold text-slate-800">
+                          {formatCurrency(aggregateCalc.faaliyetKar)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-6 font-medium text-red-500">(-) Gelir/Kurumlar Vergisi</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-red-500">
+                          {formatCurrency(aggregateCalc.vergi)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow
                         className={cn(
-                          'py-3 pl-6 text-[1.1em] font-bold',
-                          resultsTotals.totalNetProfit < 0 ? 'text-red-900' : 'text-green-900'
+                          'border-t',
+                          aggregateCalc.netKar < 0
+                            ? 'bg-[#ffe6e6] border-red-200'
+                            : 'bg-[#d1e7dd] border-green-200'
                         )}
                       >
-                        NET KÂR / ZARAR
-                      </TableCell>
-                      <TableCell
-                        className={cn(
-                          'py-3 pr-6 text-[1.1em] font-bold text-right',
-                          resultsTotals.totalNetProfit < 0 ? 'text-red-900' : 'text-green-900'
-                        )}
-                      >
-                        {formatCurrency(resultsTotals.totalNetProfit)}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                        <TableCell
+                          className={cn(
+                            'py-3 pl-6 text-[1.1em] font-bold',
+                            aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
+                          )}
+                        >
+                          NET KÂR / ZARAR
+                        </TableCell>
+                        <TableCell
+                          className={cn(
+                            'py-3 pr-6 text-[1.1em] font-bold text-right',
+                            aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
+                          )}
+                        >
+                          {formatCurrency(aggregateCalc.netKar)} ({(aggregateCalc.marginNet * 100).toFixed(2)}%)
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 

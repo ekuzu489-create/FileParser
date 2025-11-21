@@ -155,6 +155,13 @@ export default function SensitivityAnalysis() {
     { id: '1', variable: 'satisFiyat', deviationPercent: 10 },
   ]);
   const [multiVarResult, setMultiVarResult] = useState<{ netKar: number; difference: number } | null>(null);
+  const [scenarioDetails, setScenarioDetails] = useState<Array<{
+    variable: string;
+    baseValue: number;
+    deviationPercent: number;
+    newValue: number;
+    isDependent: boolean;
+  }> | null>(null);
 
   const variableOptions = [
     { key: 'satisFiyat' as const, label: 'Birim Satış Fiyatı (₺)' },
@@ -198,17 +205,56 @@ export default function SensitivityAnalysis() {
 
   const handleMultiVarAnalysis = () => {
     const modifiedData = { ...baseData };
+    const details: Array<{ variable: string; baseValue: number; deviationPercent: number; newValue: number; isDependent: boolean }> = [];
 
-    // Apply all deviations simultaneously
+    // Track directly changed variables
+    const changedVars = new Set<string>();
     multiVariableRows.forEach(row => {
+      changedVars.add(row.variable);
       const currentValue = baseData[row.variable];
       const deviation = (row.deviationPercent / 100) * (currentValue as number);
-      (modifiedData[row.variable] as number) = (currentValue as number) + deviation;
+      const newValue = (currentValue as number) + deviation;
+      (modifiedData[row.variable] as number) = newValue;
+
+      // Add directly changed variable
+      details.push({
+        variable: variableOptions.find(opt => opt.key === row.variable)?.label || row.variable,
+        baseValue: currentValue as number,
+        deviationPercent: row.deviationPercent,
+        newValue,
+        isDependent: false
+      });
     });
 
+    // Calculate results
     const baseResult = calculateScenario(baseData);
     const modifiedResult = calculateScenario(modifiedData);
 
+    // Add key dependent variables affected
+    const dependentVars = [
+      { key: 'komisyonToplam', label: 'Komisyon Tutarı (₺)', base: 0, modified: 0 },
+      { key: 'stopajToplam', label: 'Stopaj Tutarı (₺)', base: 0, modified: 0 },
+      { key: 'faaliyetGiderleriToplam', label: 'Faaliyet Giderleri (₺)', base: 0, modified: 0 },
+      { key: 'vergi', label: 'Vergi Matrahı (₺)', base: 0, modified: 0 },
+      { key: 'netKar', label: 'Net Kâr / Zarar (₺)', base: baseResult.netKar, modified: modifiedResult.netKar }
+    ];
+
+    // Add dependent variables that changed
+    dependentVars.forEach(depVar => {
+      if (depVar.base !== depVar.modified) {
+        const difference = depVar.modified - depVar.base;
+        const percentChange = depVar.base !== 0 ? (difference / depVar.base) * 100 : 0;
+        details.push({
+          variable: depVar.label,
+          baseValue: depVar.base,
+          deviationPercent: percentChange,
+          newValue: depVar.modified,
+          isDependent: true
+        });
+      }
+    });
+
+    setScenarioDetails(details);
     setMultiVarResult({
       netKar: modifiedResult.netKar,
       difference: modifiedResult.netKar - baseResult.netKar
@@ -640,6 +686,44 @@ export default function SensitivityAnalysis() {
               <TrendingUp className="w-4 h-4 mr-2" />
               Senaryo Hesapla
             </Button>
+
+            {/* Scenario Application Details Table */}
+            {scenarioDetails && (
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3">Senaryo Uygulama Detayı</h4>
+                <div className="overflow-x-auto border rounded-lg">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-slate-200 text-slate-800">
+                        <th className="px-3 py-2 text-left font-semibold">Değişken</th>
+                        <th className="px-3 py-2 text-right font-semibold">Başlangıç Değeri</th>
+                        <th className="px-3 py-2 text-right font-semibold">Sapma (%)</th>
+                        <th className="px-3 py-2 text-right font-semibold">Yeni Değer</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {scenarioDetails.map((detail, idx) => (
+                        <tr key={idx} className={detail.isDependent ? 'bg-blue-50' : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50')}>
+                          <td className={`px-3 py-2 font-medium ${detail.isDependent ? 'text-blue-700 italic' : 'text-slate-700'}`}>
+                            {detail.variable}
+                            {detail.isDependent && <span className="text-xs ml-1">(Bağımlı)</span>}
+                          </td>
+                          <td className="px-3 py-2 text-right text-slate-700">
+                            {detail.variable.includes('(₺)') ? formatCurrency(detail.baseValue) : `${detail.baseValue.toFixed(2)}%`}
+                          </td>
+                          <td className={`px-3 py-2 text-right font-semibold ${detail.deviationPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {detail.deviationPercent >= 0 ? '+' : ''}{detail.deviationPercent.toFixed(2)}%
+                          </td>
+                          <td className={`px-3 py-2 text-right font-semibold ${detail.newValue >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {detail.variable.includes('(₺)') ? formatCurrency(detail.newValue) : `${detail.newValue.toFixed(2)}%`}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* Results */}
             {multiVarResult && (

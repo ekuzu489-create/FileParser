@@ -241,6 +241,9 @@ export default function BulkSimulation() {
     const pazarlamaNetAm = fixedExpenses.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const digerGiderlerNetAm = fixedExpenses.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    
+    // Variable expenses - extract VAT from input values (all inputs are VAT-inclusive)
+    const kargoNetAm = varExpenses.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
 
     const calculated = products.map((product) => {
       const komisyonYuzde = varExpenses.komisyon / 100;
@@ -257,9 +260,9 @@ export default function BulkSimulation() {
       const smToplam = product.totalCost;
       const brutKar = netSatisHasilati - smToplam;
 
-      // Variable expenses - NO VAT extraction for kargo (per-unit cost)
+      // Variable expenses (all VAT-exclusive)
       const komisyonToplam = netSatisHasilati * komisyonYuzde;
-      const kargoToplam = varExpenses.kargo * product.totalSalesQuantity;
+      const kargoToplam = kargoNetAm * product.totalSalesQuantity;
       const platformFeeToplam = platformFeeNet * product.totalSalesQuantity;
       const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;
 
@@ -317,13 +320,14 @@ export default function BulkSimulation() {
     const komisyonYuzde = variableExpenses.komisyon / 100;
     const iadeOrani = variableExpenses.iadeOrani / 100;
 
-    // VAT extraction for fixed expenses only - NO extraction for kargo
+    // VAT extraction for all expenses - all input values are VAT-inclusive
     const personelNetAm = controlPanelValues.personel / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const depoNetAm = controlPanelValues.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const muhasebeNetAm = controlPanelValues.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const pazarlamaNetAm = controlPanelValues.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const digerGiderlerNetAm = controlPanelValues.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const kargoNetAm = variableExpenses.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
 
     // Step 1: Calculate aggregate gross revenue (VAT excluded)
     let brutSatisHasilatiKDVHariç = 0;
@@ -340,9 +344,9 @@ export default function BulkSimulation() {
     const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
     const brutKar = netSatisHasilati - smToplam;
 
-    // Step 3: Calculate variable expenses - kargo is per-unit, NO VAT extraction
+    // Step 3: Calculate variable expenses (all VAT-exclusive after extraction)
     const komisyonToplam = netSatisHasilati * komisyonYuzde;
-    const kargoToplam = variableExpenses.kargo * totalQuantity;
+    const kargoToplam = kargoNetAm * totalQuantity;
     const platformFeeToplam = platformFeeNet * totalQuantity;
     const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;
 

@@ -174,6 +174,61 @@ export default function SensitivityAnalysis() {
     }).format(value);
   };
 
+  // Determine if variable is revenue or cost impacting
+  const isRevenueVariable = ['satisFiyat', 'adet'].includes(selectedVariable);
+  const isCostVariable = ['birimMaliyet', 'kargo', 'komisyon', 'personel', 'pazarlama'].includes(selectedVariable);
+
+  // Generate dynamic commentary
+  const getCommentary = () => {
+    if (chartData.length === 0) return null;
+
+    const baselineData = chartData.find(d => d.deviation === 0);
+    const baseline = baselineData?.netKar || 0;
+
+    let worstData, bestData, worstLabel, bestLabel;
+
+    if (isRevenueVariable) {
+      // For revenue: higher values are better
+      bestData = chartData[chartData.length - 1]; // +20%
+      worstData = chartData[0]; // -20%
+      bestLabel = 'En İyi Senaryo';
+      worstLabel = 'En Kötü Senaryo';
+    } else if (isCostVariable) {
+      // For costs: lower values are better
+      worstData = chartData[chartData.length - 1]; // +20%
+      bestData = chartData[0]; // -20%
+      worstLabel = 'En Kötü Senaryo';
+      bestLabel = 'En İyi Senaryo';
+    } else {
+      return null;
+    }
+
+    const bestDifference = bestData.netKar - baseline;
+    const worstDifference = worstData.netKar - baseline;
+
+    const bestChangeText = bestDifference >= 0
+      ? `₺${Math.abs(bestDifference).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} kadar artar`
+      : `₺${Math.abs(bestDifference).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} kadar azalır`;
+
+    const worstChangeText = worstDifference >= 0
+      ? `₺${Math.abs(worstDifference).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} kadar artar`
+      : `₺${Math.abs(worstDifference).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} kadar azalır`;
+
+    return {
+      baseline,
+      bestData,
+      worstData,
+      bestLabel,
+      worstLabel,
+      bestDifference,
+      worstDifference,
+      bestChangeText,
+      worstChangeText,
+      variableLabel: variableLabel.toLowerCase(),
+      impactType: isRevenueVariable ? 'revenue' : 'cost'
+    };
+  };
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -344,6 +399,67 @@ export default function SensitivityAnalysis() {
                   </table>
                 </div>
               </div>
+
+              {/* Analysis Commentary */}
+              {(() => {
+                const commentary = getCommentary();
+                if (!commentary) return null;
+
+                return (
+                  <div className="mt-8 space-y-4">
+                    <h4 className="text-sm font-semibold text-slate-700">Analiz Yorumu ve Öneriler</h4>
+                    
+                    {/* Summary Box */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                      <p className="text-sm text-slate-700">
+                        <span className="font-semibold">{commentary.variableLabel}</span> değişkenindeki sapmalar, Net Kâr/Zarar üzerinde önemli bir etkiye sahiptir.
+                      </p>
+
+                      {/* Best Scenario */}
+                      <div className="bg-white rounded-lg p-3 border-l-4 border-emerald-600">
+                        <p className="text-xs font-semibold text-emerald-700 mb-1">{commentary.bestLabel} ({commentary.bestData.deviationPercent})</p>
+                        <p className="text-xs text-slate-700">
+                          {commentary.variableLabel} <span className="font-semibold">{commentary.bestData.deviationPercent}</span> sapma gösterdiğinde, net kâr {commentary.bestChangeText}.
+                        </p>
+                        <p className="text-xs text-slate-600 mt-1">
+                          Tahmini Net Kâr: <span className="font-semibold text-emerald-600">{formatCurrency(commentary.bestData.netKar)}</span>
+                        </p>
+                      </div>
+
+                      {/* Worst Scenario */}
+                      <div className="bg-white rounded-lg p-3 border-l-4 border-red-600">
+                        <p className="text-xs font-semibold text-red-700 mb-1">{commentary.worstLabel} ({commentary.worstData.deviationPercent})</p>
+                        <p className="text-xs text-slate-700">
+                          {commentary.variableLabel} <span className="font-semibold">{commentary.worstData.deviationPercent}</span> sapma gösterdiğinde, net kâr {commentary.worstChangeText}.
+                        </p>
+                        <p className="text-xs text-slate-600 mt-1">
+                          Tahmini Net Kâr: <span className={`font-semibold ${commentary.worstData.netKar >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{formatCurrency(commentary.worstData.netKar)}</span>
+                        </p>
+                      </div>
+
+                      {/* Recommendations */}
+                      <div className="bg-slate-50 rounded-lg p-3 mt-3 border-t border-slate-200">
+                        <p className="text-xs font-semibold text-slate-700 mb-2">💡 Tavsiyeler:</p>
+                        <ul className="text-xs text-slate-700 space-y-1">
+                          {commentary.impactType === 'revenue' ? (
+                            <>
+                              <li>• <span className="font-semibold">{commentary.variableLabel}</span> artışını destekleyen stratejiler geliştirin.</li>
+                              <li>• Fiyatlandırma ve satış miktarı optimizasyonuna odaklanın.</li>
+                              <li>• Düşüş riskine karşı kontingency planları hazırlayın.</li>
+                            </>
+                          ) : (
+                            <>
+                              <li>• <span className="font-semibold">{commentary.variableLabel}</span> maliyetlerini azaltmaya odaklanın.</li>
+                              <li>• Tedarikçi müzakereleri ve maliyet optimizasyonunu gözden geçirin.</li>
+                              <li>• Artış riskine karşı kontrol mekanizmaları kurguluyor.</li>
+                            </>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
         )}

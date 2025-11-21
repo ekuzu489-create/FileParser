@@ -8,8 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Zap, TrendingUp, Plus, Trash2 } from "lucide-react";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
-import { useGlobalReset } from "@/lib/ResetContext";
-import { useFormData } from "@/lib/FormDataContext";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
@@ -222,25 +220,37 @@ interface PnLLineItem {
 }
 
 export default function SensitivityAnalysis() {
-  const { resetVersion } = useGlobalReset();
-  const { formData } = useFormData();
-
-  // Use shared form data as base for sensitivity analysis
-  const baseData = formData;
-
-  // Analysis-specific UI state
-  const [chartData, setChartData] = useState<SensitivityDataPoint[]>([]);
-  const [hasRun, setHasRun] = useState(false);
-
-  // Reset analysis when reset is triggered
-  useEffect(() => {
-    setChartData([]);
-    setHasRun(false);
-  }, [resetVersion]);
+  const [baseData, setBaseData] = useState<ScenarioData>(() => {
+    try {
+      const saved = localStorage.getItem('simulator_form_data');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // fallback
+    }
+    return {
+      adet: DEFAULT_FORM_VALUES.adet,
+      satisFiyat: DEFAULT_FORM_VALUES.satisFiyat,
+      birimMaliyet: DEFAULT_FORM_VALUES.birimMaliyet,
+      kargo: DEFAULT_FORM_VALUES.kargo,
+      komisyon: DEFAULT_FORM_VALUES.komisyon,
+      kdvOrani: DEFAULT_FORM_VALUES.kdvOrani,
+      iadeOrani: DEFAULT_FORM_VALUES.iadeOrani,
+      gelirVergisi: DEFAULT_FORM_VALUES.gelirVergisi,
+      personel: DEFAULT_FORM_VALUES.personel,
+      depo: DEFAULT_FORM_VALUES.depo,
+      muhasebe: DEFAULT_FORM_VALUES.muhasebe,
+      pazarlama: DEFAULT_FORM_VALUES.pazarlama,
+      digerGiderler: DEFAULT_FORM_VALUES.digerGiderler,
+    };
+  });
 
   const [selectedVariable, setSelectedVariable] = useState<keyof ScenarioData>('satisFiyat');
   const [startPercent, setStartPercent] = useState(-20);
   const [endPercent, setEndPercent] = useState(20);
+  const [chartData, setChartData] = useState<SensitivityDataPoint[]>([]);
+  const [hasRun, setHasRun] = useState(false);
 
   // Multi-Variable Scenario Analysis State
   const [multiVariableRows, setMultiVariableRows] = useState<MultiVariableRow[]>([

@@ -8,8 +8,6 @@ import { Calculator, TrendingUp, DollarSign, Percent, ArrowUpRight, ArrowDownRig
 import { cn } from "@/lib/utils";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
-import { useGlobalReset } from "@/lib/ResetContext";
-import { useFormData } from "@/lib/FormDataContext";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
@@ -381,13 +379,41 @@ const ScenarioInputForm = ({
 };
 
 export default function ComparisonSimulator() {
-  const { resetVersion } = useGlobalReset();
-  const { formData } = useFormData();
+  // Senaryo 1: Initialize from localStorage, or copy from Simulator on first load
+  const [scenario1, setScenario1] = useState<ScenarioData>(() => {
+    try {
+      const saved = localStorage.getItem('comparison_scenario1_data');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      // First load: try to copy from Simulator
+      const simulatorData = localStorage.getItem('simulator_form_data');
+      if (simulatorData) {
+        const parsed = JSON.parse(simulatorData);
+        return {
+          adet: parsed.adet,
+          satisFiyat: parsed.satisFiyat,
+          birimMaliyet: parsed.birimMaliyet,
+          kargo: parsed.kargo,
+          komisyon: parsed.komisyon,
+          kdvOrani: parsed.kdvOrani,
+          iadeOrani: parsed.iadeOrani,
+          gelirVergisi: parsed.gelirVergisi,
+          personel: parsed.personel,
+          depo: parsed.depo,
+          muhasebe: parsed.muhasebe,
+          pazarlama: parsed.pazarlama,
+          digerGiderler: parsed.digerGiderler,
+        };
+      }
+      // Fallback to defaults
+      return DEFAULT_VALUES;
+    } catch {
+      return DEFAULT_VALUES;
+    }
+  });
 
-  // Senaryo 1: Use shared form data from context
-  const scenario1 = formData;
-
-  // Senaryo 2: Local state for comparison scenario
+  // Senaryo 2: Initialize from localStorage or custom defaults
   const [scenario2, setScenario2] = useState<ScenarioData>(() => {
     try {
       const saved = localStorage.getItem('comparison_scenario2_data');
@@ -406,12 +432,6 @@ export default function ComparisonSimulator() {
       return DEFAULT_FORM_VALUES.hedefKarTL;
     }
   });
-
-  // Re-initialize scenario2 when global reset is triggered
-  useEffect(() => {
-    setScenario2({ ...DEFAULT_VALUES, adet: 600, satisFiyat: 1049.99 });
-    setHedefKarTL(DEFAULT_FORM_VALUES.hedefKarTL);
-  }, [resetVersion]);
 
   // Persist Senaryo 1, Senaryo 2, and hedefKarTL to localStorage
   useEffect(() => {

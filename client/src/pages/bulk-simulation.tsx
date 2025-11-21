@@ -85,6 +85,7 @@ const DEFAULT_VARIABLE_EXPENSES = {
   komisyon: 0,
   kargo: 0,
   iadeOrani: 0,
+  gelirVergisi: 15,
 };
 
 export default function BulkSimulation() {
@@ -135,6 +136,9 @@ export default function BulkSimulation() {
       return DEFAULT_VARIABLE_EXPENSES;
     }
   });
+
+  // Update gelirVergisi in calculations
+  const gelirVergisiYuzde = variableExpenses.gelirVergisi / 100;
 
   // Persist data whenever state changes
   useEffect(() => {
@@ -228,7 +232,7 @@ export default function BulkSimulation() {
     varExpenses: typeof variableExpenses
   ) => {
     const totalQuantity = products.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
-    const gelirVergisiYuzde = DEFAULT_FORM_VALUES.gelirVergisi / 100;
+    const gelirVergisiYuzde = varExpenses.gelirVergisi / 100;
 
     const calculated = products.map((product) => {
       const komisyonYuzde = varExpenses.komisyon / 100;
@@ -306,7 +310,7 @@ export default function BulkSimulation() {
     if (bulkProducts.length === 0) return null;
 
     const totalQuantity = bulkProducts.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
-    const gelirVergisiYuzde = DEFAULT_FORM_VALUES.gelirVergisi / 100;
+    const gelirVergisiYuzde = variableExpenses.gelirVergisi / 100;
     const komisyonYuzde = variableExpenses.komisyon / 100;
     const iadeOrani = variableExpenses.iadeOrani / 100;
 
@@ -371,6 +375,7 @@ export default function BulkSimulation() {
     return {
       totalQuantity: bulkProducts.reduce((sum, p) => sum + p.totalSalesQuantity, 0),
       totalRevenue: bulkProducts.reduce((sum, p) => sum + p.totalSalesRevenue, 0),
+      totalCost: bulkProducts.reduce((sum, p) => sum + p.totalCost, 0),
     };
   }, [bulkProducts]);
 
@@ -476,6 +481,16 @@ export default function BulkSimulation() {
                       className="h-9 text-sm"
                     />
                   </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Gelir/Kurumlar Vergisi (%)</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={variableExpenses.gelirVergisi}
+                      onChange={(e) => handleVariableExpenseChange('gelirVergisi', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
@@ -551,6 +566,10 @@ export default function BulkSimulation() {
                   <div>
                     <p className="text-xs font-medium text-slate-600 mb-1">Toplam Satış Tutarı</p>
                     <p className="text-lg font-bold text-blue-600">{formatCurrency(excelTotals.totalRevenue)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 mb-1">Toplam Maliyet (Excel)</p>
+                    <p className="text-lg font-bold text-blue-600">{formatCurrency(excelTotals.totalCost)}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -701,30 +720,37 @@ export default function BulkSimulation() {
                       <TableHead className="text-left py-3 pl-6 font-semibold text-slate-700">Ürün Adı</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Ürün Maliyeti (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">KDV Oranı (%)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Toplam Giderler (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Net Kâr/Zarar (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı (%)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {results.map((result, idx) => (
-                      <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
-                        <TableCell className="py-3 pl-6 font-medium text-slate-700">{result.productName}</TableCell>
-                        <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
-                        <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
-                        <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalExpenses)}</TableCell>
-                        <TableCell
-                          className={`py-3 pr-6 text-right font-semibold ${
-                            result.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
-                          }`}
-                        >
-                          {formatCurrency(result.netProfit)}
-                        </TableCell>
-                        <TableCell className="py-3 pr-6 text-right text-blue-600 font-medium">
-                          {(result.profitMargin * 100).toFixed(2)}%
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {results.map((result, idx) => {
+                      const product = bulkProducts[idx];
+                      return (
+                        <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
+                          <TableCell className="py-3 pl-6 font-medium text-slate-700">{result.productName}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalCost)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{product?.vatRate}%</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalExpenses)}</TableCell>
+                          <TableCell
+                            className={`py-3 pr-6 text-right font-semibold ${
+                              result.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
+                            }`}
+                          >
+                            {formatCurrency(result.netProfit)}
+                          </TableCell>
+                          <TableCell className="py-3 pr-6 text-right text-blue-600 font-medium">
+                            {(result.profitMargin * 100).toFixed(2)}%
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                     <TableRow className="bg-slate-100 hover:bg-slate-100 font-bold">
                       <TableCell className="py-3 pl-6 text-slate-800">TOPLAM</TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
@@ -733,6 +759,10 @@ export default function BulkSimulation() {
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
                         {formatNumber(excelTotals.totalQuantity)}
                       </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(excelTotals.totalCost)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">-</TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
                         {formatCurrency(resultsTotals.totalExpenses)}
                       </TableCell>

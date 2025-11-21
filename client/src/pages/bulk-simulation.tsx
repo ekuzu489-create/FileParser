@@ -242,10 +242,11 @@ export default function BulkSimulation() {
       const digerGiderlerNetAm = fixedExpenses.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
       const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
 
-      // Revenue
+      // Revenue - each product's gross sales (VAT excluded)
       const brutSatisHasilatiKDVHariç = product.totalSalesRevenue / (1 + product.vatRate / 100);
-      const iadeKaybiAdet = product.totalSalesQuantity * iadeOrani;
-      const iadeTutariNet = iadeKaybiAdet * (brutSatisHasilatiKDVHariç / product.totalSalesQuantity);
+      
+      // Returns - apply percentage to this product's revenue
+      const iadeTutariNet = brutSatisHasilatiKDVHariç * iadeOrani;
       const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
 
       // COGS
@@ -256,10 +257,9 @@ export default function BulkSimulation() {
       const komisyonToplam = netSatisHasilati * komisyonYuzde;
       const kargoToplam = kargoNetAm * product.totalSalesQuantity;
       const platformFeeToplam = platformFeeNet * product.totalSalesQuantity;
-      const stopajBirim = (brutSatisHasilatiKDVHariç / product.totalSalesQuantity) * STOPAJ_RATE;
-      const stopajToplam = stopajBirim * product.totalSalesQuantity;
+      const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;
 
-      // Fixed expenses - apportion by quantity
+      // Fixed expenses - apportion by quantity share
       const quantityShare = totalQuantity > 0 ? product.totalSalesQuantity / totalQuantity : 0;
       const apportionedPersonel = fixedExpenses.personel * quantityShare;
       const apportionedDepo = depoNetAm * quantityShare;
@@ -317,31 +317,31 @@ export default function BulkSimulation() {
     const digerGiderlerNetAm = controlPanelValues.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
 
+    // Step 1: Calculate aggregate gross revenue (VAT excluded)
     let brutSatisHasilatiKDVHariç = 0;
-    let iadeTutariNet = 0;
     let smToplam = 0;
-    let komisyonToplam = 0;
-    let kargoToplam = 0;
-    let platformFeeToplam = 0;
-    let stopajToplam = 0;
 
     bulkProducts.forEach((product) => {
       const brutBirim = product.totalSalesRevenue / (1 + product.vatRate / 100);
       brutSatisHasilatiKDVHariç += brutBirim;
-      iadeTutariNet += brutBirim * iadeOrani * product.totalSalesQuantity;
       smToplam += product.totalCost;
-
-      const netSatisProduct = brutBirim - (brutBirim * iadeOrani * product.totalSalesQuantity);
-      komisyonToplam += netSatisProduct * komisyonYuzde;
-      kargoToplam += kargoNetAm * product.totalSalesQuantity;
-      platformFeeToplam += platformFeeNet * product.totalSalesQuantity;
-      stopajToplam += (brutBirim / product.totalSalesQuantity) * STOPAJ_RATE * product.totalSalesQuantity;
     });
 
+    // Step 2: Apply percentage rates to aggregate revenue
+    const iadeTutariNet = brutSatisHasilatiKDVHariç * iadeOrani;
     const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
     const brutKar = netSatisHasilati - smToplam;
 
+    // Step 3: Calculate variable expenses
+    const komisyonToplam = netSatisHasilati * komisyonYuzde;
+    const kargoToplam = kargoNetAm * totalQuantity;
+    const platformFeeToplam = platformFeeNet * totalQuantity;
+    const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;
+
+    // Step 4: Fixed expenses (no apportioning for aggregate)
     const sabitGiderlerToplamNet = controlPanelValues.personel + depoNetAm + muhasebeNetAm + pazarlamaNetAm + digerGiderlerNetAm;
+    
+    // Step 5: Calculate totals
     const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
     const faaliyetKar = brutKar - faaliyetGiderleriToplam;
     const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;

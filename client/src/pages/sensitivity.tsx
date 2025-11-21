@@ -179,20 +179,20 @@ const calculatePnLDetails = (baseData: ScenarioData, modifiedData: ScenarioData)
   if (!base || !modified) return [];
 
   return [
-    { label: 'Brüt Satış Hasılatı', baseValue: base.brutSatisHasilatiKDVHariç, scenarioValue: modified.brutSatisHasilatiKDVHariç, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '(-) İade Tutarı', baseValue: base.iadeTutariNet, scenarioValue: modified.iadeTutariNet, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '= Net Satış Hasılatı', baseValue: base.netSatisHasilati, scenarioValue: modified.netSatisHasilati, unit: 'currency', isTotal: false, isSubtotal: true },
-    { label: '(-) Satılan Malın Maliyeti (SM)', baseValue: base.smToplam, scenarioValue: modified.smToplam, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '= Brüt Kâr', baseValue: base.brutKar, scenarioValue: modified.brutKar, unit: 'currency', isTotal: false, isSubtotal: true },
-    { label: '(-) Pazaryeri Komisyonu (Değişken)', baseValue: base.komisyonToplam, scenarioValue: modified.komisyonToplam, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '(-) Kargo Gideri (Değişken)', baseValue: base.kargoToplam, scenarioValue: modified.kargoToplam, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '(-) Platform Hizmet Bedeli (Değişken)', baseValue: base.platformFeeToplam, scenarioValue: modified.platformFeeToplam, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '(-) Stopaj Gideri (Değişken)', baseValue: base.stopajToplam, scenarioValue: modified.stopajToplam, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '(-) Toplam Sabit Giderler', baseValue: base.sabitGiderlerToplamNet, scenarioValue: modified.sabitGiderlerToplamNet, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '= Toplam Faaliyet Giderleri', baseValue: base.faaliyetGiderleriToplam, scenarioValue: modified.faaliyetGiderleriToplam, unit: 'currency', isTotal: false, isSubtotal: true },
-    { label: '= Faaliyet Kârı (EBIT)', baseValue: base.faaliyetKar, scenarioValue: modified.faaliyetKar, unit: 'currency', isTotal: false, isSubtotal: true },
-    { label: '(-) Gelir/Kurumlar Vergisi', baseValue: base.vergi, scenarioValue: modified.vergi, unit: 'currency', isTotal: false, isSubtotal: false },
-    { label: '= NET KÂR / ZARAR', baseValue: base.netKar, scenarioValue: modified.netKar, unit: 'currency', isTotal: true, isSubtotal: false }
+    { label: 'Brüt Satış Hasılatı', baseValue: base.brutSatisHasilatiKDVHariç, scenarioValue: modified.brutSatisHasilatiKDVHariç, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'revenue' },
+    { label: '(-) İade Tutarı', baseValue: base.iadeTutariNet, scenarioValue: modified.iadeTutariNet, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '= Net Satış Hasılatı', baseValue: base.netSatisHasilati, scenarioValue: modified.netSatisHasilati, unit: 'currency', isTotal: false, isSubtotal: true, metricType: 'revenue' },
+    { label: '(-) Satılan Malın Maliyeti (SM)', baseValue: base.smToplam, scenarioValue: modified.smToplam, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '= Brüt Kâr', baseValue: base.brutKar, scenarioValue: modified.brutKar, unit: 'currency', isTotal: false, isSubtotal: true, metricType: 'revenue' },
+    { label: '(-) Pazaryeri Komisyonu (Değişken)', baseValue: base.komisyonToplam, scenarioValue: modified.komisyonToplam, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '(-) Kargo Gideri (Değişken)', baseValue: base.kargoToplam, scenarioValue: modified.kargoToplam, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '(-) Platform Hizmet Bedeli (Değişken)', baseValue: base.platformFeeToplam, scenarioValue: modified.platformFeeToplam, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '(-) Stopaj Gideri (Değişken)', baseValue: base.stopajToplam, scenarioValue: modified.stopajToplam, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '(-) Toplam Sabit Giderler', baseValue: base.sabitGiderlerToplamNet, scenarioValue: modified.sabitGiderlerToplamNet, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '= Toplam Faaliyet Giderleri', baseValue: base.faaliyetGiderleriToplam, scenarioValue: modified.faaliyetGiderleriToplam, unit: 'currency', isTotal: false, isSubtotal: true, metricType: 'cost' },
+    { label: '= Faaliyet Kârı (EBIT)', baseValue: base.faaliyetKar, scenarioValue: modified.faaliyetKar, unit: 'currency', isTotal: false, isSubtotal: true, metricType: 'revenue' },
+    { label: '(-) Gelir/Kurumlar Vergisi', baseValue: base.vergi, scenarioValue: modified.vergi, unit: 'currency', isTotal: false, isSubtotal: false, metricType: 'cost' },
+    { label: '= NET KÂR / ZARAR', baseValue: base.netKar, scenarioValue: modified.netKar, unit: 'currency', isTotal: true, isSubtotal: false, metricType: 'revenue' }
   ];
 };
 
@@ -215,6 +215,7 @@ interface PnLLineItem {
   unit: 'currency' | 'percentage' | 'quantity';
   isTotal: boolean;
   isSubtotal: boolean;
+  metricType: 'revenue' | 'cost';
 }
 
 export default function SensitivityAnalysis() {
@@ -764,6 +765,20 @@ export default function SensitivityAnalysis() {
                           return `${formatNumber(val)} Adet`;
                         };
 
+                        const getScenarioColor = () => {
+                          if (item.isTotal) return 'text-white';
+                          
+                          const difference = item.scenarioValue - item.baseValue;
+                          
+                          if (item.metricType === 'cost') {
+                            // For costs: Lower is favorable (green), Higher is unfavorable (red)
+                            return difference < 0 ? 'text-emerald-600' : (difference > 0 ? 'text-red-600' : 'text-slate-700');
+                          } else {
+                            // For revenue/profit: Higher is favorable (green), Lower is unfavorable (red)
+                            return difference > 0 ? 'text-emerald-600' : (difference < 0 ? 'text-red-600' : 'text-slate-700');
+                          }
+                        };
+
                         const rowClass = item.isTotal ? 'bg-slate-900 text-white font-bold' : 
                                         item.isSubtotal ? 'bg-slate-100 font-semibold' : 
                                         (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50');
@@ -776,7 +791,7 @@ export default function SensitivityAnalysis() {
                             <td className={`px-3 py-2 text-right font-semibold ${item.isTotal ? 'text-white' : (item.baseValue >= 0 ? 'text-emerald-600' : 'text-red-600')}`}>
                               {formatValue(item.baseValue, item.unit)}
                             </td>
-                            <td className={`px-3 py-2 text-right font-semibold ${item.isTotal ? 'text-white' : (item.scenarioValue >= 0 ? 'text-emerald-600' : 'text-red-600')}`}>
+                            <td className={`px-3 py-2 text-right font-semibold ${getScenarioColor()}`}>
                               {formatValue(item.scenarioValue, item.unit)}
                             </td>
                           </tr>

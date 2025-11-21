@@ -742,10 +742,11 @@ export default function BulkSimulation() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {results.slice(0, showAll ? results.length : 5).map((result, idx) => {
-                      const product = bulkProducts[idx];
+                    {results.slice(0, showAll ? results.length : 5).map((result, sliceIdx) => {
+                      const actualIdx = sliceIdx;
+                      const product = bulkProducts[actualIdx];
                       return (
-                        <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
+                        <TableRow key={`product-${result.productName}-${actualIdx}`} className="border-b border-slate-50 hover:bg-slate-50">
                           <TableCell className="py-3 pl-6 font-medium text-slate-700">{result.productName}</TableCell>
                           <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
                           <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>

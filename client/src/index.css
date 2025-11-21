@@ -298,28 +298,79 @@
  * need to be distinguished from eachother visually.
  */
 @layer utilities {
-  /* Ensure ALL Radix UI Select dropdowns always render on top */
+  /* Comprehensive Radix UI Select dropdown fix */
+  /* Make dropdowns fully opaque with solid background */
   [role="listbox"],
-  [role="option"],
   [data-radix-select-content],
-  [data-radix-select-viewport],
-  [data-radix-popover-content],
-  [data-radix-dropdown-menu-content],
-  .radix-select-content,
-  .radix-select-viewport,
-  [data-state="open"] {
+  [data-radix-select-viewport] {
+    position: relative !important;
     z-index: 9999 !important;
+    background-color: #FFFFFF !important;
+    background: white !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
-  /* Extra specificity for Radix Select portal */
+  /* Solid background for listbox items */
+  [role="option"] {
+    z-index: 9999 !important;
+    position: relative !important;
+  }
+
+  /* Portal wrapper - ensure it's visible */
+  [data-radix-select-content] {
+    background-color: white !important;
+    background: white !important;
+  }
+
+  /* Viewport - the scrollable container */
+  [data-radix-select-viewport] {
+    background-color: white !important;
+    background: white !important;
+  }
+
+  /* Popover and dropdown base styling */
+  [data-radix-popover-content],
+  [data-radix-dropdown-menu-content] {
+    z-index: 9999 !important;
+    position: relative !important;
+    background-color: white !important;
+    opacity: 1 !important;
+  }
+
+  /* Class-based selectors */
+  .radix-select-content,
+  .radix-select-viewport {
+    z-index: 9999 !important;
+    position: relative !important;
+    background-color: white !important;
+    opacity: 1 !important;
+  }
+
+  /* Ensure any open dropdown state is visible */
+  [data-state="open"] {
+    z-index: 9999 !important;
+    visibility: visible !important;
+  }
+
+  /* Extra specificity for nested elements */
   div[role="listbox"],
   [data-radix-select-content] > * {
     z-index: 9999 !important;
+    background-color: inherit;
   }
 
-  /* Ensure Select trigger area doesn't block dropdown */
+  /* Select trigger - keep it out of the way */
   [data-radix-select-trigger] {
     z-index: auto;
+    position: relative;
+  }
+
+  /* Prevent shadow/blur on dropdown */
+  [role="listbox"],
+  [data-radix-select-content] {
+    mix-blend-mode: normal !important;
+    filter: none !important;
   }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zap, TrendingUp } from "lucide-react";
+import { Zap, TrendingUp, Plus, Trash2 } from "lucide-react";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
 
 // Constants
@@ -111,6 +111,12 @@ interface SensitivityDataPoint {
   netKar: number;
 }
 
+interface MultiVariableRow {
+  id: string;
+  variable: keyof ScenarioData;
+  deviationPercent: number;
+}
+
 export default function SensitivityAnalysis() {
   const [baseData, setBaseData] = useState<ScenarioData>(() => {
     try {
@@ -144,14 +150,26 @@ export default function SensitivityAnalysis() {
   const [chartData, setChartData] = useState<SensitivityDataPoint[]>([]);
   const [hasRun, setHasRun] = useState(false);
 
+  // Multi-Variable Scenario Analysis State
+  const [multiVariableRows, setMultiVariableRows] = useState<MultiVariableRow[]>([
+    { id: '1', variable: 'satisFiyat', deviationPercent: 10 },
+  ]);
+  const [multiVarResult, setMultiVarResult] = useState<{ netKar: number; difference: number } | null>(null);
+
   const variableOptions = [
     { key: 'satisFiyat' as const, label: 'Birim Satış Fiyatı (₺)' },
     { key: 'adet' as const, label: 'Satış Adedi (Ay)' },
     { key: 'birimMaliyet' as const, label: 'Birim Maliyet (₺)' },
     { key: 'kargo' as const, label: 'Ort. Kargo (₺)' },
     { key: 'komisyon' as const, label: 'Komisyon (%)' },
+    { key: 'kdvOrani' as const, label: 'KDV (%)' },
+    { key: 'iadeOrani' as const, label: 'İade (%)' },
+    { key: 'gelirVergisi' as const, label: 'Gelir/Kurumlar Vergisi (%)' },
     { key: 'personel' as const, label: 'Personel (₺)' },
+    { key: 'depo' as const, label: 'Depo / Kira (₺)' },
+    { key: 'muhasebe' as const, label: 'Muhasebe (₺)' },
     { key: 'pazarlama' as const, label: 'Pazarlama (₺)' },
+    { key: 'digerGiderler' as const, label: 'Diğer Giderler (₺)' },
   ];
 
   const handleRunAnalysis = () => {
@@ -176,6 +194,40 @@ export default function SensitivityAnalysis() {
 
     setChartData(data);
     setHasRun(true);
+  };
+
+  const handleMultiVarAnalysis = () => {
+    const modifiedData = { ...baseData };
+
+    // Apply all deviations simultaneously
+    multiVariableRows.forEach(row => {
+      const currentValue = baseData[row.variable];
+      const deviation = (row.deviationPercent / 100) * (currentValue as number);
+      (modifiedData[row.variable] as number) = (currentValue as number) + deviation;
+    });
+
+    const baseResult = calculateScenario(baseData);
+    const modifiedResult = calculateScenario(modifiedData);
+
+    setMultiVarResult({
+      netKar: modifiedResult.netKar,
+      difference: modifiedResult.netKar - baseResult.netKar
+    });
+  };
+
+  const addMultiVarRow = () => {
+    const newId = Date.now().toString();
+    setMultiVariableRows([...multiVariableRows, { id: newId, variable: 'satisFiyat', deviationPercent: 0 }]);
+  };
+
+  const removeMultiVarRow = (id: string) => {
+    setMultiVariableRows(multiVariableRows.filter(row => row.id !== id));
+  };
+
+  const updateMultiVarRow = (id: string, field: 'variable' | 'deviationPercent', value: any) => {
+    setMultiVariableRows(multiVariableRows.map(row =>
+      row.id === id ? { ...row, [field]: value } : row
+    ));
   };
 
   const variableLabel = variableOptions.find(v => v.key === selectedVariable)?.label || '';
@@ -509,6 +561,116 @@ export default function SensitivityAnalysis() {
             </CardContent>
           </Card>
         )}
+
+        {/* Multi-Variable Scenario Analysis */}
+        <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+          <CardHeader className="pb-3 pt-5">
+            <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-blue-600" />
+              Çoklu Değişken Senaryo Analizi
+            </CardTitle>
+            <CardDescription>Birden fazla değişkeni aynı anda değiştirerek senaryo analizi yapın.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Input Table */}
+            <div className="overflow-x-auto border rounded-lg">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-blue-600 text-white">
+                    <th className="px-3 py-2 text-left font-semibold">Değişken</th>
+                    <th className="px-3 py-2 text-left font-semibold">Sapma (%)</th>
+                    <th className="px-3 py-2 text-center font-semibold w-12">İşlem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {multiVariableRows.map((row, idx) => (
+                    <tr key={row.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                      <td className="px-3 py-2">
+                        <Select value={row.variable} onValueChange={(value) => updateMultiVarRow(row.id, 'variable', value as keyof ScenarioData)}>
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="z-[9999]" style={{ zIndex: 9999 }}>
+                            {variableOptions.map(opt => (
+                              <SelectItem key={opt.key} value={opt.key}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="px-3 py-2">
+                        <Input
+                          type="number"
+                          step="1"
+                          value={row.deviationPercent}
+                          onChange={(e) => updateMultiVarRow(row.id, 'deviationPercent', parseFloat(e.target.value) || 0)}
+                          className="h-8 text-xs"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <button
+                          onClick={() => removeMultiVarRow(row.id)}
+                          className="p-1 hover:bg-red-100 rounded text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Add Row Button */}
+            <Button
+              onClick={addMultiVarRow}
+              variant="outline"
+              className="w-full h-9 text-sm"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Satır Ekle
+            </Button>
+
+            {/* Calculate Button */}
+            <Button
+              onClick={handleMultiVarAnalysis}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-9"
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Senaryo Hesapla
+            </Button>
+
+            {/* Results */}
+            {multiVarResult && (
+              <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-slate-50 rounded-lg border border-blue-200">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3">Senaryo Sonuçları</h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white rounded-lg p-3 border border-slate-200">
+                    <p className="text-xs text-slate-500 mb-1">Senaryo Net Kâr</p>
+                    <p className={`text-sm font-bold ${multiVarResult.netKar >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {formatCurrency(multiVarResult.netKar)}
+                    </p>
+                  </div>
+
+                  <div className={`rounded-lg p-3 border ${multiVarResult.difference >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
+                    <p className="text-xs text-slate-500 mb-1">Fark</p>
+                    <p className={`text-sm font-bold ${multiVarResult.difference >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {multiVarResult.difference >= 0 ? '+' : ''}{formatCurrency(multiVarResult.difference)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 p-3 bg-white rounded-lg border border-slate-200">
+                  <p className="text-xs text-slate-700">
+                    <span className="font-semibold">Özet:</span> Seçilen {multiVariableRows.length} değişken{multiVariableRows.length > 1 ? 'de' : 'de'} yapılan değişiklikler, net kârı <span className={`font-bold ${multiVarResult.difference >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{multiVarResult.difference >= 0 ? '+' : ''}{formatCurrency(multiVarResult.difference)}</span> oranında etkileyecektir.
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

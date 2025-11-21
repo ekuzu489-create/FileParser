@@ -8,6 +8,7 @@ import { Calculator, TrendingUp, DollarSign, Percent, ArrowUpRight, ArrowDownRig
 import { cn } from "@/lib/utils";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
+import { useGlobalReset } from "@/lib/ResetContext";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;

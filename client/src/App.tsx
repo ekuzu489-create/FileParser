@@ -10,6 +10,7 @@ import Simulator from "@/pages/simulator";
 import ComparisonSimulator from "@/pages/comparison";
 import SensitivityAnalysis from "@/pages/sensitivity";
 import BulkSimulation from "@/pages/bulk-simulation";
+import { ResetProvider } from "@/lib/ResetContext";
 
 export function Navigation() {
   const [location] = useLocation();
@@ -75,10 +76,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ResetProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ResetProvider>
     </QueryClientProvider>
   );
 }

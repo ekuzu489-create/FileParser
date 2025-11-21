@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
+import { useGlobalReset } from "@/lib/ResetContext";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
@@ -70,6 +71,8 @@ const formatKDVIncl = (netAmount: number, vatRate: number) => {
 };
 
 export default function Simulator() {
+  const { resetVersion, triggerGlobalReset } = useGlobalReset();
+
   // State - Initialize from localStorage, persist on changes
   const [values, setValues] = useState(() => {
     try {
@@ -79,6 +82,11 @@ export default function Simulator() {
       return DEFAULT_FORM_VALUES;
     }
   });
+
+  // Re-initialize when global reset is triggered
+  useEffect(() => {
+    setValues(DEFAULT_FORM_VALUES);
+  }, [resetVersion]);
 
   // Persist to localStorage whenever values change
   useEffect(() => {
@@ -91,7 +99,7 @@ export default function Simulator() {
   };
 
   const handleReset = () => {
-    setValues(DEFAULT_FORM_VALUES);
+    triggerGlobalReset();
   };
 
   // Calculations

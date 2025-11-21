@@ -37,6 +37,7 @@ interface BulkResult {
   totalCost: number;
   totalSalesQuantity: number;
   totalSalesRevenue: number;
+  totalExpenses: number;
   netProfit: number;
   profitMargin: number;
 }
@@ -106,51 +107,74 @@ export default function BulkSimulation() {
   };
 
   const calculateResults = (products: BulkProduct[]) => {
+    // Calculate total quantities and revenues for apportioning
+    const totalQuantity = products.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
+    const totalRevenue = products.reduce((sum, p) => sum + (p.totalSalesRevenue / (1 + p.vatRate / 100)), 0);
+
     const calculated = products.map((product) => {
       const komisyonYuzde = globalSettings.komisyon / 100;
       const iadeOrani = globalSettings.iadeOrani / 100;
       const gelirVergisiYuzde = globalSettings.gelirVergisi / 100;
 
-      // Revenue calculations
-      const brutSatisHasilatiKDVHariç = product.totalSalesRevenue / (1 + product.vatRate / 100);
-      const iadeKaybiTutar = brutSatisHasilatiKDVHariç * iadeOrani;
-      const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeKaybiTutar;
+      // VAT breakdown for costs
+      const kargoNetAm = globalSettings.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const depoNetAm = globalSettings.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const muhasebeNetAm = globalSettings.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const pazarlamaNetAm = globalSettings.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const digerGiderlerNetAm = globalSettings.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
 
-      // Cost calculations
+      // Revenue calculations (exact match with main simulator)
+      const brutSatisHasilatiKDVHariç = product.totalSalesRevenue / (1 + product.vatRate / 100);
+      const iadeKaybiAdet = product.totalSalesQuantity * iadeOrani;
+      const iadeTutariNet = iadeKaybiAdet * (brutSatisHasilatiKDVHariç / product.totalSalesQuantity);
+      const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
+
+      // COGS
       const smToplam = product.totalCost;
       const brutKar = netSatisHasilati - smToplam;
 
+      // Variable expenses
       const komisyonToplam = netSatisHasilati * komisyonYuzde;
-      const kargoToplam = globalSettings.kargo * product.totalSalesQuantity;
-      const platformFeeToplam = (PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100)) * product.totalSalesQuantity;
-
-      const stopajBirim = (netSatisHasilati / product.totalSalesQuantity) * STOPAJ_RATE;
+      const kargoToplam = kargoNetAm * product.totalSalesQuantity;
+      const platformFeeToplam = platformFeeNet * product.totalSalesQuantity;
+      const stopajBirim = (brutSatisHasilatiKDVHariç / product.totalSalesQuantity) * STOPAJ_RATE;
       const stopajToplam = stopajBirim * product.totalSalesQuantity;
 
+      // Fixed expenses - apportion based on quantity share
+      const quantityShare = totalQuantity > 0 ? product.totalSalesQuantity / totalQuantity : 0;
+      const apportionedPersonel = (globalSettings.personel || 0) * quantityShare;
+      const apportionedDepo = depoNetAm * quantityShare;
+      const apportionedMuhasebe = muhasebeNetAm * quantityShare;
+      const apportionedPazarlama = pazarlamaNetAm * quantityShare;
+      const apportionedDigerGiderler = digerGiderlerNetAm * quantityShare;
+
       const sabitGiderlerToplamNet =
-        (globalSettings.personel || 0) +
-        (globalSettings.depo || 0) +
-        (globalSettings.muhasebe || 0) +
-        (globalSettings.pazarlama || 0) +
-        (globalSettings.digerGiderler || 0);
+        apportionedPersonel + apportionedDepo + apportionedMuhasebe + apportionedPazarlama + apportionedDigerGiderler;
 
+      // Total operating expenses
       const faaliyetGiderleriToplam =
-        komisyonToplam +
-        (globalSettings.kargo || 0) * product.totalSalesQuantity +
-        platformFeeToplam +
-        stopajToplam +
-        sabitGiderlerToplamNet;
+        komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
 
+      // Profit before tax
       const faaliyetKar = brutKar - faaliyetGiderleriToplam;
+
+      // Tax
       const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;
+
+      // Net profit
       const netKar = faaliyetKar - vergi;
       const profitMargin = netSatisHasilati > 0 ? netKar / netSatisHasilati : 0;
+
+      // Total expenses (COGS + Operating expenses)
+      const totalExpenses = smToplam + faaliyetGiderleriToplam + vergi;
 
       return {
         productName: product.productName,
         totalCost: product.totalCost,
         totalSalesQuantity: product.totalSalesQuantity,
         totalSalesRevenue: product.totalSalesRevenue,
+        totalExpenses: totalExpenses,
         netProfit: netKar,
         profitMargin: profitMargin,
       };
@@ -164,6 +188,7 @@ export default function BulkSimulation() {
       totalCost: results.reduce((sum, r) => sum + r.totalCost, 0),
       totalQuantity: results.reduce((sum, r) => sum + r.totalSalesQuantity, 0),
       totalRevenue: results.reduce((sum, r) => sum + r.totalSalesRevenue, 0),
+      totalExpenses: results.reduce((sum, r) => sum + r.totalExpenses, 0),
       totalNetProfit: results.reduce((sum, r) => sum + r.netProfit, 0),
     };
   }, [results]);
@@ -253,9 +278,9 @@ export default function BulkSimulation() {
                   <TableHeader>
                     <TableRow className="bg-slate-50 hover:bg-slate-50">
                       <TableHead className="text-left py-3 pl-6 font-semibold text-slate-700">Ürün Adı</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Toplam Maliyet (₺)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Hasılatı (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Toplam Giderler (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Net Kâr/Zarar (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı</TableHead>
                     </TableRow>
@@ -264,9 +289,9 @@ export default function BulkSimulation() {
                     {results.map((result, idx) => (
                       <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
                         <TableCell className="py-3 pl-6 font-medium text-slate-700">{result.productName}</TableCell>
-                        <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalCost)}</TableCell>
-                        <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
                         <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
+                        <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
+                        <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalExpenses)}</TableCell>
                         <TableCell className={`py-3 pr-6 text-right font-semibold ${result.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                           {formatCurrency(result.netProfit)}
                         </TableCell>
@@ -277,9 +302,9 @@ export default function BulkSimulation() {
                     ))}
                     <TableRow className="bg-slate-100 hover:bg-slate-100 font-bold">
                       <TableCell className="py-3 pl-6 text-slate-800">TOPLAM</TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">{formatCurrency(totals.totalCost)}</TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">{formatNumber(totals.totalQuantity)}</TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">{formatCurrency(totals.totalRevenue)}</TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">{formatNumber(totals.totalQuantity)}</TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">{formatCurrency(totals.totalExpenses)}</TableCell>
                       <TableCell className={`py-3 pr-6 text-right ${totals.totalNetProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                         {formatCurrency(totals.totalNetProfit)}
                       </TableCell>

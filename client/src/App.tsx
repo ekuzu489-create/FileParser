@@ -4,12 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Scale, Zap, FileText } from "lucide-react";
+import { LayoutDashboard, Scale, Zap } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Simulator from "@/pages/simulator";
 import ComparisonSimulator from "@/pages/comparison";
 import SensitivityAnalysis from "@/pages/sensitivity";
-import BulkSimulation from "@/pages/bulk-simulation";
 
 export function Navigation() {
   const [location] = useLocation();
@@ -46,16 +45,6 @@ export function Navigation() {
           Hassasiyet
         </Button>
       </Link>
-      <Link href="/bulk">
-        <Button 
-          variant={location === "/bulk" ? "default" : "ghost"} 
-          size="sm"
-          className="gap-2"
-        >
-          <FileText className="w-4 h-4" />
-          Toplu Simülasyon
-        </Button>
-      </Link>
     </div>
   );
 }
@@ -66,7 +55,6 @@ function Router() {
       <Route path="/" component={Simulator} />
       <Route path="/comparison" component={ComparisonSimulator} />
       <Route path="/sensitivity" component={SensitivityAnalysis} />
-      <Route path="/bulk" component={BulkSimulation} />
       <Route component={NotFound} />
     </Switch>
   );

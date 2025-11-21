@@ -62,7 +62,7 @@ export function Navigation() {
       </div>
       <Button 
         onClick={triggerGlobalReset}
-        className="bg-white hover:bg-slate-50 text-red-500 font-semibold gap-2 border border-blue-600"
+        className="bg-white hover:bg-slate-50 text-red-500 font-semibold gap-2 border border-red-500"
         data-testid="button-reset-global"
       >
         <RotateCcw className="w-4 h-4" />

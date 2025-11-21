@@ -482,16 +482,6 @@ export default function Simulator() {
               </div>
             </CardContent>
           </Card>
-
-          <Button 
-            onClick={handleReset} 
-            variant="destructive" 
-            className="w-full h-10 text-base font-semibold bg-red-600 hover:bg-red-700 text-white shadow-[0_4px_12px_rgba(220,38,38,0.3)]"
-            data-testid="button-reset-default"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Varsayılana Sıfırla
-          </Button>
         </div>
 
         {/* Right Column: Outputs */}

@@ -9,6 +9,7 @@ import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
 import { Upload, Download, FileText, TrendingUp } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
+import { useGlobalReset } from "@/lib/ResetContext";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
@@ -89,6 +90,8 @@ const DEFAULT_VARIABLE_EXPENSES = {
 };
 
 export default function BulkSimulation() {
+  const { resetVersion } = useGlobalReset();
+
   const [bulkProducts, setBulkProducts] = useState<BulkProduct[]>(() => {
     try {
       const saved = localStorage.getItem('bulk_simulation_products');
@@ -138,6 +141,21 @@ export default function BulkSimulation() {
   });
 
   const [showAll, setShowAll] = useState(false);
+
+  // Re-initialize when global reset is triggered
+  useEffect(() => {
+    setBulkProducts([]);
+    setResults([]);
+    setControlPanelValues({
+      personel: 0,
+      depo: 0,
+      muhasebe: 0,
+      pazarlama: 0,
+      digerGiderler: 0,
+    });
+    setVariableExpenses(DEFAULT_VARIABLE_EXPENSES);
+    setShowAll(false);
+  }, [resetVersion]);
 
   // Update gelirVergisi in calculations
   const gelirVergisiYuzde = variableExpenses.gelirVergisi / 100;

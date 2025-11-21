@@ -380,6 +380,8 @@ const ScenarioInputForm = ({
 };
 
 export default function ComparisonSimulator() {
+  const { resetVersion } = useGlobalReset();
+
   // Senaryo 1: Initialize from localStorage, or copy from Simulator on first load
   const [scenario1, setScenario1] = useState<ScenarioData>(() => {
     try {
@@ -433,6 +435,13 @@ export default function ComparisonSimulator() {
       return DEFAULT_FORM_VALUES.hedefKarTL;
     }
   });
+
+  // Re-initialize when global reset is triggered
+  useEffect(() => {
+    setScenario1(DEFAULT_VALUES);
+    setScenario2({ ...DEFAULT_VALUES, adet: 600, satisFiyat: 1049.99 });
+    setHedefKarTL(DEFAULT_FORM_VALUES.hedefKarTL);
+  }, [resetVersion]);
 
   // Persist Senaryo 1, Senaryo 2, and hedefKarTL to localStorage
   useEffect(() => {

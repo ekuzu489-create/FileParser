@@ -814,7 +814,6 @@ export default function BulkSimulation() {
             )}
           </div>
         )}
-      </div>
 
         {/* Results Table */}
         {results.length > 0 && (

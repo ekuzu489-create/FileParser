@@ -1,6 +1,6 @@
 import { type User, type InsertUser } from "@shared/schema";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
@@ -14,8 +14,8 @@ export class DatabaseStorage implements IStorage {
   private db: ReturnType<typeof drizzle>;
 
   constructor(connectionString: string) {
-    const client = postgres(connectionString);
-    this.db = drizzle(client);
+    const sql = neon(connectionString);
+    this.db = drizzle(sql);
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -35,5 +35,9 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Initialize storage with Replit DB connection
-const connectionString = process.env.DATABASE_URL || "postgresql://localhost/simulator";
-export const storage = new DatabaseStorage(connectionString);
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString && process.env.NODE_ENV === "production") {
+  throw new Error("DATABASE_URL environment variable is required in production");
+}
+
+export const storage = new DatabaseStorage(connectionString || "postgresql://localhost/simulator");

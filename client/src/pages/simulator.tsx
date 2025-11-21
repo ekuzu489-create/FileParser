@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calculator, TrendingUp, DollarSign, Percent, Package, Building2, PieChart, Scale, Target, Info } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Percent, Package, Building2, PieChart, Scale, Target, Info, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
@@ -68,27 +70,15 @@ const formatKDVIncl = (netAmount: number, vatRate: number) => {
 
 export default function Simulator() {
   // State
-  const [values, setValues] = useState({
-    adet: 500,
-    satisFiyat: 999.99,
-    birimMaliyet: 312.98,
-    kargo: 85.44,
-    komisyon: 21,
-    kdvOrani: 20,
-    iadeOrani: 8,
-    gelirVergisi: 25,
-    personel: 17082,
-    depo: 5000,
-    muhasebe: 4800,
-    pazarlama: 10000,
-    digerGiderler: 2000,
-    hedefKarTL: 50000,
-    hedefKarYuzde: 20
-  });
+  const [values, setValues] = useState(DEFAULT_FORM_VALUES);
 
   const handleChange = (key: keyof typeof values, value: string) => {
     const numValue = parseFloat(value) || 0;
     setValues(prev => ({ ...prev, [key]: numValue }));
+  };
+
+  const handleReset = () => {
+    setValues(DEFAULT_FORM_VALUES);
   };
 
   // Calculations

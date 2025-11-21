@@ -29,6 +29,12 @@ const formatKDVIncl = (netAmount: number, vatRate: number) => {
   return total;
 };
 
+const formatNumber = (value: number) => {
+  return new Intl.NumberFormat('tr-TR', {
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 interface ScenarioData {
   adet: number;
   satisFiyat: number;
@@ -105,6 +111,91 @@ const calculateScenario = (data: ScenarioData): CalculationResult => {
   };
 };
 
+const calculatePnLDetails = (baseData: ScenarioData, modifiedData: ScenarioData): PnLLineItem[] => {
+  const calcP = (data: ScenarioData) => {
+    const {
+      adet, satisFiyat, birimMaliyet, kargo: kargoVal, komisyon, kdvOrani,
+      iadeOrani: iadeOraniVal, gelirVergisi, personel, depo: depoVal,
+      muhasebe: muhasebeVal, pazarlama: pazarlamaVal, digerGiderler: digerVal
+    } = data;
+
+    if (adet === 0) return null;
+
+    const komisyonYuzde = komisyon / 100;
+    const iadeOrani = iadeOraniVal / 100;
+    const gelirVergisiYuzde = gelirVergisi / 100;
+
+    const satis = solveVAT(satisFiyat, kdvOrani);
+    const maliyet = solveVAT(birimMaliyet, kdvOrani);
+    const kargo = solveVAT(kargoVal, GIDER_KDV_ORANI_SABIT);
+    const platformFee = solveVAT(PLATFORM_FEE_KDV_INCL, GIDER_KDV_ORANI_SABIT);
+    const personelNet = personel;
+    const depo = solveVAT(depoVal, GIDER_KDV_ORANI_SABIT);
+    const muhasebe = solveVAT(muhasebeVal, GIDER_KDV_ORANI_SABIT);
+    const pazarlama = solveVAT(pazarlamaVal, GIDER_KDV_ORANI_SABIT);
+    const digerGiderler = solveVAT(digerVal, GIDER_KDV_ORANI_SABIT);
+
+    const brutSatisHasilatiKDVHariç = satis.net * adet;
+    const iadeKaybiAdet = adet * iadeOrani;
+    const iadeTutariNet = iadeKaybiAdet * satis.net;
+    const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
+    const smToplam = maliyet.net * adet;
+    const brutKar = netSatisHasilati - smToplam;
+
+    const komisyonToplam = netSatisHasilati * komisyonYuzde;
+    const kargoToplam = kargo.net * adet;
+    const platformFeeToplam = platformFee.net * adet;
+    const stopajBirim = satis.net * STOPAJ_RATE;
+    const stopajToplam = stopajBirim * adet;
+
+    const sabitGiderlerToplamNet = personelNet + depo.net + muhasebe.net + pazarlama.net + digerGiderler.net;
+    const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
+
+    const faaliyetKar = brutKar - faaliyetGiderleriToplam;
+    const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;
+    const netKar = faaliyetKar - vergi;
+
+    return {
+      brutSatisHasilatiKDVHariç,
+      iadeTutariNet,
+      netSatisHasilati,
+      smToplam,
+      brutKar,
+      komisyonToplam,
+      kargoToplam,
+      platformFeeToplam,
+      stopajToplam,
+      sabitGiderlerToplamNet,
+      faaliyetGiderleriToplam,
+      faaliyetKar,
+      vergi,
+      netKar
+    };
+  };
+
+  const base = calcP(baseData);
+  const modified = calcP(modifiedData);
+
+  if (!base || !modified) return [];
+
+  return [
+    { label: 'Brüt Satış Hasılatı', baseValue: base.brutSatisHasilatiKDVHariç, scenarioValue: modified.brutSatisHasilatiKDVHariç, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '(-) İade Tutarı', baseValue: base.iadeTutariNet, scenarioValue: modified.iadeTutariNet, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '= Net Satış Hasılatı', baseValue: base.netSatisHasilati, scenarioValue: modified.netSatisHasilati, unit: 'currency', isTotal: false, isSubtotal: true },
+    { label: '(-) Satılan Malın Maliyeti (SM)', baseValue: base.smToplam, scenarioValue: modified.smToplam, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '= Brüt Kâr', baseValue: base.brutKar, scenarioValue: modified.brutKar, unit: 'currency', isTotal: false, isSubtotal: true },
+    { label: '(-) Pazaryeri Komisyonu (Değişken)', baseValue: base.komisyonToplam, scenarioValue: modified.komisyonToplam, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '(-) Kargo Gideri (Değişken)', baseValue: base.kargoToplam, scenarioValue: modified.kargoToplam, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '(-) Platform Hizmet Bedeli (Değişken)', baseValue: base.platformFeeToplam, scenarioValue: modified.platformFeeToplam, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '(-) Stopaj Gideri (Değişken)', baseValue: base.stopajToplam, scenarioValue: modified.stopajToplam, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '(-) Toplam Sabit Giderler', baseValue: base.sabitGiderlerToplamNet, scenarioValue: modified.sabitGiderlerToplamNet, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '= Toplam Faaliyet Giderleri', baseValue: base.faaliyetGiderleriToplam, scenarioValue: modified.faaliyetGiderleriToplam, unit: 'currency', isTotal: false, isSubtotal: true },
+    { label: '= Faaliyet Kârı (EBIT)', baseValue: base.faaliyetKar, scenarioValue: modified.faaliyetKar, unit: 'currency', isTotal: false, isSubtotal: true },
+    { label: '(-) Gelir/Kurumlar Vergisi', baseValue: base.vergi, scenarioValue: modified.vergi, unit: 'currency', isTotal: false, isSubtotal: false },
+    { label: '= NET KÂR / ZARAR', baseValue: base.netKar, scenarioValue: modified.netKar, unit: 'currency', isTotal: true, isSubtotal: false }
+  ];
+};
+
 interface SensitivityDataPoint {
   deviation: number;
   deviationPercent: string;
@@ -115,6 +206,15 @@ interface MultiVariableRow {
   id: string;
   variable: keyof ScenarioData;
   deviationPercent: number;
+}
+
+interface PnLLineItem {
+  label: string;
+  baseValue: number;
+  scenarioValue: number;
+  unit: 'currency' | 'percentage' | 'quantity';
+  isTotal: boolean;
+  isSubtotal: boolean;
 }
 
 export default function SensitivityAnalysis() {
@@ -155,13 +255,7 @@ export default function SensitivityAnalysis() {
     { id: '1', variable: 'satisFiyat', deviationPercent: 10 },
   ]);
   const [multiVarResult, setMultiVarResult] = useState<{ netKar: number; difference: number } | null>(null);
-  const [scenarioDetails, setScenarioDetails] = useState<Array<{
-    variable: string;
-    baseValue: number;
-    deviationPercent: number;
-    newValue: number;
-    isDependent: boolean;
-  }> | null>(null);
+  const [pnlDetails, setPnLDetails] = useState<PnLLineItem[] | null>(null);
 
   const variableOptions = [
     { key: 'satisFiyat' as const, label: 'Birim Satış Fiyatı (₺)' },
@@ -205,56 +299,18 @@ export default function SensitivityAnalysis() {
 
   const handleMultiVarAnalysis = () => {
     const modifiedData = { ...baseData };
-    const details: Array<{ variable: string; baseValue: number; deviationPercent: number; newValue: number; isDependent: boolean }> = [];
 
-    // Track directly changed variables
-    const changedVars = new Set<string>();
     multiVariableRows.forEach(row => {
-      changedVars.add(row.variable);
       const currentValue = baseData[row.variable];
       const deviation = (row.deviationPercent / 100) * (currentValue as number);
-      const newValue = (currentValue as number) + deviation;
-      (modifiedData[row.variable] as number) = newValue;
-
-      // Add directly changed variable
-      details.push({
-        variable: variableOptions.find(opt => opt.key === row.variable)?.label || row.variable,
-        baseValue: currentValue as number,
-        deviationPercent: row.deviationPercent,
-        newValue,
-        isDependent: false
-      });
+      (modifiedData[row.variable] as number) = (currentValue as number) + deviation;
     });
 
-    // Calculate results
     const baseResult = calculateScenario(baseData);
     const modifiedResult = calculateScenario(modifiedData);
+    const pnl = calculatePnLDetails(baseData, modifiedData);
 
-    // Add key dependent variables affected
-    const dependentVars = [
-      { key: 'komisyonToplam', label: 'Komisyon Tutarı (₺)', base: 0, modified: 0 },
-      { key: 'stopajToplam', label: 'Stopaj Tutarı (₺)', base: 0, modified: 0 },
-      { key: 'faaliyetGiderleriToplam', label: 'Faaliyet Giderleri (₺)', base: 0, modified: 0 },
-      { key: 'vergi', label: 'Vergi Matrahı (₺)', base: 0, modified: 0 },
-      { key: 'netKar', label: 'Net Kâr / Zarar (₺)', base: baseResult.netKar, modified: modifiedResult.netKar }
-    ];
-
-    // Add dependent variables that changed
-    dependentVars.forEach(depVar => {
-      if (depVar.base !== depVar.modified) {
-        const difference = depVar.modified - depVar.base;
-        const percentChange = depVar.base !== 0 ? (difference / depVar.base) * 100 : 0;
-        details.push({
-          variable: depVar.label,
-          baseValue: depVar.base,
-          deviationPercent: percentChange,
-          newValue: depVar.modified,
-          isDependent: true
-        });
-      }
-    });
-
-    setScenarioDetails(details);
+    setPnLDetails(pnl);
     setMultiVarResult({
       netKar: modifiedResult.netKar,
       difference: modifiedResult.netKar - baseResult.netKar
@@ -687,38 +743,45 @@ export default function SensitivityAnalysis() {
               Senaryo Hesapla
             </Button>
 
-            {/* Scenario Application Details Table */}
-            {scenarioDetails && (
+            {/* Scenario Application Details Table - Full P&L */}
+            {pnlDetails && (
               <div className="mt-6">
-                <h4 className="text-sm font-semibold text-slate-700 mb-3">Senaryo Uygulama Detayı</h4>
+                <h4 className="text-sm font-semibold text-slate-700 mb-3">Senaryo Uygulama Detayı - Aylık Kâr/Zarar Tablosu</h4>
                 <div className="overflow-x-auto border rounded-lg">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="bg-slate-200 text-slate-800">
-                        <th className="px-3 py-2 text-left font-semibold">Değişken</th>
-                        <th className="px-3 py-2 text-right font-semibold">Başlangıç Değeri</th>
-                        <th className="px-3 py-2 text-right font-semibold">Sapma (%)</th>
-                        <th className="px-3 py-2 text-right font-semibold">Yeni Değer</th>
+                        <th className="px-3 py-2 text-left font-semibold">Metrik</th>
+                        <th className="px-3 py-2 text-right font-semibold">Başlangıç Değeri (Simülatör)</th>
+                        <th className="px-3 py-2 text-right font-semibold">Senaryo Değeri (Yeni)</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {scenarioDetails.map((detail, idx) => (
-                        <tr key={idx} className={detail.isDependent ? 'bg-blue-50' : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50')}>
-                          <td className={`px-3 py-2 font-medium ${detail.isDependent ? 'text-blue-700 italic' : 'text-slate-700'}`}>
-                            {detail.variable}
-                            {detail.isDependent && <span className="text-xs ml-1">(Bağımlı)</span>}
-                          </td>
-                          <td className="px-3 py-2 text-right text-slate-700">
-                            {detail.variable.includes('(₺)') ? formatCurrency(detail.baseValue) : `${detail.baseValue.toFixed(2)}%`}
-                          </td>
-                          <td className={`px-3 py-2 text-right font-semibold ${detail.deviationPercent >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                            {detail.deviationPercent >= 0 ? '+' : ''}{detail.deviationPercent.toFixed(2)}%
-                          </td>
-                          <td className={`px-3 py-2 text-right font-semibold ${detail.newValue >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                            {detail.variable.includes('(₺)') ? formatCurrency(detail.newValue) : `${detail.newValue.toFixed(2)}%`}
-                          </td>
-                        </tr>
-                      ))}
+                      {pnlDetails.map((item, idx) => {
+                        const formatValue = (val: number, unit: string) => {
+                          if (unit === 'currency') return formatCurrency(val);
+                          if (unit === 'percentage') return `${val.toFixed(2)}%`;
+                          return `${formatNumber(val)} Adet`;
+                        };
+
+                        const rowClass = item.isTotal ? 'bg-slate-900 text-white font-bold' : 
+                                        item.isSubtotal ? 'bg-slate-100 font-semibold' : 
+                                        (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50');
+                        
+                        return (
+                          <tr key={idx} className={rowClass}>
+                            <td className={`px-3 py-2 ${item.isTotal ? 'text-white' : 'text-slate-700'}`}>
+                              {item.label}
+                            </td>
+                            <td className={`px-3 py-2 text-right font-semibold ${item.isTotal ? 'text-white' : (item.baseValue >= 0 ? 'text-emerald-600' : 'text-red-600')}`}>
+                              {formatValue(item.baseValue, item.unit)}
+                            </td>
+                            <td className={`px-3 py-2 text-right font-semibold ${item.isTotal ? 'text-white' : (item.scenarioValue >= 0 ? 'text-emerald-600' : 'text-red-600')}`}>
+                              {formatValue(item.scenarioValue, item.unit)}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

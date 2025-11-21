@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Calculator, TrendingUp, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Scale, PieChart, Target, BarChart3, Lock } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Scale, PieChart, Target, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
 
@@ -253,35 +253,24 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
 // Input Form Component
 const ScenarioInputForm = ({ 
   data, 
-  onChange,
-  isReadOnly = false
+  onChange
 }: { 
   data: ScenarioData, 
-  onChange: (key: keyof ScenarioData, value: string) => void,
-  isReadOnly?: boolean
+  onChange: (key: keyof ScenarioData, value: string) => void
 }) => {
   return (
-    <div className="space-y-4 h-full overflow-y-auto pr-2 custom-scrollbar relative">
-      {isReadOnly && (
-        <div className="absolute inset-0 bg-black/5 rounded-lg flex items-center justify-center z-10 pointer-events-none">
-          <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg flex items-center gap-2 text-xs text-slate-600 font-medium">
-            <Lock className="w-3.5 h-3.5" />
-            Varsayılan Değerler (Kilitli)
-          </div>
-        </div>
-      )}
-      
+    <div className="space-y-4 h-full overflow-y-auto pr-2 custom-scrollbar">
       <Card className="border-0 shadow-none p-0">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
-              <Input disabled={isReadOnly} className="h-9 text-sm" type="number" step="1" value={data.adet} onChange={(e) => onChange('adet', e.target.value)} />
+              <Input className="h-9 text-sm" type="number" step="1" value={data.adet} onChange={(e) => onChange('adet', e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Birim Satış (₺)</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.satisFiyat} onChange={(e) => onChange('satisFiyat', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.satisFiyat} onChange={(e) => onChange('satisFiyat', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
               </div>
             </div>
@@ -290,14 +279,14 @@ const ScenarioInputForm = ({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Birim Maliyet (₺)</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.birimMaliyet} onChange={(e) => onChange('birimMaliyet', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.birimMaliyet} onChange={(e) => onChange('birimMaliyet', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Ort. Kargo (₺)</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.kargo} onChange={(e) => onChange('kargo', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.kargo} onChange={(e) => onChange('kargo', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
               </div>
             </div>
@@ -306,21 +295,21 @@ const ScenarioInputForm = ({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Komisyon %</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.1" value={data.komisyon} onChange={(e) => onChange('komisyon', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.1" value={data.komisyon} onChange={(e) => onChange('komisyon', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">KDV %</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="1" value={data.kdvOrani} onChange={(e) => onChange('kdvOrani', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="1" value={data.kdvOrani} onChange={(e) => onChange('kdvOrani', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">İade %</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.1" value={data.iadeOrani} onChange={(e) => onChange('iadeOrani', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.1" value={data.iadeOrani} onChange={(e) => onChange('iadeOrani', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
               </div>
             </div>
@@ -328,7 +317,7 @@ const ScenarioInputForm = ({
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-600">Gelir/Kurumlar Vergisi (%)</Label>
             <div className="relative">
-              <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="1" value={data.gelirVergisi} onChange={(e) => onChange('gelirVergisi', e.target.value)} />
+              <Input className="h-9 text-sm pr-6" type="number" step="1" value={data.gelirVergisi} onChange={(e) => onChange('gelirVergisi', e.target.value)} />
               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
             </div>
           </div>
@@ -347,14 +336,14 @@ const ScenarioInputForm = ({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.personel} onChange={(e) => onChange('personel', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.personel} onChange={(e) => onChange('personel', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.depo} onChange={(e) => onChange('depo', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.depo} onChange={(e) => onChange('depo', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
               </div>
             </div>
@@ -363,14 +352,14 @@ const ScenarioInputForm = ({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.muhasebe} onChange={(e) => onChange('muhasebe', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.muhasebe} onChange={(e) => onChange('muhasebe', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
               </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
               <div className="relative">
-                <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.pazarlama} onChange={(e) => onChange('pazarlama', e.target.value)} />
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.pazarlama} onChange={(e) => onChange('pazarlama', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
               </div>
             </div>
@@ -378,7 +367,7 @@ const ScenarioInputForm = ({
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
             <div className="relative">
-              <Input disabled={isReadOnly} className="h-9 text-sm pr-6" type="number" step="0.01" value={data.digerGiderler} onChange={(e) => onChange('digerGiderler', e.target.value)} />
+              <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.digerGiderler} onChange={(e) => onChange('digerGiderler', e.target.value)} />
               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
             </div>
           </div>
@@ -389,8 +378,39 @@ const ScenarioInputForm = ({
 };
 
 export default function ComparisonSimulator() {
-  // Senaryo 1: Hardcoded to defaults (unchangeable, read-only)
-  const scenario1 = DEFAULT_VALUES;
+  // Senaryo 1: Initialize from localStorage, or copy from Simulator on first load
+  const [scenario1, setScenario1] = useState<ScenarioData>(() => {
+    try {
+      const saved = localStorage.getItem('comparison_scenario1_data');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      // First load: try to copy from Simulator
+      const simulatorData = localStorage.getItem('simulator_form_data');
+      if (simulatorData) {
+        const parsed = JSON.parse(simulatorData);
+        return {
+          adet: parsed.adet,
+          satisFiyat: parsed.satisFiyat,
+          birimMaliyet: parsed.birimMaliyet,
+          kargo: parsed.kargo,
+          komisyon: parsed.komisyon,
+          kdvOrani: parsed.kdvOrani,
+          iadeOrani: parsed.iadeOrani,
+          gelirVergisi: parsed.gelirVergisi,
+          personel: parsed.personel,
+          depo: parsed.depo,
+          muhasebe: parsed.muhasebe,
+          pazarlama: parsed.pazarlama,
+          digerGiderler: parsed.digerGiderler,
+        };
+      }
+      // Fallback to defaults
+      return DEFAULT_VALUES;
+    } catch {
+      return DEFAULT_VALUES;
+    }
+  });
 
   // Senaryo 2: Initialize from localStorage or custom defaults
   const [scenario2, setScenario2] = useState<ScenarioData>(() => {
@@ -412,7 +432,11 @@ export default function ComparisonSimulator() {
     }
   });
 
-  // Persist only Senaryo 2 and hedefKarTL to localStorage (Senaryo 1 is hardcoded)
+  // Persist Senaryo 1, Senaryo 2, and hedefKarTL to localStorage
+  useEffect(() => {
+    localStorage.setItem('comparison_scenario1_data', JSON.stringify(scenario1));
+  }, [scenario1]);
+
   useEffect(() => {
     localStorage.setItem('comparison_scenario2_data', JSON.stringify(scenario2));
   }, [scenario2]);
@@ -424,8 +448,7 @@ export default function ComparisonSimulator() {
   const handleScenarioChange = (scenario: 1 | 2) => (key: keyof ScenarioData, value: string) => {
     const numValue = parseFloat(value) || 0;
     if (scenario === 1) {
-      // Senaryo 1 is read-only, ignore changes
-      return;
+      setScenario1(prev => ({ ...prev, [key]: numValue }));
     } else {
       setScenario2(prev => ({ ...prev, [key]: numValue }));
     }
@@ -485,12 +508,12 @@ export default function ComparisonSimulator() {
               
               <div className="flex-1 overflow-hidden relative">
                 <TabsContent value="scenario1" className="absolute inset-0 p-4 overflow-y-auto m-0 custom-scrollbar">
-                  <div className="mb-4 text-xs text-slate-500">Varsayılan başlangıç değerleri (değiştirilemez).</div>
-                  <ScenarioInputForm data={scenario1} onChange={handleScenarioChange(1)} isReadOnly={true} />
+                  <div className="mb-4 text-xs text-slate-500">Simülatör senaryo parametrelerini değiştirin veya yeni değerler girin.</div>
+                  <ScenarioInputForm data={scenario1} onChange={handleScenarioChange(1)} />
                 </TabsContent>
                 <TabsContent value="scenario2" className="absolute inset-0 p-4 overflow-y-auto m-0 custom-scrollbar">
                   <div className="mb-4 text-xs text-slate-500">Kıyaslamak istediğiniz yeni satış/maliyet varsayımlarını girin.</div>
-                  <ScenarioInputForm data={scenario2} onChange={handleScenarioChange(2)} isReadOnly={false} />
+                  <ScenarioInputForm data={scenario2} onChange={handleScenarioChange(2)} />
                 </TabsContent>
               </div>
             </Tabs>

@@ -10,6 +10,7 @@ import { Upload, Download, FileText, TrendingUp } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
 import { useGlobalReset } from "@/lib/ResetContext";
+import { useFormData } from "@/lib/FormDataContext";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
@@ -91,7 +92,9 @@ const DEFAULT_VARIABLE_EXPENSES = {
 
 export default function BulkSimulation() {
   const { resetVersion } = useGlobalReset();
+  const { formData } = useFormData();
 
+  // Local state for bulk simulation specific data
   const [bulkProducts, setBulkProducts] = useState<BulkProduct[]>(() => {
     try {
       const saved = localStorage.getItem('bulk_simulation_products');
@@ -110,55 +113,17 @@ export default function BulkSimulation() {
     }
   });
 
-  const [controlPanelValues, setControlPanelValues] = useState(() => {
-    try {
-      const saved = localStorage.getItem('bulk_simulation_fixed_expenses');
-      return saved ? JSON.parse(saved) : {
-        personel: 0,
-        depo: 0,
-        muhasebe: 0,
-        pazarlama: 0,
-        digerGiderler: 0,
-      };
-    } catch {
-      return {
-        personel: 0,
-        depo: 0,
-        muhasebe: 0,
-        pazarlama: 0,
-        digerGiderler: 0,
-      };
-    }
-  });
-
-  const [variableExpenses, setVariableExpenses] = useState(() => {
-    try {
-      const saved = localStorage.getItem('bulk_simulation_variable_expenses');
-      return saved ? JSON.parse(saved) : DEFAULT_VARIABLE_EXPENSES;
-    } catch {
-      return DEFAULT_VARIABLE_EXPENSES;
-    }
-  });
-
   const [showAll, setShowAll] = useState(false);
 
   // Re-initialize when global reset is triggered
   useEffect(() => {
     setBulkProducts([]);
     setResults([]);
-    setControlPanelValues({
-      personel: 0,
-      depo: 0,
-      muhasebe: 0,
-      pazarlama: 0,
-      digerGiderler: 0,
-    });
-    setVariableExpenses(DEFAULT_VARIABLE_EXPENSES);
     setShowAll(false);
   }, [resetVersion]);
 
-  // Update gelirVergisi in calculations
-  const gelirVergisiYuzde = variableExpenses.gelirVergisi / 100;
+  // Use form data for variable expenses (gelirVergisi comes from there)
+  const gelirVergisiYuzde = formData.gelirVergisi / 100;
 
   // Persist data whenever state changes
   useEffect(() => {
@@ -168,14 +133,6 @@ export default function BulkSimulation() {
   useEffect(() => {
     localStorage.setItem('bulk_simulation_results', JSON.stringify(results));
   }, [results]);
-
-  useEffect(() => {
-    localStorage.setItem('bulk_simulation_fixed_expenses', JSON.stringify(controlPanelValues));
-  }, [controlPanelValues]);
-
-  useEffect(() => {
-    localStorage.setItem('bulk_simulation_variable_expenses', JSON.stringify(variableExpenses));
-  }, [variableExpenses]);
 
   const downloadTemplate = () => {
     const templateData = [
@@ -247,9 +204,7 @@ export default function BulkSimulation() {
   };
 
   const calculateResults = (
-    products: BulkProduct[],
-    fixedExpenses: typeof controlPanelValues,
-    varExpenses: typeof variableExpenses
+    products: BulkProduct[]
   ) => {
     const totalQuantity = products.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
     const gelirVergisiYuzde = varExpenses.gelirVergisi / 100;

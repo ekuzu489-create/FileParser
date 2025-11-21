@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,8 +69,20 @@ const formatKDVIncl = (netAmount: number, vatRate: number) => {
 };
 
 export default function Simulator() {
-  // State
-  const [values, setValues] = useState(DEFAULT_FORM_VALUES);
+  // State - Initialize from localStorage, persist on changes
+  const [values, setValues] = useState(() => {
+    try {
+      const saved = localStorage.getItem('simulator_form_data');
+      return saved ? JSON.parse(saved) : DEFAULT_FORM_VALUES;
+    } catch {
+      return DEFAULT_FORM_VALUES;
+    }
+  });
+
+  // Persist to localStorage whenever values change
+  useEffect(() => {
+    localStorage.setItem('simulator_form_data', JSON.stringify(values));
+  }, [values]);
 
   const handleChange = (key: keyof typeof values, value: string) => {
     const numValue = parseFloat(value) || 0;

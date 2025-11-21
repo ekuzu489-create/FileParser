@@ -7,6 +7,7 @@ import { Calculator, TrendingUp, DollarSign, Percent, Package, Building2, PieCha
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
 
 // Constants
@@ -472,6 +473,11 @@ export default function Simulator() {
         <div className="grid grid-rows-[auto_auto_1fr] gap-6 h-full">
           {results ? (
             <>
+              {/* Navigation Tabs - Centered Above KPI Cards */}
+              <div className="flex justify-center">
+                <Navigation />
+              </div>
+
               {/* KPI Block - Top */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">

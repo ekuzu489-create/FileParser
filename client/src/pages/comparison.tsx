@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Calculator, TrendingUp, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Scale, PieChart, Target, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
 
 // Constants

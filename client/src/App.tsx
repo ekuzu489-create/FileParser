@@ -10,11 +10,11 @@ import Simulator from "@/pages/simulator";
 import ComparisonSimulator from "@/pages/comparison";
 import SensitivityAnalysis from "@/pages/sensitivity";
 
-function Navigation() {
+export function Navigation() {
   const [location] = useLocation();
   
   return (
-    <nav className="fixed top-4 right-4 z-50 flex gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-sm border border-slate-200">
+    <div className="flex justify-center gap-2 bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-slate-200 w-fit mx-auto">
       <Link href="/">
         <Button 
           variant={location === "/" ? "default" : "ghost"} 
@@ -45,21 +45,18 @@ function Navigation() {
           Hassasiyet
         </Button>
       </Link>
-    </nav>
+    </div>
   );
 }
 
 function Router() {
   return (
-    <>
-      <Navigation />
-      <Switch>
-        <Route path="/" component={Simulator} />
-        <Route path="/comparison" component={ComparisonSimulator} />
-        <Route path="/sensitivity" component={SensitivityAnalysis} />
-        <Route component={NotFound} />
-      </Switch>
-    </>
+    <Switch>
+      <Route path="/" component={Simulator} />
+      <Route path="/comparison" component={ComparisonSimulator} />
+      <Route path="/sensitivity" component={SensitivityAnalysis} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 

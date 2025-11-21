@@ -317,6 +317,11 @@ export default function Simulator() {
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-6 font-sans text-slate-900">
+      {/* Navigation Tabs - Top Center */}
+      <div className="flex justify-center mb-6">
+        <Navigation />
+      </div>
+
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         
         {/* Left Column: Inputs */}
@@ -473,11 +478,6 @@ export default function Simulator() {
         <div className="grid grid-rows-[auto_auto_1fr] gap-6 h-full">
           {results ? (
             <>
-              {/* Navigation Tabs - Centered Above KPI Cards */}
-              <div className="flex justify-center">
-                <Navigation />
-              </div>
-
               {/* KPI Block - Top */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">

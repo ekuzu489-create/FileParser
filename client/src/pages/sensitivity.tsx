@@ -435,6 +435,11 @@ export default function SensitivityAnalysis() {
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-6 font-sans text-slate-900">
+      {/* Navigation Tabs - Top Center */}
+      <div className="flex justify-center mb-6">
+        <Navigation />
+      </div>
+
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="mb-6">

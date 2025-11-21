@@ -490,6 +490,11 @@ export default function ComparisonSimulator() {
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-6 font-sans text-slate-900">
+      {/* Navigation Tabs - Top Center */}
+      <div className="flex justify-center mb-6">
+        <Navigation />
+      </div>
+
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         
         {/* Left Column: Tabs and Inputs */}

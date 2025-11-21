@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
-import { Upload, Download, FileText, TrendingUp } from "lucide-react";
+import { Upload, Download, FileText, TrendingUp, Scale } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
 
@@ -79,6 +79,15 @@ interface AggregateCalculation {
   vergi: number;
   netKar: number;
   marginNet: number;
+  satisKDVTutari: number;
+  alisKDV: number;
+  komisyonKDV: number;
+  kargoKDVTutari: number;
+  platformFeeKDV: number;
+  sabitGiderlerKDVToplam: number;
+  indirilebilirKDVToplam: number;
+  odenecekKDV: number;
+  devredenKDV: number;
 }
 
 const DEFAULT_VARIABLE_EXPENSES = {
@@ -366,6 +375,26 @@ export default function BulkSimulation() {
     const netKar = faaliyetKar - vergi;
     const marginNet = netSatisHasilati > 0 ? netKar / netSatisHasilati : 0;
 
+    // Step 6: VAT Reconciliation
+    let satisKDVTutari = 0;
+    bulkProducts.forEach((product) => {
+      const brutBirim = product.totalSalesRevenue / (1 + product.vatRate / 100);
+      const productVAT = product.totalSalesRevenue - brutBirim;
+      satisKDVTutari += productVAT;
+    });
+
+    // Deductible VAT components
+    const alisKDV = smToplam * (GIDER_KDV_ORANI_SABIT / 100);
+    const komisyonKDV = komisyonToplam * (GIDER_KDV_ORANI_SABIT / 100);
+    const kargoKDVTutari = kargoToplam * (GIDER_KDV_ORANI_SABIT / 100);
+    const platformFeeKDV = platformFeeToplam * (GIDER_KDV_ORANI_SABIT / 100);
+    const sabitGiderlerKDVToplam = (controlPanelValues.personel + controlPanelValues.depo + controlPanelValues.muhasebe + controlPanelValues.pazarlama + controlPanelValues.digerGiderler) - sabitGiderlerToplamNet;
+
+    const indirilebilirKDVToplam = alisKDV + komisyonKDV + kargoKDVTutari + platformFeeKDV + sabitGiderlerKDVToplam;
+    const odenecekKDVBrut = satisKDVTutari - indirilebilirKDVToplam;
+    const odenecekKDV = odenecekKDVBrut > 0 ? odenecekKDVBrut : 0;
+    const devredenKDV = odenecekKDVBrut < 0 ? Math.abs(odenecekKDVBrut) : 0;
+
     return {
       brutSatisHasilatiKDVHariç,
       iadeTutariNet,
@@ -382,6 +411,15 @@ export default function BulkSimulation() {
       vergi,
       netKar,
       marginNet,
+      satisKDVTutari,
+      alisKDV,
+      komisyonKDV,
+      kargoKDVTutari,
+      platformFeeKDV,
+      sabitGiderlerKDVToplam,
+      indirilebilirKDVToplam,
+      odenecekKDV,
+      devredenKDV,
     };
   }, [bulkProducts, controlPanelValues, variableExpenses]);
 

@@ -479,18 +479,27 @@ export default function Simulator() {
           {results ? (
             <>
               {/* KPI Block - Top */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-                  <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Başabaş Noktası (Adet)</h4>
-                  <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.bepAdet))} Adet</p>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                    <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Başabaş Noktası (Adet)</h4>
+                    <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.bepAdet))} Adet</p>
+                  </div>
+                  <p className="text-xs text-slate-500 text-center">Bu adet, mevcut fiyat (₺{(parseFloat(values.satisFiyat) || 0).toFixed(2).replace('.', ',')}) ve tüm giderler dikkate alındığında, ne kâr ne de zarar elde etmek için gereken minimum satışı gösterir.</p>
                 </div>
-                <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-                  <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr Adedi</h4>
-                  <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
+                <div className="space-y-2">
+                  <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                    <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr Adedi</h4>
+                    <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
+                  </div>
+                  <p className="text-xs text-slate-500 text-center">₺{(parseFloat(values.hedefKarTL) || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için gereken satış miktarıdır.</p>
                 </div>
-                <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-                  <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Birim Fiyat</h4>
-                  <p className="text-[1.5em] font-bold text-blue-600 m-1">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
+                <div className="space-y-2">
+                  <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                    <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Birim Fiyat</h4>
+                    <p className="text-[1.5em] font-bold text-blue-600 m-1">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
+                  </div>
+                  <p className="text-xs text-slate-500 text-center">₺{(parseFloat(values.hedefKarTL) || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için gereken birim fiyatıdır (KDV dahil).</p>
                 </div>
               </div>
 

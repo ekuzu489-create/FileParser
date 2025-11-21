@@ -234,17 +234,17 @@ export default function BulkSimulation() {
     const totalQuantity = products.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
     const gelirVergisiYuzde = varExpenses.gelirVergisi / 100;
 
+    // Calculate total fixed expenses for apportioning
+    const personelNetAm = fixedExpenses.personel / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const depoNetAm = fixedExpenses.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const muhasebeNetAm = fixedExpenses.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const pazarlamaNetAm = fixedExpenses.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const digerGiderlerNetAm = fixedExpenses.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
+
     const calculated = products.map((product) => {
       const komisyonYuzde = varExpenses.komisyon / 100;
       const iadeOrani = varExpenses.iadeOrani / 100;
-
-      // VAT breakdown
-      const kargoNetAm = varExpenses.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const depoNetAm = fixedExpenses.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const muhasebeNetAm = fixedExpenses.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const pazarlamaNetAm = fixedExpenses.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const digerGiderlerNetAm = fixedExpenses.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
 
       // Revenue - each product's gross sales (VAT excluded)
       const brutSatisHasilatiKDVHariç = product.totalSalesRevenue / (1 + product.vatRate / 100);
@@ -257,15 +257,15 @@ export default function BulkSimulation() {
       const smToplam = product.totalCost;
       const brutKar = netSatisHasilati - smToplam;
 
-      // Variable expenses
+      // Variable expenses - NO VAT extraction for kargo (per-unit cost)
       const komisyonToplam = netSatisHasilati * komisyonYuzde;
-      const kargoToplam = kargoNetAm * product.totalSalesQuantity;
+      const kargoToplam = varExpenses.kargo * product.totalSalesQuantity;
       const platformFeeToplam = platformFeeNet * product.totalSalesQuantity;
       const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;
 
-      // Fixed expenses - apportion by quantity share
+      // Fixed expenses - apportion by quantity share (use net amounts)
       const quantityShare = totalQuantity > 0 ? product.totalSalesQuantity / totalQuantity : 0;
-      const apportionedPersonel = fixedExpenses.personel * quantityShare;
+      const apportionedPersonel = personelNetAm * quantityShare;
       const apportionedDepo = depoNetAm * quantityShare;
       const apportionedMuhasebe = muhasebeNetAm * quantityShare;
       const apportionedPazarlama = pazarlamaNetAm * quantityShare;
@@ -274,7 +274,7 @@ export default function BulkSimulation() {
       const sabitGiderlerToplamNet =
         apportionedPersonel + apportionedDepo + apportionedMuhasebe + apportionedPazarlama + apportionedDigerGiderler;
 
-      // Total operating expenses
+      // Total operating expenses (net)
       const faaliyetGiderleriToplam =
         komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
 
@@ -284,20 +284,23 @@ export default function BulkSimulation() {
       // Tax
       const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;
 
-      // Net profit
+      // Net profit = Gross Profit - Operating Expenses - Tax
       const netKar = faaliyetKar - vergi;
-      const profitMargin = netSatisHasilati > 0 ? netKar / netSatisHasilati : 0;
-
-      // Total expenses
-      const totalExpenses = smToplam + faaliyetGiderleriToplam + vergi;
+      
+      // Revenue after returns minus all expenses
+      const totalExpensesNet = smToplam + faaliyetGiderleriToplam + vergi;
+      
+      // Ensure equation: Net Kâr/Zarar = Net Revenue - Total Expenses
+      const netKarCheck = netSatisHasilati - totalExpensesNet;
+      const profitMargin = netSatisHasilati > 0 ? netKarCheck / netSatisHasilati : 0;
 
       return {
         productName: product.productName,
         totalSalesRevenue: product.totalSalesRevenue,
         totalSalesQuantity: product.totalSalesQuantity,
         totalCost: product.totalCost,
-        totalExpenses: totalExpenses,
-        netProfit: netKar,
+        totalExpenses: totalExpensesNet,
+        netProfit: netKarCheck,
         profitMargin: profitMargin,
       };
     });
@@ -314,7 +317,8 @@ export default function BulkSimulation() {
     const komisyonYuzde = variableExpenses.komisyon / 100;
     const iadeOrani = variableExpenses.iadeOrani / 100;
 
-    const kargoNetAm = variableExpenses.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    // VAT extraction for fixed expenses only - NO extraction for kargo
+    const personelNetAm = controlPanelValues.personel / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const depoNetAm = controlPanelValues.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const muhasebeNetAm = controlPanelValues.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const pazarlamaNetAm = controlPanelValues.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
@@ -336,14 +340,14 @@ export default function BulkSimulation() {
     const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
     const brutKar = netSatisHasilati - smToplam;
 
-    // Step 3: Calculate variable expenses
+    // Step 3: Calculate variable expenses - kargo is per-unit, NO VAT extraction
     const komisyonToplam = netSatisHasilati * komisyonYuzde;
-    const kargoToplam = kargoNetAm * totalQuantity;
+    const kargoToplam = variableExpenses.kargo * totalQuantity;
     const platformFeeToplam = platformFeeNet * totalQuantity;
     const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;
 
-    // Step 4: Fixed expenses (no apportioning for aggregate)
-    const sabitGiderlerToplamNet = controlPanelValues.personel + depoNetAm + muhasebeNetAm + pazarlamaNetAm + digerGiderlerNetAm;
+    // Step 4: Fixed expenses - sum all net amounts (after VAT extraction)
+    const sabitGiderlerToplamNet = personelNetAm + depoNetAm + muhasebeNetAm + pazarlamaNetAm + digerGiderlerNetAm;
     
     // Step 5: Calculate totals
     const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;

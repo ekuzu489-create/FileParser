@@ -788,7 +788,7 @@ export default function SensitivityAnalysis() {
                             <td className={`px-3 py-2 ${item.isTotal ? 'text-white' : 'text-slate-700'}`}>
                               {item.label}
                             </td>
-                            <td className={`px-3 py-2 text-right font-semibold ${item.isTotal ? 'text-white' : (item.baseValue >= 0 ? 'text-emerald-600' : 'text-red-600')}`}>
+                            <td className={`px-3 py-2 text-right font-semibold ${item.isTotal ? 'text-white' : 'text-slate-700'}`}>
                               {formatValue(item.baseValue, item.unit)}
                             </td>
                             <td className={`px-3 py-2 text-right font-semibold ${getScenarioColor()}`}>

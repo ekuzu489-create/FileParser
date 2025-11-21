@@ -1,8 +1,8 @@
 import { type User, type InsertUser } from "@shared/schema";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
-import { users } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
+
+// modify the interface with any CRUD methods
+// you might need
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -10,34 +10,29 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
 }
 
-export class DatabaseStorage implements IStorage {
-  private db: ReturnType<typeof drizzle>;
+export class MemStorage implements IStorage {
+  private users: Map<string, User>;
 
-  constructor(connectionString: string) {
-    const sql = neon(connectionString);
-    this.db = drizzle(sql);
+  constructor() {
+    this.users = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    const result = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
-    return result[0];
+    return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await this.db.select().from(users).where(eq(users.username, username)).limit(1);
-    return result[0];
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await this.db.insert(users).values(insertUser).returning();
-    return result[0];
+    const id = randomUUID();
+    const user: User = { ...insertUser, id };
+    this.users.set(id, user);
+    return user;
   }
 }
 
-// Initialize storage with Replit DB connection
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString && process.env.NODE_ENV === "production") {
-  throw new Error("DATABASE_URL environment variable is required in production");
-}
-
-export const storage = new DatabaseStorage(connectionString || "postgresql://localhost/simulator");
+export const storage = new MemStorage();

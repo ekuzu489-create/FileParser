@@ -138,8 +138,6 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
     muhasebe: muhasebeVal, pazarlama: pazarlamaVal, digerGiderler: digerVal
   } = data;
 
-  if (!adet || adet <= 0) return null;
-
   const komisyonYuzde = komisyon / 100;
   const iadeOrani = iadeOraniVal / 100;
   const gelirVergisiYuzde = gelirVergisi / 100;

@@ -4,10 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Scale } from "lucide-react";
+import { LayoutDashboard, Scale, Zap } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Simulator from "@/pages/simulator";
 import ComparisonSimulator from "@/pages/comparison";
+import SensitivityAnalysis from "@/pages/sensitivity";
 
 function Navigation() {
   const [location] = useLocation();
@@ -34,6 +35,16 @@ function Navigation() {
           Kıyaslama
         </Button>
       </Link>
+      <Link href="/sensitivity">
+        <Button 
+          variant={location === "/sensitivity" ? "default" : "ghost"} 
+          size="sm"
+          className="gap-2"
+        >
+          <Zap className="w-4 h-4" />
+          Hassasiyet
+        </Button>
+      </Link>
     </nav>
   );
 }
@@ -45,6 +56,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Simulator} />
         <Route path="/comparison" component={ComparisonSimulator} />
+        <Route path="/sensitivity" component={SensitivityAnalysis} />
         <Route component={NotFound} />
       </Switch>
     </>

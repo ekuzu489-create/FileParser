@@ -174,6 +174,23 @@ export default function SensitivityAnalysis() {
     }).format(value);
   };
 
+  // Helper: Get unit type for selected variable
+  const getUnitType = () => {
+    return variableLabel.includes('(%)') ? '%' : '₺';
+  };
+
+  // Helper: Get display format (integer or decimal)
+  const getFormattedValue = (value: number) => {
+    const unit = getUnitType();
+    if (unit === '%') {
+      // Percentages are typically shown as integers
+      return value % 1 === 0 ? Math.round(value).toString() : value.toFixed(2);
+    } else {
+      // Currency: show decimal if needed
+      return value % 1 === 0 ? Math.round(value).toString() : value.toFixed(2);
+    }
+  };
+
   // Determine if variable is revenue or cost impacting
   const isRevenueVariable = ['satisFiyat', 'adet'].includes(selectedVariable);
   const isCostVariable = ['birimMaliyet', 'kargo', 'komisyon', 'personel', 'pazarlama'].includes(selectedVariable);
@@ -280,9 +297,11 @@ export default function SensitivityAnalysis() {
                 </Select>
                 <p className="text-xs text-slate-500 mt-2">
                   Şu anki değer: <span className="font-semibold text-slate-700">
-                    {typeof currentValue === 'number' ? (currentValue % 1 === 0 ? Math.round(currentValue) : currentValue.toFixed(2)) : currentValue}
-                    {selectedVariable.includes('Orani') || selectedVariable === 'komisyon' ? '%' : ' ₺'}
+                    {getFormattedValue(currentValue as number)} {getUnitType()}
                   </span>
+                </p>
+                <p className="text-xs text-slate-400 mt-1 italic">
+                  Bu değer, Simülatör sekmesindeki <span className="font-semibold text-slate-600">{variableLabel}</span>'den alınmıştır.
                 </p>
               </div>
 

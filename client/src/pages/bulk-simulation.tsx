@@ -787,7 +787,7 @@ export default function BulkSimulation() {
               )}
             )}
           </div>
-        )}
+        }
 
         {/* Results Table */}
         {results.length > 0 && (

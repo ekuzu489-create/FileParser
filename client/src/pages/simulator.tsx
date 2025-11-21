@@ -499,7 +499,7 @@ export default function Simulator() {
                     <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Birim Fiyat</h4>
                     <p className="text-[1.5em] font-bold text-blue-600 m-1">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
                   </div>
-                  <p className="text-xs text-slate-500 text-center">₺{(parseFloat(values.hedefKarTL) || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için gereken birim fiyatıdır (KDV dahil).</p>
+                  <p className="text-xs text-slate-500 text-center">₺{(parseFloat(values.hedefKarTL) || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için, mevcut satış adedi olan {formatNumber(Math.ceil(parseFloat(values.adet) || 0))} Adet ile gereken birim fiyatıdır (KDV dahil).</p>
                 </div>
               </div>
 

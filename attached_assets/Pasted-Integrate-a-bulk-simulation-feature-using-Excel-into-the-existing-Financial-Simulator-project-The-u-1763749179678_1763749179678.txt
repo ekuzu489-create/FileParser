@@ -1,0 +1,18 @@
+Integrate a bulk simulation feature using Excel into the existing Financial Simulator project. The user interface elements must use Turkish names consistent with the current application.
+1.	Add a 4th Tab: Create a new tab named "Toplu Simülasyon (Excel)" next to the current simulation tabs.
+2.	Excel Template (.xlsx): Create a downloadable and uploadable .xlsx template. The template must use the following Turkish column headers: Ürün Adı, Toplam Maliyet, Toplam Satış Adeti, Toplam Satış Tutarı, KDV Oranı (%).
+3.	Import Functionality: Add controls in the new tab for users to upload the filled .xlsx file and initiate the simulation.
+4.	Simulation Logic:
+o	Read each row (product) from the uploaded Excel file.
+o	Use the Excel data fields (Toplam Maliyet, Toplam Satış Tutarı, Toplam Satış Adeti, KDV Oranı) to calculate the Net Kâr/Zarar for each product.
+o	CRITICAL: Use all other fixed rates and costs (such as Commission, Shipping, and Sabit Giderler) from the current Turkish input fields defined in the simulator's left panel.
+5.	Results: Display the collective simulation results (including Ürün Adı, Toplam Satış Tutarı, Toplam Gider, Net Kâr/Zarar) in a table on the "Toplu Simülasyon (Excel)" tab.
+REQUIRED UPDATES FOR FULL FUNCTIONALITY:
+The Toplu Simülasyon (Excel) tab needs to be upgraded to perform analysis with the same detail level as the main Financial Simulator.
+1.	Create Control Panel and Automatic Data Filling: Add a control panel immediately below the upload area, mimicking the structure of the main simulator's left panel.
+o	A) Sabit Giderler (Aylık) Input Fields: Add input fields (Personel, Kira/Depo, Muhasebe, Pazarlama, Diğer Giderler) allowing manual entry of fixed expenses for this bulk simulation.
+o	B) Satış ve Birim Verileri (Özet): Automatically fill aggregated totals (Toplam Satış Adedi, Toplam Satış Tutarı) from the uploaded Excel file into summary fields here.
+2.	Add Monthly Profit/Loss Table: Add the "Aylık Kâr/Zarar Tablosu" component next to or below the Control Panel. This table must detail all parameters and expenses (including aggregated Excel data and manually entered Sabit Giderler) and show the final Net Kâr/Zarar steps.
+3.	Update Simulation Results Calculation: The Simülasyon Sonuçları table at the bottom must be recalculated using the detailed, full expense data from the new Control Panel and the Aylık Kâr/Zarar Tablosu.
+Please integrate these features into the project.
+

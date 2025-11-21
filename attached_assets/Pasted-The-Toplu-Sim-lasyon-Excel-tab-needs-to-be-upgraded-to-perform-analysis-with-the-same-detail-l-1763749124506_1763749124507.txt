@@ -1,0 +1,24 @@
+The **Toplu Simülasyon (Excel)** tab needs to be upgraded to perform analysis with the same detail level as the main Financial Simulator (first tab). In this tab, create a **control panel** that summarizes the uploaded Excel data and allows manual entry for fixed expenses.
+
+**Required New Features:**
+
+### 1. Create Control Panel and Automatic Data Filling
+
+Add a control panel immediately below the upload area, mimicking the structure of the main simulator's left panel. The content of this panel should be as follows:
+
+* **A) Sabit Giderler (Aylık) Input Fields (Fixed Expenses - Monthly):** Add input fields identical to the main simulator (Personel, Kira/Depo, Muhasebe, Pazarlama, Diğer Giderler). These fields must allow the user to manually enter fixed expenses for this bulk simulation (If left empty, default values from the main simulator should be used). **This satisfies the need for manual fixed expense entry.**
+* **B) Satış ve Birim Verileri (Özet) (Sales and Unit Data - Summary):** Create a summary section showing the **totals** of all data coming from the Excel file.
+    * Metrics like **Toplam Satış Adedi (Total Sales Quantity)** and **Toplam Satış Tutarı (Total Sales Revenue)** in this section must be **automatically filled** by aggregating the data from all products in the uploaded Excel file. **This satisfies the request for automatic calculation and filling of Excel data.**
+
+### 2. Add Monthly Profit/Loss Table
+
+Next to or below the Control Panel, add the **"Aylık Kâr/Zarar Tablosu" (Monthly Profit/Loss Table)** component, just like in the main simulator.
+
+* This table must detail all parameters and expenses, including the aggregated **Toplu Satış Hasılâtı (Bulk Sales Revenue)** from Excel and the **Sabit Giderler (Fixed Expenses)** from the Control Panel.
+* The table's structure must include the steps: Brüt Kâr (Gross Profit), Faaliyet Giderleri (EBIT excluded), Faaliyet Kârı (EBIT), and Net Kâr/Zarar (Net Profit/Loss), consistent with the main simulator. **This satisfies the request for a table showing all parameters/expenses.**
+
+### 3. Update Simulation Results Calculation
+
+The **Simülasyon Sonuçları (Simulation Results)** table at the bottom must now be recalculated using the **final total expenses** derived from the new Control Panel (Sabit Giderler) and the **Aylık Kâr/Zarar Tablosu**, not just the raw Excel data.
+
+Please integrate these three main components to complete the Toplu Simülasyon tab.

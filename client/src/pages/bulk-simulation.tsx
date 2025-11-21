@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
-import { Upload, Download, FileText } from "lucide-react";
+import { Upload, Download, FileText, TrendingUp } from "lucide-react";
 import * as XLSX from 'xlsx';
+import { cn } from "@/lib/utils";
 
-// Constants matching Simulator
+// Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
 const GIDER_KDV_ORANI_SABIT = 20;
 const STOPAJ_RATE = 0.01;
@@ -24,6 +25,26 @@ const solveVAT = (amountKDVIncl: number, vatRate: number) => {
   return { net, vat };
 };
 
+const formatCurrency = (value: number) => {
+  const absValue = Math.abs(value);
+  const formatted = new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(absValue);
+  if (value < 0) {
+    return `(${formatted})`;
+  }
+  return formatted;
+};
+
+const formatNumber = (value: number) => {
+  return new Intl.NumberFormat('tr-TR', {
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 interface BulkProduct {
   productName: string;
   totalCost: number;
@@ -34,15 +55,28 @@ interface BulkProduct {
 
 interface BulkResult {
   productName: string;
-  totalCost: number;
-  totalSalesQuantity: number;
   totalSalesRevenue: number;
+  totalSalesQuantity: number;
+  totalCost: number;
   totalExpenses: number;
   netProfit: number;
   profitMargin: number;
 }
 
 export default function BulkSimulation() {
+  const [bulkProducts, setBulkProducts] = useState<BulkProduct[]>([]);
+  const [results, setResults] = useState<BulkResult[]>([]);
+  
+  // Control panel state - Sabit Giderler
+  const [controlPanelValues, setControlPanelValues] = useState({
+    personel: 0,
+    depo: 0,
+    muhasebe: 0,
+    pazarlama: 0,
+    digerGiderler: 0,
+  });
+
+  // Global settings from main simulator
   const [globalSettings, setGlobalSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('simulator_form_data');
@@ -52,14 +86,11 @@ export default function BulkSimulation() {
     }
   });
 
-  const [bulkProducts, setBulkProducts] = useState<BulkProduct[]>([]);
-  const [results, setResults] = useState<BulkResult[]>([]);
-
   const downloadTemplate = () => {
     const templateData = [
-      ['Product Name', 'Total Cost (₺)', 'Total Sales Quantity (Adet)', 'Total Sales Revenue (₺)', 'VAT Rate (%)'],
-      ['Example Product 1', 1000, 100, 15000, 18],
-      ['Example Product 2', 500, 50, 8000, 18],
+      ['Ürün Adı', 'Toplam Maliyet', 'Toplam Satış Adeti', 'Toplam Satış Tutarı', 'KDV Oranı (%)'],
+      ['Örnek Ürün 1', 1000, 100, 15000, 18],
+      ['Örnek Ürün 2', 500, 50, 8000, 18],
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(templateData);
@@ -67,7 +98,7 @@ export default function BulkSimulation() {
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Ürünler');
-    XLSX.writeFile(wb, 'Bulk_Simulation_Template.xlsx');
+    XLSX.writeFile(wb, 'Toplu_Simulasyon_Sablonu.xlsx');
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +128,7 @@ export default function BulkSimulation() {
         }
 
         setBulkProducts(products);
-        calculateResults(products);
+        calculateResults(products, controlPanelValues);
       } catch (error) {
         alert('Dosya okuma hatası. Lütfen geçerli bir Excel dosyası yükleyin.');
         console.error(error);
@@ -106,25 +137,32 @@ export default function BulkSimulation() {
     reader.readAsArrayBuffer(file);
   };
 
-  const calculateResults = (products: BulkProduct[]) => {
-    // Calculate total quantities and revenues for apportioning
+  const handleControlPanelChange = (key: keyof typeof controlPanelValues, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    const updated = { ...controlPanelValues, [key]: numValue };
+    setControlPanelValues(updated);
+    if (bulkProducts.length > 0) {
+      calculateResults(bulkProducts, updated);
+    }
+  };
+
+  const calculateResults = (products: BulkProduct[], fixedExpenses: typeof controlPanelValues) => {
     const totalQuantity = products.reduce((sum, p) => sum + p.totalSalesQuantity, 0);
-    const totalRevenue = products.reduce((sum, p) => sum + (p.totalSalesRevenue / (1 + p.vatRate / 100)), 0);
 
     const calculated = products.map((product) => {
       const komisyonYuzde = globalSettings.komisyon / 100;
       const iadeOrani = globalSettings.iadeOrani / 100;
       const gelirVergisiYuzde = globalSettings.gelirVergisi / 100;
 
-      // VAT breakdown for costs
+      // VAT breakdown
       const kargoNetAm = globalSettings.kargo / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const depoNetAm = globalSettings.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const muhasebeNetAm = globalSettings.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const pazarlamaNetAm = globalSettings.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
-      const digerGiderlerNetAm = globalSettings.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const depoNetAm = fixedExpenses.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const muhasebeNetAm = fixedExpenses.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const pazarlamaNetAm = fixedExpenses.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const digerGiderlerNetAm = fixedExpenses.digerGiderler / (1 + GIDER_KDV_ORANI_SABIT / 100);
       const platformFeeNet = PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100);
 
-      // Revenue calculations (exact match with main simulator)
+      // Revenue
       const brutSatisHasilatiKDVHariç = product.totalSalesRevenue / (1 + product.vatRate / 100);
       const iadeKaybiAdet = product.totalSalesQuantity * iadeOrani;
       const iadeTutariNet = iadeKaybiAdet * (brutSatisHasilatiKDVHariç / product.totalSalesQuantity);
@@ -141,9 +179,9 @@ export default function BulkSimulation() {
       const stopajBirim = (brutSatisHasilatiKDVHariç / product.totalSalesQuantity) * STOPAJ_RATE;
       const stopajToplam = stopajBirim * product.totalSalesQuantity;
 
-      // Fixed expenses - apportion based on quantity share
+      // Fixed expenses - apportion by quantity
       const quantityShare = totalQuantity > 0 ? product.totalSalesQuantity / totalQuantity : 0;
-      const apportionedPersonel = (globalSettings.personel || 0) * quantityShare;
+      const apportionedPersonel = fixedExpenses.personel * quantityShare;
       const apportionedDepo = depoNetAm * quantityShare;
       const apportionedMuhasebe = muhasebeNetAm * quantityShare;
       const apportionedPazarlama = pazarlamaNetAm * quantityShare;
@@ -166,14 +204,14 @@ export default function BulkSimulation() {
       const netKar = faaliyetKar - vergi;
       const profitMargin = netSatisHasilati > 0 ? netKar / netSatisHasilati : 0;
 
-      // Total expenses (COGS + Operating expenses)
+      // Total expenses
       const totalExpenses = smToplam + faaliyetGiderleriToplam + vergi;
 
       return {
         productName: product.productName,
-        totalCost: product.totalCost,
-        totalSalesQuantity: product.totalSalesQuantity,
         totalSalesRevenue: product.totalSalesRevenue,
+        totalSalesQuantity: product.totalSalesQuantity,
+        totalCost: product.totalCost,
         totalExpenses: totalExpenses,
         netProfit: netKar,
         profitMargin: profitMargin,
@@ -183,34 +221,27 @@ export default function BulkSimulation() {
     setResults(calculated);
   };
 
-  const totals = useMemo(() => {
+  // Aggregated totals from Excel
+  const excelTotals = useMemo(() => {
     return {
-      totalCost: results.reduce((sum, r) => sum + r.totalCost, 0),
-      totalQuantity: results.reduce((sum, r) => sum + r.totalSalesQuantity, 0),
+      totalQuantity: bulkProducts.reduce((sum, p) => sum + p.totalSalesQuantity, 0),
+      totalRevenue: bulkProducts.reduce((sum, p) => sum + p.totalSalesRevenue, 0),
+      totalCost: bulkProducts.reduce((sum, p) => sum + p.totalCost, 0),
+    };
+  }, [bulkProducts]);
+
+  // Aggregated results
+  const resultsTotals = useMemo(() => {
+    return {
       totalRevenue: results.reduce((sum, r) => sum + r.totalSalesRevenue, 0),
       totalExpenses: results.reduce((sum, r) => sum + r.totalExpenses, 0),
       totalNetProfit: results.reduce((sum, r) => sum + r.netProfit, 0),
     };
   }, [results]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('tr-TR', {
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
   return (
     <div className="min-h-screen bg-white p-4 md:p-6 font-sans text-slate-900">
-      {/* Navigation Tabs - Top Center */}
+      {/* Navigation */}
       <div className="flex justify-center mb-6">
         <Navigation />
       </div>
@@ -241,18 +272,13 @@ export default function BulkSimulation() {
               </Button>
 
               <div className="flex-1 min-w-[200px]">
-                <div className="relative">
-                  <Input
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileUpload}
-                    className="cursor-pointer"
-                    id="excel-upload"
-                  />
-                  <Label htmlFor="excel-upload" className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer">
-                    <Upload className="w-4 h-4 text-slate-400" />
-                  </Label>
-                </div>
+                <Input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleFileUpload}
+                  className="cursor-pointer"
+                  id="excel-upload"
+                />
               </div>
             </div>
 
@@ -266,11 +292,150 @@ export default function BulkSimulation() {
           </CardContent>
         </Card>
 
-        {/* Results Section */}
+        {/* Control Panel & Summary */}
+        {bulkProducts.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
+            {/* Left: Control Panel */}
+            <div className="space-y-4">
+              <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+                <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                  <CardTitle className="text-[1.1em] font-semibold text-blue-600">Sabit Giderler (Aylık)</CardTitle>
+                </CardHeader>
+                <CardContent className="p-5 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={controlPanelValues.personel}
+                      onChange={(e) => handleControlPanelChange('personel', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Kira / Depo (₺)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={controlPanelValues.depo}
+                      onChange={(e) => handleControlPanelChange('depo', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={controlPanelValues.muhasebe}
+                      onChange={(e) => handleControlPanelChange('muhasebe', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={controlPanelValues.pazarlama}
+                      onChange={(e) => handleControlPanelChange('pazarlama', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={controlPanelValues.digerGiderler}
+                      onChange={(e) => handleControlPanelChange('digerGiderler', e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+                <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                  <CardTitle className="text-[1.1em] font-semibold text-blue-600">Satış ve Birim Verileri (Özet)</CardTitle>
+                </CardHeader>
+                <CardContent className="p-5 space-y-3">
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 mb-1">Toplam Satış Adedi</p>
+                    <p className="text-lg font-bold text-blue-600">{formatNumber(excelTotals.totalQuantity)} Adet</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 mb-1">Toplam Satış Tutarı</p>
+                    <p className="text-lg font-bold text-blue-600">{formatCurrency(excelTotals.totalRevenue)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 mb-1">Toplam Maliyet</p>
+                    <p className="text-lg font-bold text-blue-600">{formatCurrency(excelTotals.totalCost)}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right: P&L Table */}
+            <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
+              <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
+                <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Aylık Kâr/Zarar Tablosu (Agregat)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableBody className="text-[0.9em]">
+                    <TableRow className="border-b border-slate-50">
+                      <TableCell className="py-2 pl-6 font-medium text-slate-700">Brüt Satış Hasılatı</TableCell>
+                      <TableCell className="py-2 pr-6 text-right font-medium text-emerald-600">
+                        {formatCurrency(resultsTotals.totalRevenue)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow className="bg-slate-100">
+                      <TableCell className="py-2 pl-6 font-bold text-slate-800">Toplam Giderler</TableCell>
+                      <TableCell className="py-2 pr-6 text-right font-bold text-slate-800">
+                        {formatCurrency(resultsTotals.totalExpenses)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow
+                      className={cn(
+                        'border-t',
+                        resultsTotals.totalNetProfit < 0
+                          ? 'bg-[#ffe6e6] border-red-200'
+                          : 'bg-[#d1e7dd] border-green-200'
+                      )}
+                    >
+                      <TableCell
+                        className={cn(
+                          'py-3 pl-6 text-[1.1em] font-bold',
+                          resultsTotals.totalNetProfit < 0 ? 'text-red-900' : 'text-green-900'
+                        )}
+                      >
+                        NET KÂR / ZARAR
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          'py-3 pr-6 text-[1.1em] font-bold text-right',
+                          resultsTotals.totalNetProfit < 0 ? 'text-red-900' : 'text-green-900'
+                        )}
+                      >
+                        {formatCurrency(resultsTotals.totalNetProfit)}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Results Table */}
         {results.length > 0 && (
           <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
             <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
-              <CardTitle className="text-lg font-semibold text-blue-600">Simülasyon Sonuçları</CardTitle>
+              <CardTitle className="text-[1.1em] font-semibold text-blue-600">Simülasyon Sonuçları (Ürün Detayı)</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
@@ -278,11 +443,11 @@ export default function BulkSimulation() {
                   <TableHeader>
                     <TableRow className="bg-slate-50 hover:bg-slate-50">
                       <TableHead className="text-left py-3 pl-6 font-semibold text-slate-700">Ürün Adı</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Hasılatı (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Toplam Giderler (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Net Kâr/Zarar (₺)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı (%)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -292,7 +457,11 @@ export default function BulkSimulation() {
                         <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
                         <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
                         <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalExpenses)}</TableCell>
-                        <TableCell className={`py-3 pr-6 text-right font-semibold ${result.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        <TableCell
+                          className={`py-3 pr-6 text-right font-semibold ${
+                            result.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
+                          }`}
+                        >
                           {formatCurrency(result.netProfit)}
                         </TableCell>
                         <TableCell className="py-3 pr-6 text-right text-blue-600 font-medium">
@@ -302,14 +471,27 @@ export default function BulkSimulation() {
                     ))}
                     <TableRow className="bg-slate-100 hover:bg-slate-100 font-bold">
                       <TableCell className="py-3 pl-6 text-slate-800">TOPLAM</TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">{formatCurrency(totals.totalRevenue)}</TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">{formatNumber(totals.totalQuantity)}</TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">{formatCurrency(totals.totalExpenses)}</TableCell>
-                      <TableCell className={`py-3 pr-6 text-right ${totals.totalNetProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {formatCurrency(totals.totalNetProfit)}
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(resultsTotals.totalRevenue)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatNumber(excelTotals.totalQuantity)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(resultsTotals.totalExpenses)}
+                      </TableCell>
+                      <TableCell
+                        className={`py-3 pr-6 text-right ${
+                          resultsTotals.totalNetProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        }`}
+                      >
+                        {formatCurrency(resultsTotals.totalNetProfit)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-blue-600">
-                        {totals.totalRevenue > 0 ? ((totals.totalNetProfit / totals.totalRevenue) * 100).toFixed(2) : '0'}%
+                        {resultsTotals.totalRevenue > 0
+                          ? ((resultsTotals.totalNetProfit / resultsTotals.totalRevenue) * 100).toFixed(2)
+                          : '0'}
+                        %
                       </TableCell>
                     </TableRow>
                   </TableBody>

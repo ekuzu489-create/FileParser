@@ -785,8 +785,9 @@ export default function BulkSimulation() {
                   </CardContent>
                 </Card>
               )}
-            )}
-          </div>
+            </div>
+          )}
+        </div>
         )}
 
         {/* Results Table */}

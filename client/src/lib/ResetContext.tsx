@@ -12,7 +12,7 @@ export function ResetProvider({ children }: { children: React.ReactNode }) {
 
   const triggerGlobalReset = useCallback(() => {
     // Clear all localStorage keys
-    localStorage.removeItem('simulator_form_data');
+    localStorage.removeItem('global_form_data');
     localStorage.removeItem('comparison_hedefKarTL');
     localStorage.removeItem('comparison_scenario1_data');
     localStorage.removeItem('comparison_scenario2_data');

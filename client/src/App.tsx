@@ -11,6 +11,7 @@ import ComparisonSimulator from "@/pages/comparison";
 import SensitivityAnalysis from "@/pages/sensitivity";
 import BulkSimulation from "@/pages/bulk-simulation";
 import { ResetProvider, useGlobalReset } from "@/lib/ResetContext";
+import { FormDataProvider } from "@/lib/FormDataContext";
 
 export function Navigation() {
   const [location] = useLocation();
@@ -87,12 +88,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ResetProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ResetProvider>
+      <FormDataProvider>
+        <ResetProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ResetProvider>
+      </FormDataProvider>
     </QueryClientProvider>
   );
 }

@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
 import { useGlobalReset } from "@/lib/ResetContext";
+import { useFormData } from "@/lib/FormDataContext";
 
 // Constants
 const PLATFORM_FEE_KDV_INCL = 10.19;
@@ -71,35 +72,17 @@ const formatKDVIncl = (netAmount: number, vatRate: number) => {
 };
 
 export default function Simulator() {
-  const { resetVersion, triggerGlobalReset } = useGlobalReset();
-
-  // State - Initialize from localStorage, persist on changes
-  const [values, setValues] = useState(() => {
-    try {
-      const saved = localStorage.getItem('simulator_form_data');
-      return saved ? JSON.parse(saved) : DEFAULT_FORM_VALUES;
-    } catch {
-      return DEFAULT_FORM_VALUES;
-    }
-  });
+  const { resetVersion } = useGlobalReset();
+  const { formData, updateFormData, resetFormData } = useFormData();
 
   // Re-initialize when global reset is triggered
   useEffect(() => {
-    setValues(DEFAULT_FORM_VALUES);
-  }, [resetVersion]);
+    resetFormData();
+  }, [resetVersion, resetFormData]);
 
-  // Persist to localStorage whenever values change
-  useEffect(() => {
-    localStorage.setItem('simulator_form_data', JSON.stringify(values));
-  }, [values]);
-
-  const handleChange = (key: keyof typeof values, value: string) => {
+  const handleChange = (key: keyof typeof formData, value: string) => {
     const numValue = parseFloat(value) || 0;
-    setValues((prev: typeof values) => ({ ...prev, [key]: numValue }));
-  };
-
-  const handleReset = () => {
-    triggerGlobalReset();
+    updateFormData({ [key]: numValue });
   };
 
   // Calculations
@@ -109,7 +92,7 @@ export default function Simulator() {
       iadeOrani: iadeOraniVal, gelirVergisi, personel, depo: depoVal,
       muhasebe: muhasebeVal, pazarlama: pazarlamaVal, digerGiderler: digerVal,
       hedefKarTL
-    } = values;
+    } = formData;
 
     if (adet === 0) return null;
 

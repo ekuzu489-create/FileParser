@@ -138,7 +138,7 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
     muhasebe: muhasebeVal, pazarlama: pazarlamaVal, digerGiderler: digerVal
   } = data;
 
-  if (adet === 0) return null;
+  if (!adet || adet <= 0) return null;
 
   const komisyonYuzde = komisyon / 100;
   const iadeOrani = iadeOraniVal / 100;
@@ -199,18 +199,19 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
   const odenecekKDV = odenecekKDVBrut > 0 ? odenecekKDVBrut : 0;
   const devredenKDV = odenecekKDVBrut < 0 ? Math.abs(odenecekKDVBrut) : 0;
 
-  // Unit Economics
-  const birimToplamMaliyet = faaliyetGiderleriToplam / adet + smToplam / adet;
-  const birimKomisyon = komisyonToplam / adet;
+  // Unit Economics - with division by zero safeguards
+  const birimToplamMaliyet = adet > 0 ? (faaliyetGiderleriToplam / adet + smToplam / adet) : 0;
+  const birimKomisyon = adet > 0 ? (komisyonToplam / adet) : 0;
   const birimDegiskenMaliyetlerTop = maliyet.net + birimKomisyon + kargo.net + platformFee.net + stopajBirim;
   const katkiPayiBirim = satis.net - birimDegiskenMaliyetlerTop;
-  const bepAdet = katkiPayiBirim > 0 ? sabitGiderlerToplamNet / katkiPayiBirim : 0;
+  const bepAdet = katkiPayiBirim > 0 && sabitGiderlerToplamNet >= 0 ? sabitGiderlerToplamNet / katkiPayiBirim : 0;
   const hedefAdet = katkiPayiBirim > 0 ? (sabitGiderlerToplamNet + hedefKarTL) / katkiPayiBirim : 0;
 
-  // Target Price Calculation
-  const hedefKarNet = hedefKarTL / (1 - gelirVergisiYuzde);
-  const birimHedefKarNet = hedefKarNet / adet;
-  const birimSabitGider = sabitGiderlerToplamNet / adet;
+  // Target Price Calculation - with division by zero safeguards
+  const divisor = 1 - gelirVergisiYuzde;
+  const hedefKarNet = divisor !== 0 ? hedefKarTL / divisor : hedefKarTL;
+  const birimHedefKarNet = adet > 0 ? hedefKarNet / adet : 0;
+  const birimSabitGider = adet > 0 ? sabitGiderlerToplamNet / adet : 0;
   const birimDegiskenMaliyetlerHariçKomisyon = maliyet.net + kargo.net + platformFee.net + stopajBirim;
   
   let hedefBirimSatisNetKomisyonOncesi = 0;
@@ -236,8 +237,8 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
     smToplam,
     alisKDV,
     
-    // Unit
-    netKarBirim: netKar / adet,
+    // Unit - with division by zero safeguards
+    netKarBirim: adet > 0 ? netKar / adet : 0,
     katkiPayiBirim,
     bepAdet,
     hedefAdet,

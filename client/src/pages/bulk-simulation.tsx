@@ -716,75 +716,78 @@ export default function BulkSimulation() {
               </Card>
 
               {/* Tax Analysis (Detaylı) */}
-              <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
-                <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
-                  <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    Vergi Analizi (Detaylı)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableBody className="text-[0.9em]">
-                      <TableRow className="border-b border-slate-50">
-                        <TableCell className="py-2 pl-6 font-medium text-slate-700">Vergi Öncesi Kâr (EBIT)</TableCell>
-                        <TableCell className="py-2 pr-6 text-right font-medium text-slate-700">{formatCurrency(aggregateCalc.faaliyetKar)}</TableCell>
-                        <TableCell className="py-2 pr-6 text-right font-medium text-slate-500">
-                          {aggregateCalc.netSatisHasilati > 0 
-                            ? ((aggregateCalc.faaliyetKar / aggregateCalc.netSatisHasilati) * 100).toFixed(2) 
-                            : '0.00'}%
-                        </TableCell>
-                      </TableRow>
-                      <TableRow className="border-b border-slate-50">
-                        <TableCell className="py-2 pl-6 font-medium text-red-500">(-) Gelir/Kurumlar Vergisi</TableCell>
-                        <TableCell className="py-2 pr-6 text-right text-red-500">{formatCurrency(aggregateCalc.vergi)}</TableCell>
-                        <TableCell className="py-2 pr-6 text-right text-red-500">
-                          {aggregateCalc.netSatisHasilati > 0 
-                            ? ((aggregateCalc.vergi / aggregateCalc.netSatisHasilati) * 100).toFixed(2) 
-                            : '0.00'}%
-                        </TableCell>
-                      </TableRow>
-                      <TableRow
-                        className={cn(
-                          'hover:opacity-90',
-                          aggregateCalc.netKar < 0
-                            ? 'bg-[#ffe6e6] border-red-200'
-                            : 'bg-[#d1e7dd] border-green-200'
-                        )}
-                      >
-                        <TableCell
+              {aggregateCalc && (
+                <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
+                  <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                    <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Vergi Analizi (Detaylı)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableBody className="text-[0.9em]">
+                        <TableRow className="border-b border-slate-50">
+                          <TableCell className="py-2 pl-6 font-medium text-slate-700">Vergi Öncesi Kâr (EBIT)</TableCell>
+                          <TableCell className="py-2 pr-6 text-right font-medium text-slate-700">{formatCurrency(aggregateCalc.faaliyetKar)}</TableCell>
+                          <TableCell className="py-2 pr-6 text-right font-medium text-slate-500">
+                            {aggregateCalc.netSatisHasilati > 0 
+                              ? ((aggregateCalc.faaliyetKar / aggregateCalc.netSatisHasilati) * 100).toFixed(2) 
+                              : '0.00'}%
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="border-b border-slate-50">
+                          <TableCell className="py-2 pl-6 font-medium text-red-500">(-) Gelir/Kurumlar Vergisi</TableCell>
+                          <TableCell className="py-2 pr-6 text-right text-red-500">{formatCurrency(aggregateCalc.vergi)}</TableCell>
+                          <TableCell className="py-2 pr-6 text-right text-red-500">
+                            {aggregateCalc.netSatisHasilati > 0 
+                              ? ((aggregateCalc.vergi / aggregateCalc.netSatisHasilati) * 100).toFixed(2) 
+                              : '0.00'}%
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
                           className={cn(
-                            'py-3 pl-6 font-bold text-[1em]',
-                            aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
+                            'hover:opacity-90',
+                            aggregateCalc.netKar < 0
+                              ? 'bg-[#ffe6e6] border-red-200'
+                              : 'bg-[#d1e7dd] border-green-200'
                           )}
                         >
-                          = Net Kâr (Net Profit)
-                        </TableCell>
-                        <TableCell
-                          className={cn(
-                            'py-3 pr-6 font-bold text-[1em] text-right',
-                            aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
-                          )}
-                        >
-                          {formatCurrency(aggregateCalc.netKar)}
-                        </TableCell>
-                        <TableCell
-                          className={cn(
-                            'py-3 pr-6 font-bold text-[1em] text-right',
-                            aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
-                          )}
-                        >
-                          {aggregateCalc.netSatisHasilati > 0 
-                            ? ((aggregateCalc.netKar / aggregateCalc.netSatisHasilati) * 100).toFixed(2) 
-                            : '0.00'}%
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+                          <TableCell
+                            className={cn(
+                              'py-3 pl-6 font-bold text-[1em]',
+                              aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
+                            )}
+                          >
+                            = Net Kâr (Net Profit)
+                          </TableCell>
+                          <TableCell
+                            className={cn(
+                              'py-3 pr-6 font-bold text-[1em] text-right',
+                              aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
+                            )}
+                          >
+                            {formatCurrency(aggregateCalc.netKar)}
+                          </TableCell>
+                          <TableCell
+                            className={cn(
+                              'py-3 pr-6 font-bold text-[1em] text-right',
+                              aggregateCalc.netKar < 0 ? 'text-red-900' : 'text-green-900'
+                            )}
+                          >
+                            {aggregateCalc.netSatisHasilati > 0 
+                              ? ((aggregateCalc.netKar / aggregateCalc.netSatisHasilati) * 100).toFixed(2) 
+                              : '0.00'}%
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            )}
+          </div>
+        )}
 
         {/* Results Table */}
         {results.length > 0 && (

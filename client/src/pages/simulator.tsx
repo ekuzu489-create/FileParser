@@ -131,7 +131,9 @@ export default function Simulator() {
     const brutKar = netSatisHasilati - smToplam;
 
     // Operating Expenses
-    const komisyonToplam = netSatisHasilati * komisyonYuzde;
+    // Commission: extract VAT from the percentage input (VAT-INCLUSIVE rate becomes VAT-EXCLUSIVE)
+    const komisyonYuzdeNet = komisyonYuzde / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const komisyonToplam = netSatisHasilati * komisyonYuzdeNet;
     const kargoToplam = kargo.net * adet;
     const platformFeeToplam = platformFee.net * adet;
     const stopajBirim = satis.net * STOPAJ_RATE;
@@ -182,7 +184,7 @@ export default function Simulator() {
       const testSmToplam = maliyet.net * testAdet;
       const testBrutKar = testNetSatisHasilati - testSmToplam;
       
-      const testKomisyonToplam = testNetSatisHasilati * komisyonYuzde;
+      const testKomisyonToplam = testNetSatisHasilati * komisyonYuzdeNet;
       const testKargoToplam = kargo.net * testAdet;
       const testPlatformFeeToplam = platformFee.net * testAdet;
       const testStopajToplam = satis.net * STOPAJ_RATE * testAdet;
@@ -252,7 +254,7 @@ export default function Simulator() {
     const birimDegiskenMaliyetlerHariçKomisyon = maliyet.net + kargo.net + platformFee.net + stopajBirim;
     
     let hedefBirimSatisNetKomisyonOncesi = 0;
-    const payda = (1 - komisyonYuzde) * (1 - iadeOrani);
+    const payda = (1 - komisyonYuzdeNet) * (1 - iadeOrani);
     
     if (payda !== 0) {
       hedefBirimSatisNetKomisyonOncesi = (birimDegiskenMaliyetlerHariçKomisyon + birimSabitGider + birimHedefKarNet) / payda;

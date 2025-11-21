@@ -261,7 +261,9 @@ export default function BulkSimulation() {
       const brutKar = netSatisHasilati - smToplam;
 
       // Variable expenses (all VAT-exclusive)
-      const komisyonToplam = netSatisHasilati * komisyonYuzde;
+      // Commission: extract VAT from the percentage input (VAT-INCLUSIVE rate becomes VAT-EXCLUSIVE)
+      const komisyonYuzdeNet = komisyonYuzde / (1 + GIDER_KDV_ORANI_SABIT / 100);
+      const komisyonToplam = netSatisHasilati * komisyonYuzdeNet;
       const kargoToplam = kargoNetAm * product.totalSalesQuantity;
       const platformFeeToplam = platformFeeNet * product.totalSalesQuantity;
       const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;
@@ -345,7 +347,9 @@ export default function BulkSimulation() {
     const brutKar = netSatisHasilati - smToplam;
 
     // Step 3: Calculate variable expenses (all VAT-exclusive after extraction)
-    const komisyonToplam = netSatisHasilati * komisyonYuzde;
+    // Commission: extract VAT from the percentage input (VAT-INCLUSIVE rate becomes VAT-EXCLUSIVE)
+    const komisyonYuzdeNet = komisyonYuzde / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    const komisyonToplam = netSatisHasilati * komisyonYuzdeNet;
     const kargoToplam = kargoNetAm * totalQuantity;
     const platformFeeToplam = platformFeeNet * totalQuantity;
     const stopajToplam = brutSatisHasilatiKDVHariç * STOPAJ_RATE;

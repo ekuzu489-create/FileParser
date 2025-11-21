@@ -1,0 +1,29 @@
+The previous "Toplu Simülasyon" section was accidentally deleted. You must **recreate the entire feature from scratch**, incorporating all the final, corrected logic and UI elements we developed.
+
+**Target File:** /src/pages/Bulk-Simulation.jsx (or the file where the original feature was)
+
+### 1. Recreate UI Structure and Inputs:
+
+* Create the **"Toplu Simülasyon (Excel)"** tab.
+* Add **Dosya Yükle** (Upload) functionality.
+* Add the **Değişken Giderler** panel with inputs: Komisyon (%), Kargo Gideri (₺), İade (%), **Gelir/Kurumlar Vergisi (%)**.
+* Add the **Sabit Giderler (Aylık)** panel with inputs: Personel, Kira/Depo, Muhasebe, Pazarlama, Diğer Giderler.
+* Add the **Satış ve Birim Verileri (Özet)** panel showing **Toplam Satış Adedi**, **Toplam Satış Tutarı**, and **Toplam Maliyet (Excel)** (aggregated from the file).
+
+### 2. Implement Correct Calculation Logic:
+
+The core logic must be based on the corrected VAT separation and cost apportionment:
+
+* **Pazaryeri Komisyonu:** The Komisyon (%) input is KDV Dahil. The calculation must **divide by (1 + VAT Rate)** to display the KDV Hariç value in the P&L.
+* **Kargo Gideri:** The input (₺) is a **per-unit cost**. Total Kargo Gideri must be calculated as: **Kargo Input * Toplam Satış Adedi**.
+* **Sabit Giderler:** The total of all Sabit Giderler must be calculated and **apportioned** to the unit costs for the detail table.
+
+### 3. Recreate Result Tables:
+
+* **Aylık Kâr/Zarar Tablosu (Agregat):** Must display the full detailed structure (Brüt Kâr, Faaliyet Giderleri (KDV Hariç), EBIT, Vergi, NET KÂR / ZARAR).
+* **Simülasyon Sonuçları (Ürün Detayı):** Must show per-product detail, including the added columns: **Ürün Maliyeti (₺)** and **KDV Oranı (%)**. Must pass the rule: (Satış Tutarı - Toplam Giderler = Net Kâr/Zarar).
+
+### 4. Implement Final Behavior:
+
+* **Reset on Refresh:** When the page is refreshed (hard reload), **all input fields and calculated results on this tab must reset to their default/empty values.**
+* **Persistence:** Data should still persist **when switching between tabs** (Simülatör, Kıyaslama, Toplu Simülasyon).

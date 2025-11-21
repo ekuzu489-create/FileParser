@@ -298,6 +298,12 @@
  * need to be distinguished from eachother visually.
  */
 @layer utilities {
+  /* Ensure Select dropdowns always render on top */
+  [role="listbox"],
+  [role="dialog"][data-state="open"],
+  .radix-select-content {
+    z-index: 9999 !important;
+  }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */
   input[type="search"]::-webkit-search-cancel-button {

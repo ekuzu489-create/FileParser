@@ -137,6 +137,8 @@ export default function BulkSimulation() {
     }
   });
 
+  const [showAll, setShowAll] = useState(false);
+
   // Update gelirVergisi in calculations
   const gelirVergisiYuzde = variableExpenses.gelirVergisi / 100;
 
@@ -740,7 +742,7 @@ export default function BulkSimulation() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {results.map((result, idx) => {
+                    {results.slice(0, showAll ? results.length : 5).map((result, idx) => {
                       const product = bulkProducts[idx];
                       return (
                         <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
@@ -795,6 +797,17 @@ export default function BulkSimulation() {
                   </TableBody>
                 </Table>
               </div>
+              {results.length > 5 && (
+                <div className="border-t border-slate-100 px-6 py-4 bg-slate-50 flex justify-center">
+                  <Button
+                    onClick={() => setShowAll(!showAll)}
+                    variant="outline"
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  >
+                    {showAll ? 'Daha Azını Göster' : 'Daha Fazlasını Göster'}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

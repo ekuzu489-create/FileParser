@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
-import { Upload, Download, FileText, TrendingUp, Scale } from "lucide-react";
+import { Upload, Download, FileText, TrendingUp } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
 
@@ -79,15 +79,6 @@ interface AggregateCalculation {
   vergi: number;
   netKar: number;
   marginNet: number;
-  satisKDVTutari: number;
-  alisKDV: number;
-  komisyonKDV: number;
-  kargoKDVTutari: number;
-  platformFeeKDV: number;
-  sabitGiderlerKDVToplam: number;
-  indirilebilirKDVToplam: number;
-  odenecekKDV: number;
-  devredenKDV: number;
 }
 
 const DEFAULT_VARIABLE_EXPENSES = {
@@ -375,26 +366,6 @@ export default function BulkSimulation() {
     const netKar = faaliyetKar - vergi;
     const marginNet = netSatisHasilati > 0 ? netKar / netSatisHasilati : 0;
 
-    // Step 6: VAT Reconciliation
-    let satisKDVTutari = 0;
-    bulkProducts.forEach((product) => {
-      const brutBirim = product.totalSalesRevenue / (1 + product.vatRate / 100);
-      const productVAT = product.totalSalesRevenue - brutBirim;
-      satisKDVTutari += productVAT;
-    });
-
-    // Deductible VAT components
-    const alisKDV = smToplam * (GIDER_KDV_ORANI_SABIT / 100);
-    const komisyonKDV = komisyonToplam * (GIDER_KDV_ORANI_SABIT / 100);
-    const kargoKDVTutari = kargoToplam * (GIDER_KDV_ORANI_SABIT / 100);
-    const platformFeeKDV = platformFeeToplam * (GIDER_KDV_ORANI_SABIT / 100);
-    const sabitGiderlerKDVToplam = (controlPanelValues.personel + controlPanelValues.depo + controlPanelValues.muhasebe + controlPanelValues.pazarlama + controlPanelValues.digerGiderler) - sabitGiderlerToplamNet;
-
-    const indirilebilirKDVToplam = alisKDV + komisyonKDV + kargoKDVTutari + platformFeeKDV + sabitGiderlerKDVToplam;
-    const odenecekKDVBrut = satisKDVTutari - indirilebilirKDVToplam;
-    const odenecekKDV = odenecekKDVBrut > 0 ? odenecekKDVBrut : 0;
-    const devredenKDV = odenecekKDVBrut < 0 ? Math.abs(odenecekKDVBrut) : 0;
-
     return {
       brutSatisHasilatiKDVHariç,
       iadeTutariNet,
@@ -411,15 +382,6 @@ export default function BulkSimulation() {
       vergi,
       netKar,
       marginNet,
-      satisKDVTutari,
-      alisKDV,
-      komisyonKDV,
-      kargoKDVTutari,
-      platformFeeKDV,
-      sabitGiderlerKDVToplam,
-      indirilebilirKDVToplam,
-      odenecekKDV,
-      devredenKDV,
     };
   }, [bulkProducts, controlPanelValues, variableExpenses]);
 
@@ -754,63 +716,6 @@ export default function BulkSimulation() {
                   </Table>
                 </CardContent>
               </Card>
-
-              {/* Vergi Analizi (Detaylı) */}
-              {aggregateCalc && (
-                <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
-                  <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
-                    <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-                      <Scale className="w-5 h-5" />
-                      Vergi Analizi (Detaylı)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <Table>
-                      <TableBody className="text-[0.9em]">
-                        <TableRow className="hover:bg-transparent border-b border-slate-50">
-                          <TableCell className="py-2 pl-5 font-medium">Satış KDV'si (Hesaplanan)</TableCell>
-                          <TableCell className="py-2 pr-5 text-right font-medium">{formatCurrency(aggregateCalc.satisKDVTutari)}</TableCell>
-                        </TableRow>
-                        <TableRow className="hover:bg-transparent">
-                          <TableCell colSpan={2} className="bg-slate-100 text-center py-1.5 font-bold text-slate-700">İndirilebilir KDV Detayı</TableCell>
-                        </TableRow>
-                        <TableRow className="hover:bg-transparent border-b border-slate-50">
-                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Alış KDV (SM)</TableCell>
-                          <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.alisKDV)}</TableCell>
-                        </TableRow>
-                        <TableRow className="hover:bg-transparent border-b border-slate-50">
-                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Komisyon KDV</TableCell>
-                          <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.komisyonKDV)}</TableCell>
-                        </TableRow>
-                        <TableRow className="hover:bg-transparent border-b border-slate-50">
-                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Kargo KDV</TableCell>
-                          <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.kargoKDVTutari)}</TableCell>
-                        </TableRow>
-                        <TableRow className="hover:bg-transparent border-b border-slate-50">
-                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Platform Hiz. KDV</TableCell>
-                          <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.platformFeeKDV)}</TableCell>
-                        </TableRow>
-                        <TableRow className="hover:bg-transparent border-b border-slate-50">
-                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Sabit Giderler KDV</TableCell>
-                          <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.sabitGiderlerKDVToplam)}</TableCell>
-                        </TableRow>
-                        <TableRow className="bg-slate-100 hover:bg-slate-100 border-t border-slate-200">
-                          <TableCell className="py-2 pl-5 font-bold text-slate-800">Toplam İndirilebilir KDV</TableCell>
-                          <TableCell className="py-2 pr-5 text-right font-bold text-slate-800">{formatCurrency(aggregateCalc.indirilebilirKDVToplam)}</TableCell>
-                        </TableRow>
-                        <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
-                          <TableCell className="py-3 pl-5 font-bold text-green-900">Ödenecek KDV Tutarı</TableCell>
-                          <TableCell className="py-3 pr-5 text-right font-bold text-green-900">{formatCurrency(aggregateCalc.odenecekKDV)}</TableCell>
-                        </TableRow>
-                        <TableRow className="bg-[#fff3cd] hover:bg-[#fff3cd] border-t border-yellow-200">
-                          <TableCell className="py-3 pl-5 font-bold text-[#856404]">Biriken (Devreden) KDV</TableCell>
-                          <TableCell className="py-3 pr-5 text-right font-bold text-[#856404]">{formatCurrency(aggregateCalc.devredenKDV)}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              )}
             )}
           </div>
         )}

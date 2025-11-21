@@ -87,7 +87,7 @@ export default function Simulator() {
 
   const handleChange = (key: keyof typeof values, value: string) => {
     const numValue = parseFloat(value) || 0;
-    setValues(prev => ({ ...prev, [key]: numValue }));
+    setValues((prev: typeof values) => ({ ...prev, [key]: numValue }));
   };
 
   const handleReset = () => {

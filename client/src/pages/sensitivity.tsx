@@ -15,11 +15,15 @@ const STOPAJ_RATE = 0.01;
 
 const solveVAT = (amountKDVIncl: number, vatRate: number) => {
   const rateDecimal = vatRate / 100;
-  const amountWithoutVAT = amountKDVIncl / (1 + rateDecimal);
-  return amountWithoutVAT;
+  if (vatRate === 0 || amountKDVIncl === 0) {
+    return { net: amountKDVIncl, vat: 0 };
+  }
+  const net = amountKDVIncl / (1 + rateDecimal);
+  const vat = amountKDVIncl - net;
+  return { net, vat };
 };
 
-const solveKDVIncl = (netAmount: number, vatRate: number) => {
+const formatKDVIncl = (netAmount: number, vatRate: number) => {
   const rateDecimal = vatRate / 100;
   const total = netAmount * (1 + rateDecimal);
   return total;
@@ -48,40 +52,52 @@ interface CalculationResult {
 
 const calculateScenario = (data: ScenarioData): CalculationResult => {
   const {
-    adet, satisFiyat, birimMaliyet, kargo, komisyon, kdvOrani,
-    iadeOrani, gelirVergisi, personel, depo, muhasebe, pazarlama, digerGiderler
+    adet, satisFiyat, birimMaliyet, kargo: kargoVal, komisyon, kdvOrani,
+    iadeOrani: iadeOraniVal, gelirVergisi, personel, depo: depoVal,
+    muhasebe: muhasebeVal, pazarlama: pazarlamaVal, digerGiderler: digerVal
   } = data;
 
-  const satisHasilatiKDVHaric = (satisFiyat / (1 + kdvOrani / 100));
-  const netSatisHasilati = satisHasilatiKDVHaric * adet;
-  const iadeTutariNet = satisHasilatiKDVHaric * (iadeOrani / 100) * adet;
-  const netSatisHasılatiAdjusted = netSatisHasilati - iadeTutariNet;
+  if (adet === 0) return { netKar: 0, netKarBirim: 0 };
 
-  const komisyonTutari = (satisHasilatiKDVHaric * (komisyon / 100)) * adet;
-  const kargoBedeli = kargo * adet;
-  const birimMaliyetToplam = birimMaliyet * adet;
+  const komisyonYuzde = komisyon / 100;
+  const iadeOrani = iadeOraniVal / 100;
+  const gelirVergisiYuzde = gelirVergisi / 100;
 
-  const platformFeeNet = (PLATFORM_FEE_KDV_INCL / (1 + GIDER_KDV_ORANI_SABIT / 100)) * adet;
-  const totalVariable = komisyonTutari + kargoBedeli + birimMaliyetToplam + platformFeeNet;
+  // VAT Calculations (EXACT MATCH with Simülatör)
+  const satis = solveVAT(satisFiyat, kdvOrani);
+  const maliyet = solveVAT(birimMaliyet, kdvOrani);
+  const kargo = solveVAT(kargoVal, GIDER_KDV_ORANI_SABIT);
+  const platformFee = solveVAT(PLATFORM_FEE_KDV_INCL, GIDER_KDV_ORANI_SABIT);
+  
+  const personelNet = personel;
+  const depo = solveVAT(depoVal, GIDER_KDV_ORANI_SABIT);
+  const muhasebe = solveVAT(muhasebeVal, GIDER_KDV_ORANI_SABIT);
+  const pazarlama = solveVAT(pazarlamaVal, GIDER_KDV_ORANI_SABIT);
+  const digerGiderler = solveVAT(digerVal, GIDER_KDV_ORANI_SABIT);
 
-  const smToplam = totalVariable;
-  const brutKar = netSatisHasılatiAdjusted - smToplam;
+  // Revenue & Gross Profit
+  const brutSatisHasilatiKDVHariç = satis.net * adet;
+  const iadeKaybiAdet = adet * iadeOrani;
+  const iadeTutariNet = iadeKaybiAdet * satis.net;
+  
+  const netSatisHasilati = brutSatisHasilatiKDVHariç - iadeTutariNet;
+  const smToplam = maliyet.net * adet;
+  const brutKar = netSatisHasilati - smToplam;
 
-  const faaliyetGiderleriToplam = personel + depo + muhasebe + pazarlama + digerGiderler;
+  // Operating Expenses
+  const komisyonToplam = netSatisHasilati * komisyonYuzde;
+  const kargoToplam = kargo.net * adet;
+  const platformFeeToplam = platformFee.net * adet;
+  const stopajBirim = satis.net * STOPAJ_RATE;
+  const stopajToplam = stopajBirim * adet;
+
+  const sabitGiderlerToplamNet = personelNet + depo.net + muhasebe.net + pazarlama.net + digerGiderler.net;
+  const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
+
+  // Profit (EXACT MATCH with Simülatör)
   const faaliyetKar = brutKar - faaliyetGiderleriToplam;
-
-  const alisKDV = birimMaliyet * adet * (GIDER_KDV_ORANI_SABIT / 100);
-  const satisKDV = satisHasilatiKDVHaric * (kdvOrani / 100) * adet;
-  const odenecekKDV = satisKDV - alisKDV;
-
-  const devredenKDV = alisKDV - satisKDV;
-  const kdvAdjusted = odenecekKDV > 0 ? odenecekKDV : 0;
-
-  const vergilendirilebilirKar = faaliyetKar - kdvAdjusted;
-  const gelirVergisiTutari = Math.max(0, vergilendirilebilirKar * (gelirVergisi / 100));
-  const stopajTutari = satisHasilatiKDVHaric * STOPAJ_RATE * adet;
-
-  const netKar = vergilendirilebilirKar - gelirVergisiTutari - stopajTutari;
+  const vergi = faaliyetKar > 0 ? faaliyetKar * gelirVergisiYuzde : 0;
+  const netKar = faaliyetKar - vergi;
 
   return {
     netKar,

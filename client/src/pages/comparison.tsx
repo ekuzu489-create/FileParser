@@ -437,13 +437,13 @@ export default function ComparisonSimulator() {
     }
   });
 
-  // Senaryo 2: Initialize from localStorage or custom defaults
+  // Senaryo 2: Initialize from localStorage or defaults
   const [scenario2, setScenario2] = useState<ScenarioData>(() => {
     try {
       const saved = localStorage.getItem('comparison_scenario2_data');
-      return saved ? JSON.parse(saved) : { ...DEFAULT_VALUES, adet: 600, satisFiyat: 1049.99 };
+      return saved ? JSON.parse(saved) : DEFAULT_VALUES;
     } catch {
-      return { ...DEFAULT_VALUES, adet: 600, satisFiyat: 1049.99 };
+      return DEFAULT_VALUES;
     }
   });
 

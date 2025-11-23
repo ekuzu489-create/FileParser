@@ -736,7 +736,8 @@ export default function BulkSimulation() {
                   <TableHeader>
                     <TableRow className="bg-slate-50 hover:bg-slate-50">
                       <TableHead className="text-left py-3 pl-6 font-semibold text-slate-700">Ürün Adı</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">KDV Hariç Satış Tutarı (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺, KDV Dahil)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺, KDV Hariç)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Ürün Maliyeti (₺, KDV Dahil)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">KDV Oranı (%)</TableHead>
@@ -747,7 +748,7 @@ export default function BulkSimulation() {
                             <TooltipTrigger asChild>
                               <Info className="w-4 h-4 text-slate-500 cursor-help" />
                             </TooltipTrigger>
-                            <TooltipContent side="left" className="max-w-xs">
+                            <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
                               <p>Satılan Malın Maliyeti + Pazaryeri Komisyonu + Kargo + Platform Bedeli + Stopaj + Sabit Giderler (oranlanmış) + Vergi</p>
                             </TooltipContent>
                           </Tooltip>
@@ -764,6 +765,7 @@ export default function BulkSimulation() {
                         <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
                           <TableCell className="py-3 pl-6 font-medium text-slate-700">{result.productName}</TableCell>
                           <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.netSatisHasilatiKDVHariç)}</TableCell>
                           <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
                           <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalCost)}</TableCell>
                           <TableCell className="py-3 pr-6 text-right">{product?.vatRate}%</TableCell>
@@ -785,6 +787,9 @@ export default function BulkSimulation() {
                       <TableCell className="py-3 pl-6 text-slate-800">TOPLAM</TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
                         {formatCurrency(resultsTotals.totalRevenue)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(resultsTotals.netSatisHasilatiKDVHariç)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
                         {formatNumber(excelTotals.totalQuantity)}

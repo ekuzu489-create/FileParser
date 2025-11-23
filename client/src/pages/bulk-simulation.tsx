@@ -749,7 +749,16 @@ export default function BulkSimulation() {
                               <Info className="w-4 h-4 text-slate-500 cursor-help" />
                             </TooltipTrigger>
                             <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
-                              <p>Satılan Malın Maliyeti + Pazaryeri Komisyonu + Kargo + Platform Bedeli + Stopaj + Sabit Giderler (oranlanmış) + Vergi</p>
+                              <div className="space-y-1.5">
+                                <p className="font-semibold">Hesaplama Detayları:</p>
+                                <p>Satılan Malın Maliyeti +</p>
+                                <p>Pazaryeri Komisyonu +</p>
+                                <p>Kargo +</p>
+                                <p>Platform Bedeli +</p>
+                                <p>Stopaj +</p>
+                                <p>Sabit Giderler (Ürünün satış adedi / Toplam satış adedi oranında) +</p>
+                                <p>Vergi (Faaliyet Kârı varsa)</p>
+                              </div>
                             </TooltipContent>
                           </Tooltip>
                         </div>

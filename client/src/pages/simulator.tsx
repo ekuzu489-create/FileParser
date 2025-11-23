@@ -80,30 +80,22 @@ export default function Simulator() {
     }
   });
 
-  // Persist to localStorage whenever values change
+  // Persist to localStorage
   useEffect(() => {
     localStorage.setItem('simulator_form_data', JSON.stringify(values));
   }, [values]);
 
-  const handleChange = (key: keyof typeof values, value: string) => {
+  const handleInputChange = (key: string, value: string) => {
     const numValue = parseFloat(value) || 0;
-    setValues((prev: typeof values) => ({ ...prev, [key]: numValue }));
+    setValues((prev: any) => ({ ...prev, [key]: numValue }));
   };
 
-  const handleReset = () => {
-    setValues(DEFAULT_FORM_VALUES);
-  };
-
-  // Calculations
   const results = useMemo(() => {
     const {
       adet, satisFiyat, birimMaliyet, kargo: kargoVal, komisyon, kdvOrani,
       iadeOrani: iadeOraniVal, gelirVergisi, personel, depo: depoVal,
-      muhasebe: muhasebeVal, pazarlama: pazarlamaVal, digerGiderler: digerVal,
-      hedefKarTL
+      muhasebe: muhasebeVal, pazarlama: pazarlamaVal, digerGiderler: digerVal, hedefKarTL
     } = values;
-
-    if (adet === 0) return null;
 
     const komisyonYuzde = komisyon / 100;
     const iadeOrani = iadeOraniVal / 100;
@@ -120,6 +112,53 @@ export default function Simulator() {
     const muhasebe = solveVAT(muhasebeVal, GIDER_KDV_ORANI_SABIT);
     const pazarlama = solveVAT(pazarlamaVal, GIDER_KDV_ORANI_SABIT);
     const digerGiderler = solveVAT(digerVal, GIDER_KDV_ORANI_SABIT);
+
+    const sabitGiderlerToplamNet = personelNet + depo.net + muhasebe.net + pazarlama.net + digerGiderler.net;
+
+    // Handle adet = 0 case: all variable expenses are 0, net profit is -fixed costs
+    if (adet === 0) {
+      return {
+        brutSatisHasilatiKDVHariç: 0,
+        iadeTutariNet: 0,
+        netSatisHasilati: 0,
+        smToplam: 0,
+        brutKar: 0,
+        komisyonToplam: 0,
+        kargoToplam: 0,
+        platformFeeToplam: 0,
+        stopajToplam: 0,
+        sabitGiderlerToplamNet,
+        faaliyetGiderleriToplam: sabitGiderlerToplamNet,
+        faaliyetKar: -sabitGiderlerToplamNet,
+        vergi: 0,
+        netKar: -sabitGiderlerToplamNet,
+        marginBrut: 0,
+        marginFaaliyet: 0,
+        marginNet: 0,
+        marginIade: 0,
+        satisKDVTutari: 0,
+        alisKDV: 0,
+        kargoKDVTutari: 0,
+        platformFeeKDV: 0,
+        komisyonKDV: 0,
+        sabitGiderlerKDVToplam: depo.vat + muhasebe.vat + pazarlama.vat + digerGiderler.vat,
+        indirilebilirKDVToplam: 0,
+        odenecekKDV: 0,
+        devredenKDV: 0,
+        netKarBirim: 0,
+        katkiPayiBirim: 0,
+        bepAdet: 0,
+        hedefAdet: 0,
+        hedefFiyatKDVIncl: 0,
+        birimAlisMaliyet: 0,
+        birimKomisyonNet: 0,
+        birimKargoNet: 0,
+        birimPlatformFeeNet: 0,
+        birimStopajNet: 0,
+        birimSabitGiderler: 0,
+        birimVergi: 0,
+      };
+    }
 
     // Revenue & Gross Profit
     const brutSatisHasilatiKDVHariç = satis.net * adet;
@@ -139,7 +178,6 @@ export default function Simulator() {
     const stopajBirim = satis.net * STOPAJ_RATE;
     const stopajToplam = stopajBirim * adet;
 
-    const sabitGiderlerToplamNet = personelNet + depo.net + muhasebe.net + pazarlama.net + digerGiderler.net;
     const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
 
     // Profit
@@ -168,7 +206,6 @@ export default function Simulator() {
     const devredenKDV = odenecekKDVBrut < 0 ? Math.abs(odenecekKDVBrut) : 0;
 
     // Unit Economics & Break-even
-    const birimToplamMaliyet = faaliyetGiderleriToplam / adet + smToplam / adet;
     const birimKomisyon = komisyonToplam / adet;
     const birimDegiskenMaliyetlerTop = maliyet.net + birimKomisyon + kargo.net + platformFee.net + stopajBirim;
     const katkiPayiBirim = satis.net - birimDegiskenMaliyetlerTop;
@@ -293,17 +330,15 @@ export default function Simulator() {
       marginIade,
       satisKDVTutari,
       alisKDV,
-      komisyonKDV,
       kargoKDVTutari,
       platformFeeKDV,
+      komisyonKDV,
       sabitGiderlerKDVToplam,
       indirilebilirKDVToplam,
       odenecekKDV,
       devredenKDV,
-      satisNet: satis.net,
-      birimToplamMaliyet,
+      netKarBirim: adet > 0 ? netKar / adet : 0,
       katkiPayiBirim,
-      netKarBirim: netKar / adet,
       bepAdet,
       hedefAdet,
       hedefFiyatKDVIncl,
@@ -313,7 +348,7 @@ export default function Simulator() {
       birimPlatformFeeNet,
       birimStopajNet,
       birimSabitGiderler,
-      birimVergi
+      birimVergi,
     };
   }, [values]);
 
@@ -325,150 +360,257 @@ export default function Simulator() {
       </div>
 
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
-        
-        {/* Left Column: Inputs */}
-        <div className="space-y-4 h-full overflow-y-auto pr-2 custom-scrollbar">
-          <div className="flex items-center space-x-2 mb-1">
-            <Calculator className="w-6 h-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-slate-800">Finansal Simülatör</h1>
-          </div>
-
-          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+        {/* Left Column: Input Form */}
+        <div className="h-full overflow-y-auto pr-2 custom-scrollbar">
+          {/* Product Info Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
             <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
-              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                Satış ve Birim Verileri
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Ürün Bilgileri
               </CardTitle>
-              <CardDescription className="text-xs mt-1">*Parasal Girdiler KDV Dahil.</CardDescription>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="adet" className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
-                  <div className="relative">
-                    <Input id="adet" className="h-9 text-sm" type="number" step="1" value={values.adet} onChange={(e) => handleChange('adet', e.target.value)} />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="satisFiyat" className="text-xs font-medium text-slate-600">Birim Satış (₺)</Label>
-                  <div className="relative">
-                    <Input id="satisFiyat" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.satisFiyat} onChange={(e) => handleChange('satisFiyat', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
-                </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
+                <Input 
+                  className="h-9 text-sm" 
+                  type="number" 
+                  step="1" 
+                  value={values.adet}
+                  onChange={(e) => handleInputChange('adet', e.target.value)}
+                  data-testid="input-adet"
+                />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="birimMaliyet" className="text-xs font-medium text-slate-600">Birim Maliyet (₺)</Label>
-                  <div className="relative">
-                    <Input id="birimMaliyet" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.birimMaliyet} onChange={(e) => handleChange('birimMaliyet', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="kargo" className="text-xs font-medium text-slate-600">Ort. Kargo (₺)</Label>
-                  <div className="relative">
-                    <Input id="kargo" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.kargo} onChange={(e) => handleChange('kargo', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="komisyon" className="text-xs font-medium text-slate-600">Komisyon %</Label>
-                  <div className="relative">
-                    <Input id="komisyon" className="h-9 text-sm pr-6" type="number" step="0.1" value={values.komisyon} onChange={(e) => handleChange('komisyon', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="kdvOrani" className="text-xs font-medium text-slate-600">KDV %</Label>
-                  <div className="relative">
-                    <Input id="kdvOrani" className="h-9 text-sm pr-6" type="number" step="1" value={values.kdvOrani} onChange={(e) => handleChange('kdvOrani', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="iadeOrani" className="text-xs font-medium text-slate-600">İade %</Label>
-                  <div className="relative">
-                    <Input id="iadeOrani" className="h-9 text-sm pr-6" type="number" step="0.1" value={values.iadeOrani} onChange={(e) => handleChange('iadeOrani', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
-                  </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Birim Satış Fiyatı (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.satisFiyat}
+                    onChange={(e) => handleInputChange('satisFiyat', e.target.value)}
+                    data-testid="input-satisFiyat"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="gelirVergisi" className="text-xs font-medium text-slate-600">Gelir/Kurumlar Vergisi (%)</Label>
+                <Label className="text-xs font-medium text-slate-600">Birim Maliyet (₺, KDV Dahil)</Label>
                 <div className="relative">
-                  <Input id="gelirVergisi" className="h-9 text-sm pr-6" type="number" step="1" value={values.gelirVergisi} onChange={(e) => handleChange('gelirVergisi', e.target.value)} />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.birimMaliyet}
+                    onChange={(e) => handleInputChange('birimMaliyet', e.target.value)}
+                    data-testid="input-birimMaliyet"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">KDV Oranı (%)</Label>
+                  <div className="relative">
+                    <Input 
+                      className="h-9 text-sm pr-6" 
+                      type="number" 
+                      step="1" 
+                      value={values.kdvOrani}
+                      onChange={(e) => handleInputChange('kdvOrani', e.target.value)}
+                      data-testid="input-kdvOrani"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">İade Oranı (%)</Label>
+                  <div className="relative">
+                    <Input 
+                      className="h-9 text-sm pr-6" 
+                      type="number" 
+                      step="0.1" 
+                      value={values.iadeOrani}
+                      onChange={(e) => handleInputChange('iadeOrani', e.target.value)}
+                      data-testid="input-iadeOrani"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+          {/* Variable Expenses Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
             <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
-              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
-                Sabit Giderler (Aylık)
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Değişken Giderler
               </CardTitle>
-              <CardDescription className="text-xs mt-1">(KDV %20 Oranından Düşülecektir)</CardDescription>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="personel" className="text-xs font-medium text-slate-600">Personel (₺)</Label>
-                  <div className="relative">
-                    <Input id="personel" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.personel} onChange={(e) => handleChange('personel', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="depo" className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
-                  <div className="relative">
-                    <Input id="depo" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.depo} onChange={(e) => handleChange('depo', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="muhasebe" className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
-                  <div className="relative">
-                    <Input id="muhasebe" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.muhasebe} onChange={(e) => handleChange('muhasebe', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="pazarlama" className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
-                  <div className="relative">
-                    <Input id="pazarlama" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.pazarlama} onChange={(e) => handleChange('pazarlama', e.target.value)} />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Pazaryeri Komisyonu (%, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.1" 
+                    value={values.komisyon}
+                    onChange={(e) => handleInputChange('komisyon', e.target.value)}
+                    data-testid="input-komisyon"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="digerGiderler" className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                <Label className="text-xs font-medium text-slate-600">Ort. Kargo Gideri (₺, KDV Dahil)</Label>
                 <div className="relative">
-                  <Input id="digerGiderler" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.digerGiderler} onChange={(e) => handleChange('digerGiderler', e.target.value)} />
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.kargo}
+                    onChange={(e) => handleInputChange('kargo', e.target.value)}
+                    data-testid="input-kargo"
+                  />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+          {/* Fixed Expenses Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
             <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
-              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Hedefler
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
+                Aylık Sabit Giderler
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="hedefKarTL" className="text-xs font-medium text-slate-600">Hedef Net Kâr (₺)</Label>
+                <Label className="text-xs font-medium text-slate-600">Personel (₺, KDV Dahil)</Label>
                 <div className="relative">
-                  <Input id="hedefKarTL" className="h-9 text-sm pr-6" type="number" step="0.01" value={values.hedefKarTL} onChange={(e) => handleChange('hedefKarTL', e.target.value)} />
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.personel}
+                    onChange={(e) => handleInputChange('personel', e.target.value)}
+                    data-testid="input-personel"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.depo}
+                    onChange={(e) => handleInputChange('depo', e.target.value)}
+                    data-testid="input-depo"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Muhasebe (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.muhasebe}
+                    onChange={(e) => handleInputChange('muhasebe', e.target.value)}
+                    data-testid="input-muhasebe"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Pazarlama (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.pazarlama}
+                    onChange={(e) => handleInputChange('pazarlama', e.target.value)}
+                    data-testid="input-pazarlama"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.digerGiderler}
+                    onChange={(e) => handleInputChange('digerGiderler', e.target.value)}
+                    data-testid="input-digerGiderler"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tax Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Percent className="w-5 h-5" />
+                Vergi
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Gelir/Kurumlar Vergisi (%)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="1" 
+                    value={values.gelirVergisi}
+                    onChange={(e) => handleInputChange('gelirVergisi', e.target.value)}
+                    data-testid="input-gelirVergisi"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Target Profit Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Hedef Kâr
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Hedef Net Kâr (₺)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.hedefKarTL}
+                    onChange={(e) => handleInputChange('hedefKarTL', e.target.value)}
+                    data-testid="input-hedefKarTL"
+                  />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                 </div>
               </div>
@@ -485,23 +627,23 @@ export default function Simulator() {
                 <div className="space-y-2">
                   <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
                     <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Başabaş Noktası (Adet)</h4>
-                    <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.bepAdet))} Adet</p>
+                    <p className="text-[1.5em] font-bold text-blue-600 m-1" data-testid="kpi-bepAdet">{formatNumber(Math.ceil(results.bepAdet))} Adet</p>
                   </div>
-                  <p className="text-xs text-slate-500 text-center">Bu adet, mevcut fiyat (₺{(parseFloat(values.satisFiyat) || 0).toFixed(2).replace('.', ',')}) ve tüm giderler dikkate alındığında, ne kâr ne de zarar elde etmek için gereken minimum satışı gösterir.</p>
+                  <p className="text-xs text-slate-500 text-center">Bu adet, mevcut fiyat (₺{(values.satisFiyat || 0).toFixed(2).replace('.', ',')}) ve tüm giderler dikkate alındığında, ne kâr ne de zarar elde etmek için gereken minimum satışı gösterir.</p>
                 </div>
                 <div className="space-y-2">
                   <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
                     <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Kâr Adedi</h4>
-                    <p className="text-[1.5em] font-bold text-blue-600 m-1">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
+                    <p className="text-[1.5em] font-bold text-blue-600 m-1" data-testid="kpi-hedefAdet">{formatNumber(Math.ceil(results.hedefAdet))} Adet</p>
                   </div>
-                  <p className="text-xs text-slate-500 text-center">₺{(parseFloat(values.hedefKarTL) || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için, mevcut birim satış fiyatı olan ₺{(parseFloat(values.satisFiyat) || 0).toFixed(2).replace('.', ',')} ile gereken minimum satışı gösterir.</p>
+                  <p className="text-xs text-slate-500 text-center">₺{(values.hedefKarTL || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için, mevcut birim satış fiyatı olan ₺{(values.satisFiyat || 0).toFixed(2).replace('.', ',')} ile gereken minimum satışı gösterir.</p>
                 </div>
                 <div className="space-y-2">
                   <div className="bg-[#f8f9fa] border border-slate-200 rounded-lg p-3 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
                     <h4 className="text-[0.9em] text-slate-600 font-medium m-0">Hedef Birim Fiyat</h4>
-                    <p className="text-[1.5em] font-bold text-blue-600 m-1">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
+                    <p className="text-[1.5em] font-bold text-blue-600 m-1" data-testid="kpi-hedefFiyat">₺{(results.hedefFiyatKDVIncl).toFixed(2).replace('.', ',')}</p>
                   </div>
-                  <p className="text-xs text-slate-500 text-center">₺{(parseFloat(values.hedefKarTL) || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için, mevcut satış adedi olan {formatNumber(Math.ceil(parseFloat(values.adet) || 0))} Adet ile gereken birim fiyatıdır (KDV dahil).</p>
+                  <p className="text-xs text-slate-500 text-center">₺{(values.hedefKarTL || 0).toFixed(2).replace('.', ',')} net kâr hedefine ulaşmak için, mevcut satış adedi olan {formatNumber(Math.ceil(values.adet || 0))} Adet ile gereken birim fiyatıdır (KDV dahil).</p>
                 </div>
               </div>
 
@@ -587,7 +729,7 @@ export default function Simulator() {
                       </TableRow>
                       <TableRow className={cn("border-t hover:opacity-90", results.netKar < 0 ? "bg-[#ffe6e6] border-red-200" : "bg-[#d1e7dd] border-green-200")}>
                         <TableCell className={cn("py-3 pl-6 text-[1.1em] font-bold", results.netKar < 0 ? "text-red-900" : "text-green-900")}>NET KÂR / ZARAR</TableCell>
-                        <TableCell className={cn("py-3 pr-6 text-[1.1em] font-bold text-right", results.netKar < 0 ? "text-red-900" : "text-green-900")}><MoneyDisplay value={results.netKar} className={results.netKar < 0 ? "text-red-900" : "text-green-900"} /></TableCell>
+                        <TableCell className={cn("py-3 pr-6 text-[1.1em] font-bold text-right", results.netKar < 0 ? "text-red-900" : "text-green-900")} data-testid="pnl-netKar"><MoneyDisplay value={results.netKar} className={results.netKar < 0 ? "text-red-900" : "text-green-900"} /></TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -601,7 +743,7 @@ export default function Simulator() {
                   <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
                     <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
                       <Scale className="w-5 h-5" />
-                      Vergi Analizi (Detaylı)
+                      KDV Analizi (Detaylı)
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
@@ -627,32 +769,31 @@ export default function Simulator() {
                           <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.kargoKDVTutari} className="text-slate-600" /></TableCell>
                         </TableRow>
                         <TableRow className="hover:bg-transparent border-b border-slate-50">
-                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Platform Hiz. KDV</TableCell>
+                          <TableCell className="py-1.5 pl-5 text-slate-600">(+) Platform Hizmet KDV</TableCell>
                           <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.platformFeeKDV} className="text-slate-600" /></TableCell>
                         </TableRow>
                         <TableRow className="hover:bg-transparent border-b border-slate-50">
                           <TableCell className="py-1.5 pl-5 text-slate-600">(+) Sabit Giderler KDV</TableCell>
                           <TableCell className="py-1.5 pr-5 text-right text-slate-600"><MoneyDisplay value={results.sabitGiderlerKDVToplam} className="text-slate-600" /></TableCell>
                         </TableRow>
-                        
-                        <TableRow className="bg-slate-100 hover:bg-slate-100 border-t border-slate-200">
-                          <TableCell className="py-2 pl-5 font-bold text-slate-800">Toplam İndirilebilir KDV</TableCell>
-                          <TableCell className="py-2 pr-5 text-right font-bold text-slate-800"><MoneyDisplay value={results.indirilebilirKDVToplam} className="text-slate-800" /></TableCell>
+                        <TableRow className="bg-slate-100 hover:bg-slate-100">
+                          <TableCell className="py-1.5 pl-5 font-bold">Toplam İndirilebilir KDV</TableCell>
+                          <TableCell className="py-1.5 pr-5 text-right font-bold"><MoneyDisplay value={results.indirilebilirKDVToplam} className="text-slate-700" /></TableCell>
                         </TableRow>
-                        <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
-                          <TableCell className="py-3 pl-5 font-bold text-green-900">Ödenecek KDV Tutarı</TableCell>
-                          <TableCell className="py-3 pr-5 text-right font-bold text-green-900"><MoneyDisplay value={results.odenecekKDV} className="text-green-900" /></TableCell>
+                        <TableRow className={cn("hover:bg-transparent", results.odenecekKDV > 0 ? "bg-red-50 border-b border-red-100" : "bg-blue-50 border-b border-blue-100")}>
+                          <TableCell className={cn("py-2 pl-5 font-bold", results.odenecekKDV > 0 ? "text-red-900" : "text-blue-900")}>Ödenecek KDV</TableCell>
+                          <TableCell className={cn("py-2 pr-5 text-right font-bold", results.odenecekKDV > 0 ? "text-red-900" : "text-blue-900")}><MoneyDisplay value={results.odenecekKDV} className={results.odenecekKDV > 0 ? "text-red-900" : "text-blue-900"} /></TableCell>
                         </TableRow>
-                        <TableRow className="bg-[#fff3cd] hover:bg-[#fff3cd] border-t border-yellow-200">
-                          <TableCell className="py-3 pl-5 font-bold text-[#856404]">Biriken (Devreden) KDV</TableCell>
-                          <TableCell className="py-3 pr-5 text-right font-bold text-[#856404]"><MoneyDisplay value={results.devredenKDV} className="text-[#856404]" /></TableCell>
+                        <TableRow className={cn("hover:bg-transparent", results.devredenKDV > 0 ? "bg-blue-50" : "")}>
+                          <TableCell className="py-2 pl-5 font-bold text-blue-900">Biriken (Devreden) KDV</TableCell>
+                          <TableCell className="py-2 pr-5 text-right font-bold text-blue-900"><MoneyDisplay value={results.devredenKDV} className="text-blue-900" /></TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
                   </CardContent>
                 </Card>
 
-                {/* Birim Ekonomisi - Unit Economics Card */}
+                {/* Unit Economics */}
                 <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden h-fit">
                   <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
                     <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
@@ -661,148 +802,55 @@ export default function Simulator() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    {/* Summary Table */}
                     <Table>
                       <TableBody className="text-[0.9em]">
-                        <TableRow className="hover:bg-transparent border-b border-slate-100">
-                          <TableCell className="py-2 pl-5 font-medium text-slate-700">Birim Satış Fiyatı (KDV Hariç)</TableCell>
-                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.satisNet} className="text-slate-700" /></TableCell>
+                        <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Satış Fiyatı (Net)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={values.satisFiyat / (1 + values.kdvOrani / 100)} className="text-slate-700" /></TableCell>
                         </TableRow>
-                        <TableRow className="hover:bg-transparent border-b border-slate-100">
-                          <TableCell className="py-2 pl-5 font-medium text-red-500">Birim Maliyetler Toplamı (KDV Hariç)</TableCell>
-                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimToplamMaliyet} className="text-red-500" /></TableCell>
+                        <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Alış Maliyeti (Net)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimAlisMaliyet} className="text-slate-700" /></TableCell>
                         </TableRow>
-                        <TableRow className="bg-slate-100 hover:bg-slate-100">
-                          <TableCell className="py-2 pl-5 font-bold text-slate-800">Birim Katkı Payı</TableCell>
-                          <TableCell className="py-2 pr-5 text-right font-bold text-slate-800"><MoneyDisplay value={results.katkiPayiBirim} className="text-slate-800" /></TableCell>
+                        <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Komisyon (Net)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimKomisyonNet} className="text-slate-700" /></TableCell>
                         </TableRow>
-                        <TableRow className="bg-[#d1e7dd] hover:bg-[#d1e7dd] border-t border-green-200">
-                          <TableCell className="py-2 pl-5 font-bold text-green-900">Net Kâr / Birim</TableCell>
-                          <TableCell className="py-2 pr-5 text-right font-bold text-green-900"><MoneyDisplay value={results.netKarBirim} className="text-green-900" /></TableCell>
+                        <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Kargo (Net)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimKargoNet} className="text-slate-700" /></TableCell>
+                        </TableRow>
+                        <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Platform Bedeli (Net)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimPlatformFeeNet} className="text-slate-700" /></TableCell>
+                        </TableRow>
+                        <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Stopaj (Net)</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimStopajNet} className="text-slate-700" /></TableCell>
+                        </TableRow>
+                        <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Sabit Gider Payı</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimSabitGiderler} className="text-slate-700" /></TableCell>
+                        </TableRow>
+                        <TableRow className="bg-slate-100 hover:bg-slate-100 border-b border-slate-200">
+                          <TableCell className="py-2 pl-5 font-bold">Birim Katkı Payı</TableCell>
+                          <TableCell className="py-2 pr-5 text-right font-bold"><MoneyDisplay value={results.katkiPayiBirim} className="text-slate-700" /></TableCell>
+                        </TableRow>
+                        <TableRow className="hover:bg-transparent">
+                          <TableCell className="py-2 pl-5 font-medium">Birim Vergi</TableCell>
+                          <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimVergi} className="text-slate-700" /></TableCell>
+                        </TableRow>
+                        <TableRow className={cn("border-t", results.netKarBirim < 0 ? "bg-[#ffe6e6] border-red-200" : "bg-[#d1e7dd] border-green-200")}>
+                          <TableCell className={cn("py-2 pl-5 font-bold", results.netKarBirim < 0 ? "text-red-900" : "text-green-900")}>Birim Net Kâr</TableCell>
+                          <TableCell className={cn("py-2 pr-5 text-right font-bold", results.netKarBirim < 0 ? "text-red-900" : "text-green-900")}><MoneyDisplay value={results.netKarBirim} className={results.netKarBirim < 0 ? "text-red-900" : "text-green-900"} /></TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
-
-                    {/* Birim Maliyet Detayı Subsection */}
-                    <div className="border-t border-slate-200 p-5">
-                      <div className="text-[0.9em] space-y-2">
-                        <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-3">Maliyet Detayı</h3>
-                        
-                        <div className="grid grid-cols-2 gap-2 border-b border-slate-100 pb-2 text-[0.85em]">
-                          <div className="font-medium text-slate-600">Birim Satış (KDV Hariç)</div>
-                          <div className="text-right font-bold text-blue-600"><MoneyDisplay value={results.satisNet} className="text-blue-600" /></div>
-                        </div>
-
-                        <div className="space-y-1.5 text-[0.85em]">
-                          <div className="font-medium text-slate-600 mb-1.5">Değişken Maliyetler:</div>
-                          
-                          <div className="grid grid-cols-2 gap-1 ml-2">
-                            <div className="flex items-center gap-1">
-                              <span className="text-slate-600">- Satın Alma (SM)</span>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent className="text-xs max-w-xs">
-                                  Birim başına ürün satın alma maliyeti
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimAlisMaliyet} className="text-red-600" /></div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-1 ml-2">
-                            <div className="flex items-center gap-1">
-                              <span className="text-slate-600">- Komisyon</span>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent className="text-xs max-w-xs">
-                                  Pazaryeri komisyon oranı
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimKomisyonNet} className="text-red-600" /></div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-1 ml-2">
-                            <div className="flex items-center gap-1">
-                              <span className="text-slate-600">- Kargo</span>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent className="text-xs max-w-xs">
-                                  Taşıma ve kargo maliyeti
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimKargoNet} className="text-red-600" /></div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-1 ml-2">
-                            <div className="flex items-center gap-1">
-                              <span className="text-slate-600">- Platform Hiz.</span>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent className="text-xs max-w-xs">
-                                  Platform kullanım ücreti
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimPlatformFeeNet} className="text-red-600" /></div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-1 ml-2">
-                            <div className="flex items-center gap-1">
-                              <span className="text-slate-600">- Stopaj</span>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="w-3 h-3 text-slate-400 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent className="text-xs max-w-xs">
-                                  Stopaj vergisi (%{STOPAJ_RATE * 100})
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimStopajNet} className="text-red-600" /></div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1 border-t border-slate-100 pt-1.5 text-[0.85em]">
-                          <div className="font-medium text-slate-600 mb-1">Sabit Giderler & Vergiler:</div>
-                          
-                          <div className="grid grid-cols-2 gap-1 ml-2">
-                            <span className="text-slate-600">- Sabit Giderler</span>
-                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimSabitGiderler} className="text-red-600" /></div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-1 ml-2">
-                            <span className="text-slate-600">- Vergiler</span>
-                            <div className="text-right text-red-600 text-[0.95em]"><MoneyDisplay value={results.birimVergi} className="text-red-600" /></div>
-                          </div>
-                        </div>
-
-                        <div className="bg-[#d1e7dd] rounded p-1.5 mt-2 text-[0.9em]">
-                          <div className="grid grid-cols-2 gap-1 font-bold text-green-900">
-                            <span>= Net Kâr / Birim</span>
-                            <div className="text-right"><MoneyDisplay value={results.netKarBirim} className="text-green-900" /></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               </div>
             </>
-          ) : (
-            <div className="h-full flex items-center justify-center text-slate-400">
-              Lütfen satış adedini giriniz.
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

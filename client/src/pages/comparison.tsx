@@ -95,7 +95,6 @@ type ScenarioData = {
   muhasebe: number;
   pazarlama: number;
   digerGiderler: number;
-  // hedefKarTL is handled globally now
 };
 
 const DEFAULT_VALUES: ScenarioData = {
@@ -154,6 +153,33 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
   const pazarlama = solveVAT(pazarlamaVal, GIDER_KDV_ORANI_SABIT);
   const digerGiderler = solveVAT(digerVal, GIDER_KDV_ORANI_SABIT);
 
+  const sabitGiderlerToplamNet = personelNet + depo.net + muhasebe.net + pazarlama.net + digerGiderler.net;
+
+  // Handle adet = 0 case
+  if (adet === 0) {
+    return {
+      netSatisHasilati: 0,
+      brutKar: 0,
+      faaliyetKar: -sabitGiderlerToplamNet,
+      faaliyetGiderleriToplam: sabitGiderlerToplamNet,
+      odenecekKDV: 0,
+      netKar: -sabitGiderlerToplamNet,
+      devredenKDV: 0,
+      iadeTutariNet: 0,
+      smToplam: 0,
+      alisKDV: 0,
+      netKarBirim: 0,
+      katkiPayiBirim: 0,
+      bepAdet: 0,
+      hedefAdet: 0,
+      hedefFiyatKDVIncl: 0,
+      marginBrut: 0,
+      marginFaaliyet: 0,
+      marginNet: 0,
+      marginIade: 0
+    };
+  }
+
   // Revenue & Gross Profit
   const brutSatisHasilatiKDVHariç = satis.net * adet;
   const iadeKaybiAdet = adet * iadeOrani;
@@ -164,13 +190,13 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
   const brutKar = netSatisHasilati - smToplam;
 
   // Operating Expenses
-  const komisyonToplam = netSatisHasilati * komisyonYuzde;
+  const komisyonYuzdeNet = komisyonYuzde / (1 + GIDER_KDV_ORANI_SABIT / 100);
+  const komisyonToplam = netSatisHasilati * komisyonYuzdeNet;
   const kargoToplam = kargo.net * adet;
   const platformFeeToplam = platformFee.net * adet;
   const stopajBirim = satis.net * STOPAJ_RATE;
   const stopajToplam = stopajBirim * adet;
 
-  const sabitGiderlerToplamNet = personelNet + depo.net + muhasebe.net + pazarlama.net + digerGiderler.net;
   const faaliyetGiderleriToplam = komisyonToplam + kargoToplam + platformFeeToplam + stopajToplam + sabitGiderlerToplamNet;
 
   // Profit
@@ -194,26 +220,25 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
 
   const indirilebilirKDVToplam = alisKDV + komisyonKDV + kargoKDVTutari + platformFeeKDV + sabitGiderlerKDVToplam;
   const odenecekKDVBrut = satisKDVTutari - indirilebilirKDVToplam;
+  
   const odenecekKDV = odenecekKDVBrut > 0 ? odenecekKDVBrut : 0;
   const devredenKDV = odenecekKDVBrut < 0 ? Math.abs(odenecekKDVBrut) : 0;
 
-  // Unit Economics - with division by zero safeguards
-  const birimToplamMaliyet = adet > 0 ? (faaliyetGiderleriToplam / adet + smToplam / adet) : 0;
-  const birimKomisyon = adet > 0 ? (komisyonToplam / adet) : 0;
+  // Unit Economics
+  const birimKomisyon = komisyonToplam / adet;
   const birimDegiskenMaliyetlerTop = maliyet.net + birimKomisyon + kargo.net + platformFee.net + stopajBirim;
   const katkiPayiBirim = satis.net - birimDegiskenMaliyetlerTop;
-  const bepAdet = katkiPayiBirim > 0 && sabitGiderlerToplamNet >= 0 ? sabitGiderlerToplamNet / katkiPayiBirim : 0;
+  const bepAdet = katkiPayiBirim > 0 ? sabitGiderlerToplamNet / katkiPayiBirim : 0;
   const hedefAdet = katkiPayiBirim > 0 ? (sabitGiderlerToplamNet + hedefKarTL) / katkiPayiBirim : 0;
 
-  // Target Price Calculation - with division by zero safeguards
-  const divisor = 1 - gelirVergisiYuzde;
-  const hedefKarNet = divisor !== 0 ? hedefKarTL / divisor : hedefKarTL;
-  const birimHedefKarNet = adet > 0 ? hedefKarNet / adet : 0;
-  const birimSabitGider = adet > 0 ? sabitGiderlerToplamNet / adet : 0;
+  // Target Price Calculation
+  const hedefKarNet = hedefKarTL / (1 - gelirVergisiYuzde);
+  const birimHedefKarNet = hedefKarNet / adet;
+  const birimSabitGider = sabitGiderlerToplamNet / adet;
   const birimDegiskenMaliyetlerHariçKomisyon = maliyet.net + kargo.net + platformFee.net + stopajBirim;
   
   let hedefBirimSatisNetKomisyonOncesi = 0;
-  const payda = (1 - komisyonYuzde) * (1 - iadeOrani);
+  const payda = (1 - komisyonYuzdeNet) * (1 - iadeOrani);
   
   if (payda !== 0) {
     hedefBirimSatisNetKomisyonOncesi = (birimDegiskenMaliyetlerHariçKomisyon + birimSabitGider + birimHedefKarNet) / payda;
@@ -235,7 +260,7 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
     smToplam,
     alisKDV,
     
-    // Unit - with division by zero safeguards
+    // Unit
     netKarBirim: adet > 0 ? netKar / adet : 0,
     katkiPayiBirim,
     bepAdet,
@@ -321,56 +346,56 @@ const ScenarioInputForm = ({
               <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
             </div>
           </div>
-        </div>
-      </Card>
 
-      <Card className="border-0 shadow-none p-0 mt-6">
-        <CardHeader className="pb-3 pt-0 px-0 border-b border-slate-100 mb-4">
-          <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Sabit Giderler (Aylık)
-          </CardTitle>
-        </CardHeader>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
-              <div className="relative">
-                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.personel} onChange={(e) => onChange('personel', e.target.value)} />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+          <Card className="border-0 shadow-none p-0 mt-6">
+            <CardHeader className="pb-3 pt-0 px-0 border-b border-slate-100 mb-4">
+              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Sabit Giderler (Aylık)
+              </CardTitle>
+            </CardHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.personel} onChange={(e) => onChange('personel', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.depo} onChange={(e) => onChange('depo', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.muhasebe} onChange={(e) => onChange('muhasebe', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.pazarlama} onChange={(e) => onChange('pazarlama', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                <div className="relative">
+                  <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.digerGiderler} onChange={(e) => onChange('digerGiderler', e.target.value)} />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
-              <div className="relative">
-                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.depo} onChange={(e) => onChange('depo', e.target.value)} />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
-              <div className="relative">
-                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.muhasebe} onChange={(e) => onChange('muhasebe', e.target.value)} />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
-              <div className="relative">
-                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.pazarlama} onChange={(e) => onChange('pazarlama', e.target.value)} />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
-            <div className="relative">
-              <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.digerGiderler} onChange={(e) => onChange('digerGiderler', e.target.value)} />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-            </div>
-          </div>
+          </Card>
         </div>
       </Card>
     </div>
@@ -484,7 +509,7 @@ export default function ComparisonSimulator() {
     { label: 'Kâr Marjı (Brüt)', key: 'marginBrut' as const },
     { label: 'Kâr Marjı (Faaliyet)', key: 'marginFaaliyet' as const },
     { label: 'İade Oranı (Tutar)', key: 'marginIade' as const },
-    { label: 'Alış KDV (İndirilebilir)', key: 'alisKDV' as const, isCurrency: true }, // This was in the sample logic
+    { label: 'Alış KDV (İndirilebilir)', key: 'alisKDV' as const, isCurrency: true },
   ];
 
   return (
@@ -683,18 +708,21 @@ export default function ComparisonSimulator() {
                               <TableCell className="font-medium text-slate-700 py-2.5">{metric.label}</TableCell>
                               <TableCell className="text-right py-2.5">
                                 {metric.isCurrency ? 
-                                   <MoneyDisplay value={val1} className="text-slate-700" /> :
-                                   <PercentDisplay value={val1} />
+                                  <MoneyDisplay value={val1} className="text-slate-700" /> : 
+                                  <PercentDisplay value={val1} />
                                 }
                               </TableCell>
                               <TableCell className="text-right py-2.5">
                                 {metric.isCurrency ? 
-                                   <MoneyDisplay value={val2} className="text-slate-700" /> :
-                                   <PercentDisplay value={val2} />
+                                  <MoneyDisplay value={val2} className="text-slate-700" /> : 
+                                  <PercentDisplay value={val2} />
                                 }
                               </TableCell>
                               <TableCell className="text-right py-2.5">
-                                <DiffDisplay value={diff} type={metric.isCurrency ? 'currency' : 'percent'} />
+                                {metric.isCurrency ? 
+                                  <DiffDisplay value={diff} /> : 
+                                  <DiffDisplay value={diff} type="percent" />
+                                }
                               </TableCell>
                             </TableRow>
                           );
@@ -703,7 +731,6 @@ export default function ComparisonSimulator() {
                     </Table>
                  </div>
               </div>
-
             </div>
           </Card>
         </div>

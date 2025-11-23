@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Scale, Zap, FileText } from "lucide-react";
+import { LayoutDashboard, Scale, Zap, FileText, RotateCcw } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Simulator from "@/pages/simulator";
 import ComparisonSimulator from "@/pages/comparison";
@@ -13,14 +13,33 @@ import BulkSimulation from "@/pages/bulk-simulation";
 
 export function Navigation() {
   const [location] = useLocation();
+
+  const handleResetAll = () => {
+    const confirmed = window.confirm(
+      'Tüm verileri varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.'
+    );
+    if (confirmed) {
+      localStorage.removeItem('simulator_form_data');
+      localStorage.removeItem('comparison_scenario1_data');
+      localStorage.removeItem('comparison_scenario2_data');
+      localStorage.removeItem('comparison_hedefKarTL');
+      localStorage.removeItem('sensitivity_base_data');
+      localStorage.removeItem('bulk_simulation_products');
+      localStorage.removeItem('bulk_simulation_results');
+      localStorage.removeItem('bulk_simulation_fixed_expenses');
+      localStorage.removeItem('bulk_simulation_variable_expenses');
+      window.location.reload();
+    }
+  };
   
   return (
-    <div className="flex justify-center gap-2 bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-slate-200 w-fit mx-auto">
+    <div className="flex justify-center gap-2 bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-slate-200 w-fit mx-auto flex-wrap">
       <Link href="/">
         <Button 
           variant={location === "/" ? "default" : "ghost"} 
           size="sm"
           className="gap-2"
+          data-testid="nav-simulator"
         >
           <LayoutDashboard className="w-4 h-4" />
           Simülatör
@@ -31,6 +50,7 @@ export function Navigation() {
           variant={location === "/comparison" ? "default" : "ghost"} 
           size="sm"
           className="gap-2"
+          data-testid="nav-comparison"
         >
           <Scale className="w-4 h-4" />
           Kıyaslama
@@ -41,6 +61,7 @@ export function Navigation() {
           variant={location === "/sensitivity" ? "default" : "ghost"} 
           size="sm"
           className="gap-2"
+          data-testid="nav-sensitivity"
         >
           <Zap className="w-4 h-4" />
           Hassasiyet
@@ -51,11 +72,22 @@ export function Navigation() {
           variant={location === "/bulk" ? "default" : "ghost"} 
           size="sm"
           className="gap-2"
+          data-testid="nav-bulk"
         >
           <FileText className="w-4 h-4" />
           Toplu Simülasyon
         </Button>
       </Link>
+      <Button 
+        variant="outline" 
+        size="sm"
+        className="gap-2 text-slate-600 hover:text-slate-900"
+        onClick={handleResetAll}
+        data-testid="button-reset-all"
+      >
+        <RotateCcw className="w-4 h-4" />
+        Varsayılana Sıfırla
+      </Button>
     </div>
   );
 }

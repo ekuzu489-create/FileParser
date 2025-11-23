@@ -371,7 +371,7 @@ export default function Simulator() {
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         {/* Left Column: Input Form */}
         <div className="space-y-4 h-full overflow-y-auto pr-2 custom-scrollbar">
-          <Card className="border-0 shadow-none p-0">
+          <Card className="border border-slate-200 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-5">
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">

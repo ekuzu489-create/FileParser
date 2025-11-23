@@ -287,52 +287,56 @@ const ScenarioInputForm = ({
     <div className="space-y-4 h-full overflow-y-auto pr-2 custom-scrollbar">
       <Card className="border-0 shadow-none p-0">
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
-            <Input className="h-9 text-sm" type="number" step="1" value={data.adet} onChange={(e) => onChange('adet', e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-600">Birim Satış Fiyatı (₺, KDV Dahil)</Label>
-            <div className="relative">
-              <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.satisFiyat} onChange={(e) => onChange('satisFiyat', e.target.value)} />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
+              <Input className="h-9 text-sm" type="number" step="1" value={data.adet} onChange={(e) => onChange('adet', e.target.value)} />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-600">Birim Maliyet (₺, KDV Dahil)</Label>
-            <div className="relative">
-              <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.birimMaliyet} onChange={(e) => onChange('birimMaliyet', e.target.value)} />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-slate-600">Birim Satış (₺)</Label>
+              <div className="relative">
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.satisFiyat} onChange={(e) => onChange('satisFiyat', e.target.value)} />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">KDV Oranı (%)</Label>
+              <Label className="text-xs font-medium text-slate-600">Birim Maliyet (₺)</Label>
+              <div className="relative">
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.birimMaliyet} onChange={(e) => onChange('birimMaliyet', e.target.value)} />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-slate-600">Ort. Kargo (₺)</Label>
+              <div className="relative">
+                <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.kargo} onChange={(e) => onChange('kargo', e.target.value)} />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-slate-600">Komisyon %</Label>
+              <div className="relative">
+                <Input className="h-9 text-sm pr-6" type="number" step="0.1" value={data.komisyon} onChange={(e) => onChange('komisyon', e.target.value)} />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-slate-600">KDV %</Label>
               <div className="relative">
                 <Input className="h-9 text-sm pr-6" type="number" step="1" value={data.kdvOrani} onChange={(e) => onChange('kdvOrani', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-slate-600">İade Oranı (%)</Label>
+              <Label className="text-xs font-medium text-slate-600">İade %</Label>
               <div className="relative">
                 <Input className="h-9 text-sm pr-6" type="number" step="0.1" value={data.iadeOrani} onChange={(e) => onChange('iadeOrani', e.target.value)} />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
               </div>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-600">Pazaryeri Komisyonu (%, KDV Dahil)</Label>
-            <div className="relative">
-              <Input className="h-9 text-sm pr-6" type="number" step="0.1" value={data.komisyon} onChange={(e) => onChange('komisyon', e.target.value)} />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-slate-600">Ort. Kargo Gideri (₺, KDV Dahil)</Label>
-            <div className="relative">
-              <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.kargo} onChange={(e) => onChange('kargo', e.target.value)} />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
             </div>
           </div>
           <div className="space-y-1.5">
@@ -347,40 +351,44 @@ const ScenarioInputForm = ({
             <CardHeader className="pb-3 pt-0 px-0 border-b border-slate-100 mb-4">
               <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
-                Aylık Sabit Giderler
+                Sabit Giderler (Aylık)
               </CardTitle>
             </CardHeader>
             <div className="space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Personel (₺, KDV Dahil)</Label>
-                <div className="relative">
-                  <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.personel} onChange={(e) => onChange('personel', e.target.value)} />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.personel} onChange={(e) => onChange('personel', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.depo} onChange={(e) => onChange('depo', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.muhasebe} onChange={(e) => onChange('muhasebe', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                  <div className="relative">
+                    <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.pazarlama} onChange={(e) => onChange('pazarlama', e.target.value)} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                  </div>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺, KDV Dahil)</Label>
-                <div className="relative">
-                  <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.depo} onChange={(e) => onChange('depo', e.target.value)} />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Muhasebe (₺, KDV Dahil)</Label>
-                <div className="relative">
-                  <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.muhasebe} onChange={(e) => onChange('muhasebe', e.target.value)} />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Pazarlama (₺, KDV Dahil)</Label>
-                <div className="relative">
-                  <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.pazarlama} onChange={(e) => onChange('pazarlama', e.target.value)} />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺, KDV Dahil)</Label>
+                <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
                 <div className="relative">
                   <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.digerGiderler} onChange={(e) => onChange('digerGiderler', e.target.value)} />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
@@ -429,13 +437,13 @@ export default function ComparisonSimulator() {
     }
   });
 
-  // Senaryo 2: Initialize from localStorage or defaults
+  // Senaryo 2: Initialize from localStorage or custom defaults
   const [scenario2, setScenario2] = useState<ScenarioData>(() => {
     try {
       const saved = localStorage.getItem('comparison_scenario2_data');
-      return saved ? JSON.parse(saved) : DEFAULT_VALUES;
+      return saved ? JSON.parse(saved) : { ...DEFAULT_VALUES, adet: 600, satisFiyat: 1049.99 };
     } catch {
-      return DEFAULT_VALUES;
+      return { ...DEFAULT_VALUES, adet: 600, satisFiyat: 1049.99 };
     }
   });
 

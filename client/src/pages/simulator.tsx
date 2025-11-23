@@ -362,8 +362,14 @@ export default function Simulator() {
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         {/* Left Column: Input Form */}
         <div className="h-full overflow-y-auto pr-2 custom-scrollbar">
-          {/* Compact Input Form */}
+          {/* Product Info Card */}
           <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Ürün Bilgileri
+              </CardTitle>
+            </CardHeader>
             <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-slate-600">Satış Adedi (Ay)</Label>
@@ -434,6 +440,18 @@ export default function Simulator() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Variable Expenses Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Değişken Giderler
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-slate-600">Pazaryeri Komisyonu (%, KDV Dahil)</Label>
                 <div className="relative">
@@ -462,6 +480,100 @@ export default function Simulator() {
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Fixed Expenses Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
+                Aylık Sabit Giderler
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Personel (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.personel}
+                    onChange={(e) => handleInputChange('personel', e.target.value)}
+                    data-testid="input-personel"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.depo}
+                    onChange={(e) => handleInputChange('depo', e.target.value)}
+                    data-testid="input-depo"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Muhasebe (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.muhasebe}
+                    onChange={(e) => handleInputChange('muhasebe', e.target.value)}
+                    data-testid="input-muhasebe"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Pazarlama (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.pazarlama}
+                    onChange={(e) => handleInputChange('pazarlama', e.target.value)}
+                    data-testid="input-pazarlama"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺, KDV Dahil)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.digerGiderler}
+                    onChange={(e) => handleInputChange('digerGiderler', e.target.value)}
+                    data-testid="input-digerGiderler"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tax Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Percent className="w-5 h-5" />
+                Vergi
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-slate-600">Gelir/Kurumlar Vergisi (%)</Label>
                 <div className="relative">
@@ -476,97 +588,30 @@ export default function Simulator() {
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">%</span>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="border-t border-slate-200 pt-4 mt-4">
-                <h4 className="text-sm font-semibold text-blue-600 mb-3">Aylık Sabit Giderler</h4>
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Personel (₺, KDV Dahil)</Label>
-                    <div className="relative">
-                      <Input 
-                        className="h-9 text-sm pr-6" 
-                        type="number" 
-                        step="0.01" 
-                        value={values.personel}
-                        onChange={(e) => handleInputChange('personel', e.target.value)}
-                        data-testid="input-personel"
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺, KDV Dahil)</Label>
-                    <div className="relative">
-                      <Input 
-                        className="h-9 text-sm pr-6" 
-                        type="number" 
-                        step="0.01" 
-                        value={values.depo}
-                        onChange={(e) => handleInputChange('depo', e.target.value)}
-                        data-testid="input-depo"
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Muhasebe (₺, KDV Dahil)</Label>
-                    <div className="relative">
-                      <Input 
-                        className="h-9 text-sm pr-6" 
-                        type="number" 
-                        step="0.01" 
-                        value={values.muhasebe}
-                        onChange={(e) => handleInputChange('muhasebe', e.target.value)}
-                        data-testid="input-muhasebe"
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Pazarlama (₺, KDV Dahil)</Label>
-                    <div className="relative">
-                      <Input 
-                        className="h-9 text-sm pr-6" 
-                        type="number" 
-                        step="0.01" 
-                        value={values.pazarlama}
-                        onChange={(e) => handleInputChange('pazarlama', e.target.value)}
-                        data-testid="input-pazarlama"
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺, KDV Dahil)</Label>
-                    <div className="relative">
-                      <Input 
-                        className="h-9 text-sm pr-6" 
-                        type="number" 
-                        step="0.01" 
-                        value={values.digerGiderler}
-                        onChange={(e) => handleInputChange('digerGiderler', e.target.value)}
-                        data-testid="input-digerGiderler"
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-slate-200 pt-4 mt-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-600">Hedef Net Kâr (₺)</Label>
-                  <div className="relative">
-                    <Input 
-                      className="h-9 text-sm pr-6" 
-                      type="number" 
-                      step="0.01" 
-                      value={values.hedefKarTL}
-                      onChange={(e) => handleInputChange('hedefKarTL', e.target.value)}
-                      data-testid="input-hedefKarTL"
-                    />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
-                  </div>
+          {/* Target Profit Card */}
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] p-0 mb-4">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Hedef Kâr
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-slate-600">Hedef Net Kâr (₺)</Label>
+                <div className="relative">
+                  <Input 
+                    className="h-9 text-sm pr-6" 
+                    type="number" 
+                    step="0.01" 
+                    value={values.hedefKarTL}
+                    onChange={(e) => handleInputChange('hedefKarTL', e.target.value)}
+                    data-testid="input-hedefKarTL"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                 </div>
               </div>
             </CardContent>

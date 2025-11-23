@@ -15,21 +15,20 @@ export function Navigation() {
   const [location] = useLocation();
 
   const handleResetAll = () => {
-    const confirmed = window.confirm(
-      'Tüm verileri varsayılana sıfırlamak istediğinize emin misiniz? Bu işlem geri alınamaz.'
-    );
-    if (confirmed) {
-      localStorage.removeItem('simulator_form_data');
-      localStorage.removeItem('comparison_scenario1_data');
-      localStorage.removeItem('comparison_scenario2_data');
-      localStorage.removeItem('comparison_hedefKarTL');
-      localStorage.removeItem('sensitivity_base_data');
-      localStorage.removeItem('bulk_simulation_products');
-      localStorage.removeItem('bulk_simulation_results');
-      localStorage.removeItem('bulk_simulation_fixed_expenses');
-      localStorage.removeItem('bulk_simulation_variable_expenses');
-      window.location.reload();
+    localStorage.removeItem('simulator_form_data');
+    localStorage.removeItem('comparison_scenario1_data');
+    localStorage.removeItem('comparison_scenario2_data');
+    localStorage.removeItem('comparison_hedefKarTL');
+    localStorage.removeItem('sensitivity_base_data');
+    localStorage.removeItem('bulk_simulation_products');
+    localStorage.removeItem('bulk_simulation_results');
+    localStorage.removeItem('bulk_simulation_fixed_expenses');
+    localStorage.removeItem('bulk_simulation_variable_expenses');
+    const fileInput = document.getElementById('excel-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
     }
+    window.location.reload();
   };
   
   return (

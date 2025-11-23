@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
-import { Upload, Download, FileText, TrendingUp } from "lucide-react";
+import { Upload, Download, FileText, TrendingUp, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
 
@@ -735,11 +736,23 @@ export default function BulkSimulation() {
                   <TableHeader>
                     <TableRow className="bg-slate-50 hover:bg-slate-50">
                       <TableHead className="text-left py-3 pl-6 font-semibold text-slate-700">Ürün Adı</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">KDV Hariç Satış Tutarı (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Ürün Maliyeti (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Ürün Maliyeti (₺, KDV Dahil)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">KDV Oranı (%)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Toplam Giderler (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">
+                        <div className="flex items-center justify-end gap-1">
+                          <span>Toplam Giderler (₺)</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-4 h-4 text-slate-500 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-xs">
+                              <p>Satılan Malın Maliyeti + Pazaryeri Komisyonu + Kargo + Platform Bedeli + Stopaj + Sabit Giderler (oranlanmış) + Vergi</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Net Kâr/Zarar (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı (%)</TableHead>
                     </TableRow>

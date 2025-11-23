@@ -61,6 +61,7 @@ interface BulkResult {
   totalExpenses: number;
   netProfit: number;
   profitMargin: number;
+  netSatisHasilatiKDVHariç: number;
 }
 
 interface AggregateCalculation {
@@ -309,6 +310,7 @@ export default function BulkSimulation() {
         totalExpenses: totalExpensesNet,
         netProfit: netKarCheck,
         profitMargin: profitMargin,
+        netSatisHasilatiKDVHariç: netSatisHasilati,
       };
     });
 
@@ -398,6 +400,7 @@ export default function BulkSimulation() {
       totalRevenue: results.reduce((sum, r) => sum + r.totalSalesRevenue, 0),
       totalExpenses: results.reduce((sum, r) => sum + r.totalExpenses, 0),
       totalNetProfit: results.reduce((sum, r) => sum + r.netProfit, 0),
+      netSatisHasilatiKDVHariç: results.reduce((sum, r) => sum + (r.netSatisHasilatiKDVHariç || 0), 0),
     };
   }, [results]);
 
@@ -788,8 +791,8 @@ export default function BulkSimulation() {
                         {formatCurrency(resultsTotals.totalNetProfit)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-blue-600">
-                        {resultsTotals.totalRevenue > 0
-                          ? ((resultsTotals.totalNetProfit / resultsTotals.totalRevenue) * 100).toFixed(2)
+                        {resultsTotals.netSatisHasilatiKDVHariç > 0
+                          ? ((resultsTotals.totalNetProfit / resultsTotals.netSatisHasilatiKDVHariç) * 100).toFixed(2)
                           : '0'}
                         %
                       </TableCell>

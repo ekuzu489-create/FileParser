@@ -359,6 +359,12 @@ export default function Simulator() {
         <Navigation />
       </div>
 
+      {/* Header */}
+      <div className="max-w-[1400px] mx-auto mb-6">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Finansal Simülatör</h1>
+        <p className="text-sm text-slate-600">Parasal Girdiler KDV Dahil</p>
+      </div>
+
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">
         {/* Left Column: Input Form */}
         <div className="space-y-4 h-full overflow-y-auto pr-2 custom-scrollbar">

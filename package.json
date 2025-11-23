@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev:client": "vite dev --port 5000",
-    "build": "cd client && npm run build",
-    "start": "node ESM --production node dist/index.js",
+    "build": "vite build"
+    "start": "node index.js"
     "check": "tsc",
     "db:push": "drizzle-kit push"
   },

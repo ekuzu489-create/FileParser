@@ -361,8 +361,11 @@ export default function Simulator() {
 
       {/* Header */}
       <div className="max-w-[1400px] mx-auto mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Finansal Simülatör</h1>
-        <p className="text-sm text-slate-600">Parasal Girdiler KDV Dahil</p>
+        <div className="flex items-center gap-2 mb-1">
+          <Calculator className="w-6 h-6 text-blue-600" />
+          <h1 className="text-2xl font-bold text-blue-600">Finansal Simülatör</h1>
+        </div>
+        <p className="text-xs text-slate-500 ml-8">*Parasal Girdiler KDV Dahil</p>
       </div>
 
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6 h-full">

@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev:client": "vite dev --port 5000", // <-- Virgülü EKLEYİN
+    "dev:client": "vite dev --port 5000",
     "build": "vite build",
     "start": "node index.js",
     "check": "tsc",

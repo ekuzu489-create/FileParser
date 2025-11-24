@@ -1209,8 +1209,8 @@ export default function BulkSimulation() {
                         {formatCurrency(aggregateCalc?.birimNetKar || 0)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-blue-600">
-                        {resultsTotals.netSatisHasilatiKDVHariç > 0
-                          ? ((resultsTotals.totalNetProfit / resultsTotals.netSatisHasilatiKDVHariç) * 100).toFixed(2)
+                        {aggregateCalc
+                          ? ((aggregateCalc.marginNet * 100).toFixed(2))
                           : '0'}
                         %
                       </TableCell>

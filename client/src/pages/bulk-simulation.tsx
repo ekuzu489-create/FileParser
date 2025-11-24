@@ -63,6 +63,7 @@ interface BulkResult {
   netProfit: number;
   profitMargin: number;
   netSatisHasilatiKDVHariç: number;
+  birimKar: number;
 }
 
 interface AggregateCalculation {
@@ -328,6 +329,8 @@ export default function BulkSimulation() {
       const netKarCheck = netSatisHasilati - totalExpensesNet;
       const profitMargin = netSatisHasilati > 0 ? netKarCheck / netSatisHasilati : 0;
 
+      const birimKar = product.totalSalesQuantity > 0 ? netKarCheck / product.totalSalesQuantity : 0;
+      
       return {
         productName: product.productName,
         totalSalesRevenue: product.totalSalesRevenue,
@@ -337,6 +340,7 @@ export default function BulkSimulation() {
         netProfit: netKarCheck,
         profitMargin: profitMargin,
         netSatisHasilatiKDVHariç: netSatisHasilati,
+        birimKar: birimKar,
       };
     });
 
@@ -1135,6 +1139,7 @@ export default function BulkSimulation() {
                         </div>
                       </TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Net Kâr/Zarar (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Birim Kâr (₺)</TableHead>
                       <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı (%)</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1156,6 +1161,13 @@ export default function BulkSimulation() {
                             }`}
                           >
                             {formatCurrency(result.netProfit)}
+                          </TableCell>
+                          <TableCell
+                            className={`py-3 pr-6 text-right font-semibold ${
+                              result.birimKar >= 0 ? 'text-emerald-600' : 'text-red-600'
+                            }`}
+                          >
+                            {formatCurrency(result.birimKar)}
                           </TableCell>
                           <TableCell className="py-3 pr-6 text-right text-blue-600 font-medium">
                             {(result.profitMargin * 100).toFixed(2)}%
@@ -1187,6 +1199,15 @@ export default function BulkSimulation() {
                         }`}
                       >
                         {formatCurrency(resultsTotals.totalNetProfit)}
+                      </TableCell>
+                      <TableCell
+                        className={`py-3 pr-6 text-right font-semibold ${
+                          excelTotals.totalQuantity > 0 && (resultsTotals.totalNetProfit / excelTotals.totalQuantity) >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        }`}
+                      >
+                        {excelTotals.totalQuantity > 0
+                          ? formatCurrency(resultsTotals.totalNetProfit / excelTotals.totalQuantity)
+                          : formatCurrency(0)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-blue-600">
                         {resultsTotals.netSatisHasilatiKDVHariç > 0

@@ -1203,12 +1203,10 @@ export default function BulkSimulation() {
                       </TableCell>
                       <TableCell
                         className={`py-3 pr-6 text-right font-semibold ${
-                          excelTotals.totalQuantity > 0 && (resultsTotals.totalNetProfit / excelTotals.totalQuantity) >= 0 ? 'text-emerald-600' : 'text-red-600'
+                          aggregateCalc && aggregateCalc.birimNetKar >= 0 ? 'text-emerald-600' : 'text-red-600'
                         }`}
                       >
-                        {excelTotals.totalQuantity > 0
-                          ? formatCurrency(resultsTotals.totalNetProfit / excelTotals.totalQuantity)
-                          : formatCurrency(0)}
+                        {formatCurrency(aggregateCalc?.birimNetKar || 0)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-blue-600">
                         {resultsTotals.netSatisHasilatiKDVHariç > 0

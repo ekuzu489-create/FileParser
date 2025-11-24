@@ -265,7 +265,9 @@ export default function BulkSimulation() {
     const gelirVergisiYuzde = varExpenses.gelirVergisi / 100;
 
     // Calculate total fixed expenses for apportioning
-    const personelNetAm = fixedExpenses.personel / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    // Personel has NO VAT - use as-is
+    const personelNetAm = fixedExpenses.personel;
+    // Other fixed expenses are VAT-inclusive (20%) - extract VAT
     const depoNetAm = fixedExpenses.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const muhasebeNetAm = fixedExpenses.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const pazarlamaNetAm = fixedExpenses.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);

@@ -894,17 +894,22 @@ export default function BulkSimulation() {
                     </Table>
                   </CardContent>
                 </Card>
+              </>
+            )}
+          </div>
+        )}
 
-                {/* Financial Analysis & Recommendations */}
-                <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
-                  <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
-                    <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
-                      Finansal Analiz & Öneriler
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-3 gap-6">
+        {/* Financial Analysis & Recommendations - Full Width */}
+        {aggregateCalc && (
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+            <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+              <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Finansal Analiz & Öneriler
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-3 gap-6">
                       {/* Profitability Status */}
                       <div className={cn(
                         "p-4 rounded-lg border-2",
@@ -1070,9 +1075,7 @@ export default function BulkSimulation() {
                     </div>
                   </CardContent>
                 </Card>
-              </>
             )}
-          </div>
         )}
 
         {/* Analysis Tables */}

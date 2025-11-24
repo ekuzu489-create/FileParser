@@ -467,7 +467,7 @@ export default function Simulator() {
                             <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
                           </TooltipTrigger>
                           <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
-                            <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                            <p className="text-xs">KDV Dahil (KDV Oranı %20)</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -486,7 +486,7 @@ export default function Simulator() {
                             <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
                           </TooltipTrigger>
                           <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
-                            <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                            <p className="text-xs">KDV Dahil (KDV Oranı %20)</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -503,7 +503,7 @@ export default function Simulator() {
                             <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
                           </TooltipTrigger>
                           <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
-                            <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                            <p className="text-xs">KDV Dahil (KDV Oranı %20)</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -521,7 +521,7 @@ export default function Simulator() {
                           <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
-                          <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                          <p className="text-xs">KDV Dahil (KDV Oranı %20)</p>
                         </TooltipContent>
                       </Tooltip>
                     </div>

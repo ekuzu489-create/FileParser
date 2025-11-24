@@ -1496,7 +1496,7 @@ export default function BulkSimulation() {
                         </div>
                         <div>
                           <p className="font-semibold">Eylem 2: Ürün Mix Optimizasyonu</p>
-                          <p className="text-xs text-orange-700 mt-0.5">Düşük marjlı ürünler (SMM >%50) satıştan çıkar, yüksek marjlı (SMM <%35) ürünleri artır → Ortalama SMM %{Math.max(38, Math.floor((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100) - 8))}'a düş.</p>
+                          <p className="text-xs text-orange-700 mt-0.5">Düşük marjlı ürünler (SMM yüksek ürünler: %50 üzeri) satıştan çıkar, yüksek marjlı (SMM düşük ürünler: %35 altı) ürünleri artır → Ortalama SMM %{Math.max(38, Math.floor((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100) - 8))}'a düş.</p>
                         </div>
                         <div>
                           <p className="font-semibold">Eylem 3: Toplu Alım Stratejisi</p>

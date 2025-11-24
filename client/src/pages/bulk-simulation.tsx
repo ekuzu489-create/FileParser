@@ -1447,158 +1447,47 @@ export default function BulkSimulation() {
                   </div>
                 </div>
 
-                {/* Kapsamlı Öneriler & Eylem Planı - Çok Detaylı */}
-                <div className="space-y-4">
-                  <p className="font-semibold text-slate-900 flex items-center gap-2 text-base">
-                    <Target className="w-5 h-5 text-blue-600" />
-                    Kapsamlı Öneriler & Eylem Planı
+                {/* Öneriler & Eylem Planı - Kompakt */}
+                <div className="space-y-2">
+                  <p className="font-semibold text-slate-900 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-blue-600" />
+                    Anlık Aksiyonlar
                   </p>
 
-                  {/* 🚨 ACIL MÜDAHALELER - 0-7 Gün */}
-                  <div className="bg-red-50 p-4 rounded-lg border-2 border-red-200 space-y-3">
-                    <p className="font-bold text-red-900 flex items-center gap-2 text-sm">
-                      <span className="bg-red-200 px-2 py-1 rounded text-xs font-bold">ACİL</span>
-                      <span>0-7 Gün Müdahale Zorunluluğu</span>
-                    </p>
-                    
-                    {aggregateCalc.netKar < 0 && (
-                      <div className="bg-white border border-red-200 p-3 rounded space-y-2">
-                        <p className="font-semibold text-red-900 text-sm">⚠ İşletme Zararlı: {formatCurrency(Math.abs(aggregateCalc.netKar))} Aylık Kayıp</p>
-                        <p className="text-xs text-red-800">Mevcut model sürdürülemez. Aşağıdaki adımlardan en az birini bu hafta içinde başlatmalısınız:</p>
-                        <ul className="text-xs text-red-800 space-y-1 ml-3">
-                          <li>✓ <strong>Fiyat Analizi:</strong> Tüm ürünleri yeniden fiyatlandırın (ortalama %{Math.max(5, Math.ceil(Math.abs(aggregateCalc.netKar) / (aggregateCalc.netSatisHasilati * 0.03)))} artış hedefleyin)</li>
-                          <li>✓ <strong>Stok Gözden Geçirme:</strong> En düşük marjlı ürünleri satış ağından çıkarın</li>
-                          <li>✓ <strong>Pazaryeri Değerlendirmesi:</strong> En yüksek komisyonlu pazaryerlerden çekilmeyi düşünün</li>
-                          <li>✓ <strong>Gider Kesintisi:</strong> Anında tasarruf: Pazarlama bütçesi %50 azaltın, gereksiz hizmetleri iptal edin</li>
-                        </ul>
-                        <p className="text-xs text-red-700 font-semibold mt-2">Hedef: Bu ayı break-even (başa baş) kapatmak</p>
-                      </div>
-                    )}
-
-                    {((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) > 0.50) && (
-                      <div className="bg-white border border-orange-200 p-3 rounded space-y-2">
-                        <p className="font-semibold text-orange-900 text-sm">📦 SMM Kritiği: %{((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)} (Çok Yüksek)</p>
-                        <p className="text-xs text-orange-800"><strong>Hedef:</strong> Bu oranı %35-40'a düşürmek</p>
-                        <ul className="text-xs text-orange-800 space-y-1 ml-3">
-                          <li>✓ Tedarikçi müzakereleri başlatın (en az %5-10 indirim talep edin)</li>
-                          <li>✓ Alternatif tedarikçiler araştırın (Alibaba, TradeTown, vb.)</li>
-                          <li>✓ Direkt ithalatı değerlendirin (toptan fiyat avantajı)</li>
-                          <li>✓ Ürün kategorilerini optimize edin - düşük marj kategorileri azaltın</li>
-                        </ul>
-                      </div>
-                    )}
-
-                    {((aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) > 0.22) && (
-                      <div className="bg-white border border-indigo-200 p-3 rounded space-y-2">
-                        <p className="font-semibold text-indigo-900 text-sm">💳 Komisyon Alarm: %{((aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)} Satışları Gidiyor</p>
-                        <ul className="text-xs text-indigo-800 space-y-1 ml-3">
-                          <li>✓ Pazaryeri müzakeresi yapın - daha düşük komisyon oran talep edin</li>
-                          <li>✓ Doğrudan satış kanalı (kendi web sitesi, Instagram Shop) açmayı başlatın</li>
-                          <li>✓ Commission-free pazaryerler araştırın</li>
-                        </ul>
-                      </div>
-                    )}
-
-                    {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) > 0.35) && (
-                      <div className="bg-white border border-purple-200 p-3 rounded space-y-2">
-                        <p className="font-semibold text-purple-900 text-sm">🏢 Sabit Gider Fazlası: %{((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}</p>
-                        <ul className="text-xs text-purple-800 space-y-1 ml-3">
-                          <li>✓ Kira: Daha ucuz depo/ofis bul veya kira müzakere yap (%20-30 azaltmayı hedefle)</li>
-                          <li>✓ Personel: Freelance/part-time modeline geç, gereksiz pozisyonları kapatmayı değerlendir</li>
-                          <li>✓ Pazarlama: Ücretli reklam bütçesini %50 azalt, organik (ücretsiz) kanalara odaklan</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ⚡ KISA VADELİ İYİLEŞTİRMELER - 1-3 Ay */}
-                  <div className="bg-amber-50 p-4 rounded-lg border-2 border-amber-200 space-y-3">
-                    <p className="font-bold text-amber-900 flex items-center gap-2 text-sm">
-                      <span className="bg-amber-200 px-2 py-1 rounded text-xs font-bold">1-3 AY</span>
-                      <span>Kısa Vadeli Optimizasyonlar</span>
-                    </p>
-                    
-                    <div className="bg-white border border-amber-200 p-3 rounded space-y-2">
-                      <p className="font-semibold text-amber-900 text-sm">💡 Marj Hedefi: Net marjınızı %{Math.max(5, Math.min(25, Math.round(aggregateCalc.marginNet * 100) + 5))}'e çıkartın</p>
-                      <ul className="text-xs text-amber-800 space-y-1 ml-3">
-                        <li>✓ <strong>A/B Fiyatlandırması:</strong> En çok satılan 5 ürünün fiyatını denemeli olarak %3-5 arttırın ve satış etkisini izleyin</li>
-                        <li>✓ <strong>Bundle Stratejisi:</strong> Düşük marj ürünler + yüksek marj ürünleri paket olarak satın</li>
-                        <li>✓ <strong>Ürün Mix Optimizasyonu:</strong> En düşük 20% marjlı ürünleri çıkarın, yüksek marj kategorileri artırın</li>
-                        <li>✓ <strong>Kargo Optimizasyonu:</strong> Kargo ortağını değiştirin veya kendi kargo sistemini kur</li>
-                        <li>✓ <strong>Müşteri Segmentasyonu:</strong> Yüksek değerli müşterilere özel fiyatlandırma uygula</li>
-                      </ul>
+                  {aggregateCalc.netKar < 0 && (
+                    <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                      <p className="text-xs font-semibold text-red-900">🚨 Şimdi Yap: Fiyatları %{Math.max(5, Math.ceil(Math.abs(aggregateCalc.netKar) / (aggregateCalc.netSatisHasilati * 0.03)))} arttır</p>
+                      <p className="text-xs text-red-800 mt-1">→ {formatCurrency(Math.abs(aggregateCalc.netKar))} aylık zararı kapatacak</p>
                     </div>
+                  )}
 
-                    <div className="bg-white border border-blue-200 p-3 rounded space-y-2">
-                      <p className="font-semibold text-blue-900 text-sm">📊 Operasyon Verimliliği +%10 Hedefi</p>
-                      <ul className="text-xs text-blue-800 space-y-1 ml-3">
-                        <li>✓ İş süreçlerini otomatikleştir (manuel işleri azalt)</li>
-                        <li>✓ Tedarikçi bağlantılarını güçlendir - toplu sipariş indirimlerini kapat</li>
-                        <li>✓ Satış verilerini analiz et - hangi ürünler/pazaryerler en karlı öğren</li>
-                      </ul>
+                  {((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) > 0.50) && (
+                    <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                      <p className="text-xs font-semibold text-orange-900">📦 Şimdi Yap: Tedarikçiyle %10 indirim müzakeresi başlat</p>
+                      <p className="text-xs text-orange-800 mt-1">→ Marjı {((aggregateCalc.marginNet * 100) + 3).toFixed(1)}%'e çıkaracak</p>
                     </div>
-                  </div>
+                  )}
 
-                  {/* 📈 ORTA VADELİ STRATEJİLER - 3-6 Ay */}
-                  <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 space-y-3">
-                    <p className="font-bold text-blue-900 flex items-center gap-2 text-sm">
-                      <span className="bg-blue-200 px-2 py-1 rounded text-xs font-bold">3-6 AY</span>
-                      <span>Orta Vadeli Büyüme Stratejileri</span>
-                    </p>
-
-                    <div className="bg-white border border-blue-200 p-3 rounded space-y-2">
-                      <p className="font-semibold text-blue-900 text-sm">🚀 Satış Hacmi +{aggregateCalc.sabitGiderlerToplamNet > 0 ? Math.round(Math.min(50, Math.max(15, (aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100))) : 20}% Hedefi</p>
-                      <p className="text-xs text-blue-800"><strong>Neden:</strong> Sabit giderleriniz {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%. Satış %{aggregateCalc.sabitGiderlerToplamNet > 0 ? Math.round(Math.min(50, Math.max(15, (aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100))) : 20} arttırılsa, marjınız {((aggregateCalc.marginNet * 100 + Math.min(5, (aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 50))).toFixed(1)}%'e çıkacak</p>
-                      <ul className="text-xs text-blue-800 space-y-1 ml-3">
-                        <li>✓ Yeni pazaryerler ekle (Trendyol, Hepsiburada, GittiGidiyor vs.)</li>
-                        <li>✓ Organik SEO ve sosyal medya pazarlamasını yoğunlaştır (maliyet-etkin)</li>
-                        <li>✓ Influencer partnership'leri explore et</li>
-                        <li>✓ Email marketing kampanyalarını başlat</li>
-                      </ul>
+                  {((aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) > 0.20) && (
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                      <p className="text-xs font-semibold text-blue-900">💳 Şimdi Yap: Pazaryeri komisyon oranını düşür veya doğrudan satış kanalı aç</p>
+                      <p className="text-xs text-blue-800 mt-1">→ Satışların %{((aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}'ini kaydet</p>
                     </div>
+                  )}
 
-                    <div className="bg-white border border-green-200 p-3 rounded space-y-2">
-                      <p className="font-semibold text-green-900 text-sm">💰 Yeni Gelir Kaynakları Geliştir</p>
-                      <ul className="text-xs text-green-800 space-y-1 ml-3">
-                        <li>✓ Kendi e-ticaret platformunu (Shopify/Wix) kur - pazaryeri komisyonundan kaçın</li>
-                        <li>✓ B2B satışlarını başlat (toplu satış, wholesaleler)</li>
-                        <li>✓ Subscription model / recurring revenue modelleri test et</li>
-                        <li>✓ Yan ürün kategorileri ekle (komplementer ürünler)</li>
-                      </ul>
+                  {aggregateCalc.sabitGiderlerToplamNet > 0 && ((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) > 0.12) && (
+                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                      <p className="text-xs font-semibold text-purple-900">🏢 Şimdi Yap: Pazarlama bütçesini %30 azalt, organik pazarlamaya geç</p>
+                      <p className="text-xs text-purple-800 mt-1">→ Aylık {formatCurrency((aggregateCalc.sabitGiderlerToplamNet * 0.3))} tasarruf + marj +{((aggregateCalc.sabitGiderlerToplamNet * 0.3) / aggregateCalc.netSatisHasilati * 100).toFixed(1)}%</p>
                     </div>
-                  </div>
+                  )}
 
-                  {/* 🚀 UZUN VADELİ BÜYÜME - 6+ Ay */}
-                  <div className="bg-emerald-50 p-4 rounded-lg border-2 border-emerald-200 space-y-3">
-                    <p className="font-bold text-emerald-900 flex items-center gap-2 text-sm">
-                      <span className="bg-emerald-200 px-2 py-1 rounded text-xs font-bold">6+ AY</span>
-                      <span>Uzun Vadeli Başlangıç Projesi</span>
-                    </p>
-
-                    {aggregateCalc.marginNet > 0 && (
-                      <div className="bg-white border border-emerald-200 p-3 rounded space-y-2">
-                        <p className="font-semibold text-emerald-900 text-sm">🎯 Kârlı Model Ölçeklendirilsin: {(aggregateCalc.netKar * 12).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0 })} Yıllık Hedefi</p>
-                        <ul className="text-xs text-emerald-800 space-y-1 ml-3">
-                          <li>✓ <strong>Tim Kurma:</strong> Satış, operasyon, pazarlama ekipleri oluştur</li>
-                          <li>✓ <strong>Lokasyon Genişletme:</strong> Yeni şehir/bölgelere giriş yap</li>
-                          <li>✓ <strong>Ürün Gamı Diversifikasyon:</strong> Komplementer kategori portföyü genişlet</li>
-                          <li>✓ <strong>Teknoloji Yatırımı:</strong> CRM, otomasyon, veri analitik sistemleri kurumsallaştır</li>
-                          <li>✓ <strong>Markalaşma:</strong> Güçlü marka kimliği ve müşteri bağlılığı inşa et</li>
-                        </ul>
-                      </div>
-                    )}
-
-                    <div className="bg-white border border-purple-200 p-3 rounded space-y-2">
-                      <p className="font-semibold text-purple-900 text-sm">🏆 5 Yıllık Vizyon</p>
-                      <p className="text-xs text-purple-800">Mevcut model {aggregateCalc.marginNet > 0 ? 'karlı' : 'geliştirilebilir'} - Ölçeklendirmeye odaklan:</p>
-                      <ul className="text-xs text-purple-800 space-y-1 ml-3">
-                        <li>• Yıllık satış: {(aggregateCalc.netSatisHasilati * 12 * 3).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0 })} (3x büyüme hedefi)</li>
-                        <li>• Net marj hedefi: %{Math.max(10, Math.round(aggregateCalc.marginNet * 100 + 5))}-{Math.round(aggregateCalc.marginNet * 100 + 15)}%</li>
-                        <li>• Çalışan sayısı: 5-10 kişi</li>
-                        <li>• Bölgesel/Uluslararası expansion planlama</li>
-                      </ul>
+                  {aggregateCalc.netKar > 0 && (
+                    <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                      <p className="text-xs font-semibold text-emerald-900">✓ Yapman Gereken: Satış hacmini %{aggregateCalc.sabitGiderlerToplamNet > 0 ? Math.round(Math.min(40, Math.max(10, (aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100))) : 20} arttır</p>
+                      <p className="text-xs text-emerald-800 mt-1">→ Net marj %{(aggregateCalc.marginNet * 100 + Math.min(4, (aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 40)).toFixed(1)}%'e yükselecek (Sabit giderler dağılacak)</p>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </CardContent>

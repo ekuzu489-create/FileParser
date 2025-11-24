@@ -904,7 +904,7 @@ export default function BulkSimulation() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
-                    <div className="space-y-6">
+                    <div className="grid grid-cols-3 gap-6">
                       {/* Profitability Status */}
                       <div className={cn(
                         "p-4 rounded-lg border-2",

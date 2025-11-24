@@ -1,0 +1,52 @@
+## 🚀 Geliştirme İsteği: Toplu Simülasyon Analiz Tabloları Ekleme
+
+### 🎯 Amaç
+
+`Toplu Simülasyon` ekranındaki mevcut `NET KÂR / ZARAR` sonucunun hemen altına, **Finansal Simülatör** bölümünde bulunan **KDV Analizi (Detaylı)** ve **Birim Ekonomisi** tablolarını ekleyin.
+
+Bu tablolar, Excel dosyasından yüklenen ve Toplu Simülasyon bölümünde kullanılan **agregat (toplu)** verilerle hesaplanacaktır.
+
+---
+
+### 1. Veri Kaynağı ve Tasarım
+
+* **Veri Kaynağı:** Hesaplamalar için gereken tüm toplam tutarlar (`Brüt Satış Tutarı`, `SM`, `Kargo Gideri`, `Toplam Satış Adedi` vb.), **Excel'den gelen ve Toplu Simülasyon için kullanılan güncel toplu veriler** olmalıdır.
+* **Tasarım:** Yeni eklenecek iki tablonun görünümü ve düzeni, **Finansal Simülatör** bölümündeki tablolarla **birebir aynı** olmalıdır.
+
+---
+
+### 2. KDV Analizi (Detaylı) Hesaplama Kuralları
+
+Tablo yapısı aşağıdaki gibi olmalı ve değerler toplu verilere göre hesaplanmalıdır:
+
+| Başlık | Hesaplama Formülü |
+| :--- | :--- |
+| **Satış KDV'si (Hesaplanan)** | `Brüt Satış Tutarı` * `Vergi Oranı` (%KDV) |
+| (+) İndirilebilir KDV'ler (Toplamı) | Aşağıdaki 5 kalemin KDV tutarları toplanır: |
+| * Alış KDV'si | `Satılan Malın Maliyeti (SM)` * `Alış KDV Oranı` |
+| * Komisyon KDV'si | `Komisyon Gideri` * `Komisyon KDV Oranı` |
+| * Kargo KDV'si | `Kargo Giderleri` * `Kargo KDV Oranı` |
+| * Platform KDV'si | `Platform Hizmet Bedeli` * `Platform KDV Oranı` |
+| * Sabit Gider KDV'si | `Toplam Sabit Giderler` * `Sabit Gider KDV Oranı` |
+| **Toplam İndirilebilir KDV** | (+) İndirilebilir KDV'lerin toplamı. |
+| **Ödenecek KDV** | **Maks** (0, `Satış KDV'si` - `Toplam İndirilebilir KDV`) |
+| **Biriken (Devreden) KDV** | **Maks** (0, `Toplam İndirilebilir KDV` - `Satış KDV'si`) |
+
+---
+
+### 3. Birim Ekonomisi Hesaplama Kuralları
+
+Bu tablo, **Toplam Satış Adedi** kullanılarak tüm toplu değerlerin birim başına düşen maliyetlerini/kârlarını gösterecektir:
+
+| Başlık | Hesaplama Formülü |
+| :--- | :--- |
+| **Birim Satış Fiyatı (Net)** | `Toplam Satış Tutarı` / `Toplam Satış Adedi` |
+| **Birim Maliyetler Toplamı** | Aşağıdaki 6 kalemin toplamı: |
+| * Birim Alış Maliyeti (Net) | `Satılan Malın Maliyeti (SM)` / `Toplam Satış Adedi` |
+| * Birim Komisyon (Net) | `Komisyon Gideri` / `Toplam Satış Adedi` |
+| * Birim Kargo (Net) | `Kargo Gideri` / `Toplam Satış Adedi` |
+| * Birim Platform Bedeli (Net) | `Platform Hizmet Bedeli` / `Toplam Satış Adedi` |
+| * Birim Stopaj (Net) | `Stopaj Gideri` / `Toplam Satış Adedi` |
+| * Birim Sabit Gider Payı | `Toplam Sabit Giderler` / `Toplam Satış Adedi` |
+| **Birim Vergi** | `Ödenecek KDV` / `Toplam Satış Adedi` |
+| **Birim Net Kâr** | `Birim Satış Fiyatı (Net)` - `Birim Maliyetler Toplamı` - `Birim Vergi` |

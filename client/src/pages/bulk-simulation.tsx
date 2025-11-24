@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
-import { Upload, Download, FileText, TrendingUp, Info } from "lucide-react";
+import { Upload, Download, FileText, TrendingUp, Info, Scale, PieChart } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import * as XLSX from 'xlsx';
 import { cn } from "@/lib/utils";
@@ -81,6 +81,26 @@ interface AggregateCalculation {
   vergi: number;
   netKar: number;
   marginNet: number;
+  totalQuantity: number;
+  satisKDVTutari: number;
+  alisKDV: number;
+  komisyonKDV: number;
+  kargoKDVTutari: number;
+  platformFeeKDV: number;
+  sabitGiderlerKDVToplam: number;
+  indirilebilirKDVToplam: number;
+  odenecekKDV: number;
+  devredenKDV: number;
+  birimSatisFiyatiNet: number;
+  birimAlisMaliyet: number;
+  birimKomisyonNet: number;
+  birimKargoNet: number;
+  birimPlatformFeeNet: number;
+  birimStopajNet: number;
+  birimSabitGiderler: number;
+  birimMaliyetlerToplam: number;
+  birimVergi: number;
+  birimNetKar: number;
 }
 
 const DEFAULT_VARIABLE_EXPENSES = {
@@ -369,6 +389,36 @@ export default function BulkSimulation() {
     const netKar = faaliyetKar - vergi;
     const marginNet = netSatisHasilati > 0 ? netKar / netSatisHasilati : 0;
 
+    // KDV Analizi Calculations
+    let satisKDVTutari = 0;
+    bulkProducts.forEach((product) => {
+      const brutBirim = product.totalSalesRevenue / (1 + product.vatRate / 100);
+      const kdvBirim = product.totalSalesRevenue - brutBirim;
+      satisKDVTutari += kdvBirim;
+    });
+
+    const alisKDV = smToplam > 0 ? (smToplam - smToplam / (1 + GIDER_KDV_ORANI_SABIT / 100)) : 0;
+    const komisyonKDV = komisyonToplam * (GIDER_KDV_ORANI_SABIT / 100);
+    const kargoKDVTutari = kargoToplam * (GIDER_KDV_ORANI_SABIT / 100);
+    const platformFeeKDV = platformFeeToplam * (GIDER_KDV_ORANI_SABIT / 100);
+    const sabitGiderlerKDVToplam = sabitGiderlerToplamNet * (GIDER_KDV_ORANI_SABIT / 100);
+    const indirilebilirKDVToplam = alisKDV + komisyonKDV + kargoKDVTutari + platformFeeKDV + sabitGiderlerKDVToplam;
+    const odenecekKDVBrut = satisKDVTutari - indirilebilirKDVToplam;
+    const odenecekKDV = odenecekKDVBrut > 0 ? odenecekKDVBrut : 0;
+    const devredenKDV = odenecekKDVBrut < 0 ? Math.abs(odenecekKDVBrut) : 0;
+
+    // Birim Ekonomisi Calculations
+    const birimSatisFiyatiNet = totalQuantity > 0 ? netSatisHasilati / totalQuantity : 0;
+    const birimAlisMaliyet = totalQuantity > 0 ? smToplam / totalQuantity : 0;
+    const birimKomisyonNet = totalQuantity > 0 ? komisyonToplam / totalQuantity : 0;
+    const birimKargoNet = totalQuantity > 0 ? kargoToplam / totalQuantity : 0;
+    const birimPlatformFeeNet = totalQuantity > 0 ? platformFeeToplam / totalQuantity : 0;
+    const birimStopajNet = totalQuantity > 0 ? stopajToplam / totalQuantity : 0;
+    const birimSabitGiderler = totalQuantity > 0 ? sabitGiderlerToplamNet / totalQuantity : 0;
+    const birimMaliyetlerToplam = birimAlisMaliyet + birimKomisyonNet + birimKargoNet + birimPlatformFeeNet + birimStopajNet + birimSabitGiderler;
+    const birimVergi = totalQuantity > 0 ? vergi / totalQuantity : 0;
+    const birimNetKar = birimSatisFiyatiNet - birimMaliyetlerToplam - birimVergi;
+
     return {
       brutSatisHasilatiKDVHariç,
       iadeTutariNet,
@@ -385,6 +435,26 @@ export default function BulkSimulation() {
       vergi,
       netKar,
       marginNet,
+      totalQuantity,
+      satisKDVTutari,
+      alisKDV,
+      komisyonKDV,
+      kargoKDVTutari,
+      platformFeeKDV,
+      sabitGiderlerKDVToplam,
+      indirilebilirKDVToplam,
+      odenecekKDV,
+      devredenKDV,
+      birimSatisFiyatiNet,
+      birimAlisMaliyet,
+      birimKomisyonNet,
+      birimKargoNet,
+      birimPlatformFeeNet,
+      birimStopajNet,
+      birimSabitGiderler,
+      birimMaliyetlerToplam,
+      birimVergi,
+      birimNetKar,
     };
   }, [bulkProducts, controlPanelValues, variableExpenses]);
 
@@ -831,6 +901,122 @@ export default function BulkSimulation() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* Analysis Tables */}
+        {aggregateCalc && (
+          <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6">
+            {/* Tax Analysis */}
+            <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden h-fit">
+              <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                  <Scale className="w-5 h-5" />
+                  KDV Analizi (Detaylı)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableBody className="text-[0.9em]">
+                    <TableRow className="hover:bg-transparent border-b border-slate-50">
+                      <TableCell className="py-2 pl-5 font-medium">Satış KDV'si (Hesaplanan)</TableCell>
+                      <TableCell className="py-2 pr-5 text-right font-medium">{formatCurrency(aggregateCalc.satisKDVTutari)}</TableCell>
+                    </TableRow>
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={2} className="bg-slate-100 text-center py-1.5 font-bold text-slate-700">İndirilebilir KDV Detayı</TableCell>
+                    </TableRow>
+                    <TableRow className="hover:bg-transparent border-b border-slate-50">
+                      <TableCell className="py-1.5 pl-5 text-slate-600">(+) Alış KDV (SM)</TableCell>
+                      <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.alisKDV)}</TableCell>
+                    </TableRow>
+                    <TableRow className="hover:bg-transparent border-b border-slate-50">
+                      <TableCell className="py-1.5 pl-5 text-slate-600">(+) Komisyon KDV</TableCell>
+                      <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.komisyonKDV)}</TableCell>
+                    </TableRow>
+                    <TableRow className="hover:bg-transparent border-b border-slate-50">
+                      <TableCell className="py-1.5 pl-5 text-slate-600">(+) Kargo KDV</TableCell>
+                      <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.kargoKDVTutari)}</TableCell>
+                    </TableRow>
+                    <TableRow className="hover:bg-transparent border-b border-slate-50">
+                      <TableCell className="py-1.5 pl-5 text-slate-600">(+) Platform Hizmet KDV</TableCell>
+                      <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.platformFeeKDV)}</TableCell>
+                    </TableRow>
+                    <TableRow className="hover:bg-transparent border-b border-slate-50">
+                      <TableCell className="py-1.5 pl-5 text-slate-600">(+) Sabit Giderler KDV</TableCell>
+                      <TableCell className="py-1.5 pr-5 text-right text-slate-600">{formatCurrency(aggregateCalc.sabitGiderlerKDVToplam)}</TableCell>
+                    </TableRow>
+                    <TableRow className="bg-slate-100 hover:bg-slate-100">
+                      <TableCell className="py-1.5 pl-5 font-bold">Toplam İndirilebilir KDV</TableCell>
+                      <TableCell className="py-1.5 pr-5 text-right font-bold">{formatCurrency(aggregateCalc.indirilebilirKDVToplam)}</TableCell>
+                    </TableRow>
+                    <TableRow className={cn("hover:bg-transparent", aggregateCalc.odenecekKDV > 0 ? "bg-red-50 border-b border-red-100" : "bg-blue-50 border-b border-blue-100")}>
+                      <TableCell className={cn("py-2 pl-5 font-bold", aggregateCalc.odenecekKDV > 0 ? "text-red-900" : "text-blue-900")}>Ödenecek KDV</TableCell>
+                      <TableCell className={cn("py-2 pr-5 text-right font-bold", aggregateCalc.odenecekKDV > 0 ? "text-red-900" : "text-blue-900")}>{formatCurrency(aggregateCalc.odenecekKDV)}</TableCell>
+                    </TableRow>
+                    <TableRow className={cn("hover:bg-transparent", aggregateCalc.devredenKDV > 0 ? "bg-blue-50" : "")}>
+                      <TableCell className="py-2 pl-5 font-bold text-blue-900">Biriken (Devreden) KDV</TableCell>
+                      <TableCell className="py-2 pr-5 text-right font-bold text-blue-900">{formatCurrency(aggregateCalc.devredenKDV)}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            {/* Unit Economics */}
+            <Card className="border-0 shadow-[0_6px_16px_rgba(0,0,0,0.1)] overflow-hidden h-fit">
+              <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
+                <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
+                  <PieChart className="w-5 h-5" />
+                  Birim Ekonomisi
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableBody className="text-[0.9em]">
+                    <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Satış Fiyatı (Net)</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimSatisFiyatiNet)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Alış Maliyeti (Net)</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimAlisMaliyet)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Komisyon (Net)</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimKomisyonNet)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Kargo (Net)</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimKargoNet)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Platform Bedeli (Net)</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimPlatformFeeNet)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Stopaj (Net)</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimStopajNet)}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Sabit Gider Payı</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimSabitGiderler)}</TableCell>
+                    </TableRow>
+                    <TableRow className="bg-slate-100 hover:bg-slate-100 border-b border-slate-200">
+                      <TableCell className="py-2 pl-5 font-bold">Birim Maliyetler Toplamı</TableCell>
+                      <TableCell className="py-2 pr-5 text-right font-bold">{formatCurrency(aggregateCalc.birimMaliyetlerToplam)}</TableCell>
+                    </TableRow>
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell className="py-2 pl-5 font-medium">Birim Vergi</TableCell>
+                      <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimVergi)}</TableCell>
+                    </TableRow>
+                    <TableRow className={cn("border-t hover:bg-transparent", aggregateCalc.birimNetKar >= 0 ? "bg-[#d1e7dd] border-green-200" : "bg-[#ffe6e6] border-red-200")}>
+                      <TableCell className={cn("py-2 pl-5 font-bold", aggregateCalc.birimNetKar >= 0 ? "text-green-900" : "text-red-900")}>Birim Net Kâr</TableCell>
+                      <TableCell className={cn("py-2 pr-5 text-right font-bold", aggregateCalc.birimNetKar >= 0 ? "text-green-900" : "text-red-900")}>{formatCurrency(aggregateCalc.birimNetKar)}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

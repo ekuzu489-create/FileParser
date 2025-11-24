@@ -358,8 +358,10 @@ export default function BulkSimulation() {
     const komisyonYuzde = variableExpenses.komisyon / 100;
     const iadeOrani = variableExpenses.iadeOrani / 100;
 
-    // VAT extraction for all expenses - all input values are VAT-inclusive
-    const personelNetAm = controlPanelValues.personel / (1 + GIDER_KDV_ORANI_SABIT / 100);
+    // VAT extraction for all expenses - all input values are VAT-inclusive (except Personel)
+    // Personel has NO VAT - use as-is
+    const personelNetAm = controlPanelValues.personel;
+    // Other fixed expenses are VAT-inclusive (20%) - extract VAT
     const depoNetAm = controlPanelValues.depo / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const muhasebeNetAm = controlPanelValues.muhasebe / (1 + GIDER_KDV_ORANI_SABIT / 100);
     const pazarlamaNetAm = controlPanelValues.pazarlama / (1 + GIDER_KDV_ORANI_SABIT / 100);

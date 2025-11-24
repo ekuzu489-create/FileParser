@@ -443,14 +443,34 @@ export default function Simulator() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                      <div className="flex items-center gap-1">
+                        <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">KDV Uygulanmaz</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <div className="relative">
                         <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={values.personel} onChange={(e) => handleInputChange('personel', e.target.value)} data-testid="input-personel" />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
+                      <div className="flex items-center gap-1">
+                        <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <div className="relative">
                         <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={values.depo} onChange={(e) => handleInputChange('depo', e.target.value)} data-testid="input-depo" />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
@@ -459,14 +479,34 @@ export default function Simulator() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                      <div className="flex items-center gap-1">
+                        <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <div className="relative">
                         <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={values.muhasebe} onChange={(e) => handleInputChange('muhasebe', e.target.value)} data-testid="input-muhasebe" />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                      <div className="flex items-center gap-1">
+                        <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                       <div className="relative">
                         <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={values.pazarlama} onChange={(e) => handleInputChange('pazarlama', e.target.value)} data-testid="input-pazarlama" />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
@@ -474,7 +514,17 @@ export default function Simulator() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                          <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <div className="relative">
                       <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={values.digerGiderler} onChange={(e) => handleInputChange('digerGiderler', e.target.value)} data-testid="input-digerGiderler" />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>

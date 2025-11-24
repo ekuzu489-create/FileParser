@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Calculator, TrendingUp, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Scale, PieChart, Target, BarChart3 } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Scale, PieChart, Target, BarChart3, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Navigation } from "@/App";
 import { DEFAULT_FORM_VALUES } from "@/lib/defaults";
@@ -357,14 +358,34 @@ const ScenarioInputForm = ({
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                  <div className="flex items-center gap-1">
+                    <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                        <p className="text-xs">KDV Uygulanmaz</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <div className="relative">
                     <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.personel} onChange={(e) => onChange('personel', e.target.value)} />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
+                  <div className="flex items-center gap-1">
+                    <Label className="text-xs font-medium text-slate-600">Depo / Kira (₺)</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                        <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <div className="relative">
                     <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.depo} onChange={(e) => onChange('depo', e.target.value)} />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
@@ -373,14 +394,34 @@ const ScenarioInputForm = ({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                  <div className="flex items-center gap-1">
+                    <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                        <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <div className="relative">
                     <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.muhasebe} onChange={(e) => onChange('muhasebe', e.target.value)} />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                  <div className="flex items-center gap-1">
+                    <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                        <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <div className="relative">
                     <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.pazarlama} onChange={(e) => onChange('pazarlama', e.target.value)} />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>
@@ -388,7 +429,17 @@ const ScenarioInputForm = ({
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                <div className="flex items-center gap-1">
+                  <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                      <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <div className="relative">
                   <Input className="h-9 text-sm pr-6" type="number" step="0.01" value={data.digerGiderler} onChange={(e) => onChange('digerGiderler', e.target.value)} />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">₺</span>

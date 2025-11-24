@@ -589,7 +589,17 @@ export default function BulkSimulation() {
                 </CardHeader>
                 <CardContent className="p-5 space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs font-medium text-slate-600">Personel (₺)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                          <p className="text-xs">KDV Uygulanmaz</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       type="number"
                       step="0.01"
@@ -599,7 +609,17 @@ export default function BulkSimulation() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Kira / Depo (₺)</Label>
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs font-medium text-slate-600">Kira / Depo (₺)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                          <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       type="number"
                       step="0.01"
@@ -609,7 +629,17 @@ export default function BulkSimulation() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs font-medium text-slate-600">Muhasebe (₺)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                          <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       type="number"
                       step="0.01"
@@ -619,7 +649,17 @@ export default function BulkSimulation() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs font-medium text-slate-600">Pazarlama (₺)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                          <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       type="number"
                       step="0.01"
@@ -629,7 +669,17 @@ export default function BulkSimulation() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs font-medium text-slate-600">Diğer Giderler (₺)</Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                          <p className="text-xs">KDV Dahil / KDV Hariç değer girilebilir</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       type="number"
                       step="0.01"

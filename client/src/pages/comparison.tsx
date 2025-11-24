@@ -354,6 +354,7 @@ const ScenarioInputForm = ({
                 <TrendingUp className="w-4 h-4" />
                 Sabit Giderler (Aylık)
               </CardTitle>
+              <p className="text-xs text-slate-500 mt-2 font-normal">KDV Dahil Fiyat girileceği (Personel hariç)</p>
             </CardHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">

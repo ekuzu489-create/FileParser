@@ -439,6 +439,7 @@ export default function Simulator() {
                     <TrendingUp className="w-4 h-4" />
                     Sabit Giderler (Aylık)
                   </CardTitle>
+                  <p className="text-xs text-slate-500 mt-2 font-normal">KDV Dahil Fiyat girileceği (Personel hariç)</p>
                 </CardHeader>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
@@ -591,6 +592,7 @@ export default function Simulator() {
                     </CardTitle>
                     <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">(₺, KDV Hariç Net Tutarlar)</span>
                   </div>
+                  <p className="text-xs text-slate-500 mt-2 font-normal">Tüm rakamlar KDV Hariç (Net) olup, bu şekilde hesaplanmıştır.</p>
                   {/* Margin Analysis Grid */}
                   <div className="grid grid-cols-4 gap-2 mt-3">
                     <AnalysisBox label="Kâr Marjı (Brüt)" value={results.marginBrut} />

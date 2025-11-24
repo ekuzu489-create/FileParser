@@ -586,6 +586,7 @@ export default function BulkSimulation() {
               <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
                 <CardHeader className="pb-3 pt-5 px-5 border-b border-slate-100">
                   <CardTitle className="text-[1.1em] font-semibold text-blue-600">Sabit Giderler (Aylık)</CardTitle>
+                  <p className="text-xs text-slate-500 mt-2 font-normal">KDV Dahil Fiyat girileceği (Personel hariç)</p>
                 </CardHeader>
                 <CardContent className="p-5 space-y-4">
                   <div className="space-y-1.5">
@@ -721,6 +722,7 @@ export default function BulkSimulation() {
                     <TrendingUp className="w-5 h-5" />
                     Aylık Kâr/Zarar Tablosu (Agregat)
                   </CardTitle>
+                  <p className="text-xs text-slate-500 mt-2 font-normal">Tüm rakamlar KDV Hariç (Net) olup, bu şekilde hesaplanmıştır.</p>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>

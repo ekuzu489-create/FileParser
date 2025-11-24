@@ -426,7 +426,8 @@ export default function BulkSimulation() {
     const birimSabitGiderler = totalQuantity > 0 ? sabitGiderlerToplamNet / totalQuantity : 0;
     const birimMaliyetlerToplam = birimAlisMaliyet + birimKomisyonNet + birimKargoNet + birimPlatformFeeNet + birimStopajNet + birimSabitGiderler;
     const birimVergi = totalQuantity > 0 ? vergi / totalQuantity : 0;
-    const birimNetKar = birimSatisFiyatiNet - birimMaliyetlerToplam - birimVergi;
+    // Calculate birim net kâr directly from total net profit for accuracy
+    const birimNetKar = totalQuantity > 0 ? netKar / totalQuantity : 0;
 
     return {
       brutSatisHasilatiKDVHariç,

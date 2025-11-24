@@ -794,115 +794,6 @@ export default function BulkSimulation() {
           </div>
         )}
 
-        {/* Results Table */}
-        {results.length > 0 && (
-          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
-            <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
-              <CardTitle className="text-[1.1em] font-semibold text-blue-600">Simülasyon Sonuçları (Ürün Detayı)</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-50 hover:bg-slate-50">
-                      <TableHead className="text-left py-3 pl-6 font-semibold text-slate-700">Ürün Adı</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺, KDV Dahil)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺, KDV Hariç)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Ürün Maliyeti (₺, KDV Dahil)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">KDV Oranı (%)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">
-                        <div className="flex items-center justify-end gap-1">
-                          <span>Toplam Giderler (₺)</span>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="w-4 h-4 text-slate-500 cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
-                              <p>Satılan Malın Maliyeti + Pazaryeri Komisyonu + Kargo + Platform Bedeli + Stopaj + Sabit Giderler (oranlanmış) + Vergi</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Net Kâr/Zarar (₺)</TableHead>
-                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı (%)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {results.slice(0, showAll ? results.length : 5).map((result, idx) => {
-                      const product = bulkProducts[idx];
-                      return (
-                        <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
-                          <TableCell className="py-3 pl-6 font-medium text-slate-700">{result.productName}</TableCell>
-                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
-                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.netSatisHasilatiKDVHariç)}</TableCell>
-                          <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
-                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalCost)}</TableCell>
-                          <TableCell className="py-3 pr-6 text-right">{product?.vatRate}%</TableCell>
-                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalExpenses)}</TableCell>
-                          <TableCell
-                            className={`py-3 pr-6 text-right font-semibold ${
-                              result.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
-                            }`}
-                          >
-                            {formatCurrency(result.netProfit)}
-                          </TableCell>
-                          <TableCell className="py-3 pr-6 text-right text-blue-600 font-medium">
-                            {(result.profitMargin * 100).toFixed(2)}%
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    <TableRow className="bg-slate-100 hover:bg-slate-100 font-bold">
-                      <TableCell className="py-3 pl-6 text-slate-800">TOPLAM</TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(resultsTotals.totalRevenue)}
-                      </TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(resultsTotals.netSatisHasilatiKDVHariç)}
-                      </TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatNumber(excelTotals.totalQuantity)}
-                      </TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(excelTotals.totalCost)}
-                      </TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">-</TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(resultsTotals.totalExpenses)}
-                      </TableCell>
-                      <TableCell
-                        className={`py-3 pr-6 text-right ${
-                          resultsTotals.totalNetProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
-                        }`}
-                      >
-                        {formatCurrency(resultsTotals.totalNetProfit)}
-                      </TableCell>
-                      <TableCell className="py-3 pr-6 text-right text-blue-600">
-                        {resultsTotals.netSatisHasilatiKDVHariç > 0
-                          ? ((resultsTotals.totalNetProfit / resultsTotals.netSatisHasilatiKDVHariç) * 100).toFixed(2)
-                          : '0'}
-                        %
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-              {results.length > 5 && (
-                <div className="border-t border-slate-100 px-6 py-4 bg-slate-50 flex justify-center">
-                  <Button
-                    onClick={() => setShowAll(!showAll)}
-                    variant="outline"
-                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                  >
-                    {showAll ? 'Daha Azını Göster' : 'Daha Fazlasını Göster'}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
         {/* Analysis Tables */}
         {aggregateCalc && (
           <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6">
@@ -1017,6 +908,115 @@ export default function BulkSimulation() {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {/* Results Table */}
+        {results.length > 0 && (
+          <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
+            <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
+              <CardTitle className="text-[1.1em] font-semibold text-blue-600">Simülasyon Sonuçları (Ürün Detayı)</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50 hover:bg-slate-50">
+                      <TableHead className="text-left py-3 pl-6 font-semibold text-slate-700">Ürün Adı</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺, KDV Dahil)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Tutarı (₺, KDV Hariç)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Satış Adedi</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Ürün Maliyeti (₺, KDV Dahil)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">KDV Oranı (%)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">
+                        <div className="flex items-center justify-end gap-1">
+                          <span>Toplam Giderler (₺)</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-4 h-4 text-slate-500 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-xs bg-white text-slate-900">
+                              <p>Satılan Malın Maliyeti + Pazaryeri Komisyonu + Kargo + Platform Bedeli + Stopaj + Sabit Giderler (oranlanmış) + Vergi</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Net Kâr/Zarar (₺)</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-slate-700">Kâr Marjı (%)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {results.slice(0, showAll ? results.length : 5).map((result, idx) => {
+                      const product = bulkProducts[idx];
+                      return (
+                        <TableRow key={idx} className="border-b border-slate-50 hover:bg-slate-50">
+                          <TableCell className="py-3 pl-6 font-medium text-slate-700">{result.productName}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalSalesRevenue)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.netSatisHasilatiKDVHariç)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatNumber(result.totalSalesQuantity)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalCost)}</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{product?.vatRate}%</TableCell>
+                          <TableCell className="py-3 pr-6 text-right">{formatCurrency(result.totalExpenses)}</TableCell>
+                          <TableCell
+                            className={`py-3 pr-6 text-right font-semibold ${
+                              result.netProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
+                            }`}
+                          >
+                            {formatCurrency(result.netProfit)}
+                          </TableCell>
+                          <TableCell className="py-3 pr-6 text-right text-blue-600 font-medium">
+                            {(result.profitMargin * 100).toFixed(2)}%
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    <TableRow className="bg-slate-100 hover:bg-slate-100 font-bold">
+                      <TableCell className="py-3 pl-6 text-slate-800">TOPLAM</TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(resultsTotals.totalRevenue)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(resultsTotals.netSatisHasilatiKDVHariç)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatNumber(excelTotals.totalQuantity)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(excelTotals.totalCost)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">-</TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-slate-800">
+                        {formatCurrency(resultsTotals.totalExpenses)}
+                      </TableCell>
+                      <TableCell
+                        className={`py-3 pr-6 text-right ${
+                          resultsTotals.totalNetProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        }`}
+                      >
+                        {formatCurrency(resultsTotals.totalNetProfit)}
+                      </TableCell>
+                      <TableCell className="py-3 pr-6 text-right text-blue-600">
+                        {resultsTotals.netSatisHasilatiKDVHariç > 0
+                          ? ((resultsTotals.totalNetProfit / resultsTotals.netSatisHasilatiKDVHariç) * 100).toFixed(2)
+                          : '0'}
+                        %
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+              {results.length > 5 && (
+                <div className="border-t border-slate-100 px-6 py-4 bg-slate-50 flex justify-center">
+                  <Button
+                    onClick={() => setShowAll(!showAll)}
+                    variant="outline"
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  >
+                    {showAll ? 'Daha Azını Göster' : 'Daha Fazlasını Göster'}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

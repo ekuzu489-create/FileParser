@@ -559,11 +559,11 @@ export default function ComparisonSimulator() {
   ];
 
   const unitMetrics = [
-    { label: 'Net Kâr / Birim', key: 'netKarBirim' as const },
-    { label: 'Birim Katkı Payı', key: 'katkiPayiBirim' as const },
-    { label: 'Başabaş Noktası', key: 'bepAdet' as const, isInt: true },
-    { label: 'Hedef Kâr İçin Gerekli Adet', key: 'hedefAdet' as const, isInt: true },
-    { label: 'Hedef Kâr İçin Birim Fiyat (KDV Dahil)', key: 'hedefFiyatKDVIncl' as const },
+    { label: 'Net Kâr / Birim', key: 'netKarBirim' as const, tooltip: 'Birim satış - birim toplam maliyet - birim vergi' },
+    { label: 'Birim Katkı Payı', key: 'katkiPayiBirim' as const, tooltip: 'Birim satış - birim değişken maliyetler' },
+    { label: 'Başabaş Noktası', key: 'bepAdet' as const, isInt: true, tooltip: 'Sabit giderler ÷ birim katkı payı' },
+    { label: 'Hedef Kâr İçin Gerekli Adet', key: 'hedefAdet' as const, isInt: true, tooltip: '(Sabit giderler + hedef kâr) ÷ birim katkı payı' },
+    { label: 'Hedef Kâr İçin Birim Fiyat (KDV Dahil)', key: 'hedefFiyatKDVIncl' as const, tooltip: 'Hedef kâra ulaşmak için gerekli net fiyat, KDV dahil' },
   ];
 
   const percentMetrics = [
@@ -714,7 +714,19 @@ export default function ComparisonSimulator() {
                           
                           return (
                             <TableRow key={metric.key} className="border-b border-slate-100 hover:bg-slate-50">
-                              <TableCell className="font-medium text-slate-700 py-2.5">{metric.label}</TableCell>
+                              <TableCell className="font-medium text-slate-700 py-2.5 flex items-center gap-2">
+                                {metric.label}
+                                {metric.tooltip && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                      <p className="text-xs">{metric.tooltip}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </TableCell>
                               <TableCell className="text-right py-2.5">
                                 {metric.isInt ? 
                                   `${Math.ceil(val1)} Adet` : 

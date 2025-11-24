@@ -958,43 +958,143 @@ export default function BulkSimulation() {
                 <Table>
                   <TableBody className="text-[0.9em]">
                     <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Satış Fiyatı (Net)</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Satış Fiyatı (Net)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Satış fiyatından KDV çıkartılan net tutarı</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimSatisFiyatiNet)}</TableCell>
                     </TableRow>
                     <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Alış Maliyeti (Net)</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Alış Maliyeti (Net)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Ürün maliyetinden KDV çıkartılan net tutarı</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimAlisMaliyet)}</TableCell>
                     </TableRow>
                     <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Komisyon (Net)</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Komisyon (Net)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Toplam komisyon ÷ satış adedi</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimKomisyonNet)}</TableCell>
                     </TableRow>
                     <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Kargo (Net)</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Kargo (Net)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Toplam kargo gideri ÷ satış adedi</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimKargoNet)}</TableCell>
                     </TableRow>
                     <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Platform Bedeli (Net)</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Platform Bedeli (Net)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Platform hizmet bedeli ÷ satış adedi</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimPlatformFeeNet)}</TableCell>
                     </TableRow>
                     <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Stopaj (Net)</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Stopaj (Net)
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Satış fiyatı × %1 stopaj oranı</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimStopajNet)}</TableCell>
                     </TableRow>
                     <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Sabit Gider Payı</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Sabit Gider Payı
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Toplam sabit giderler ÷ satış adedi</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimSabitGiderler)}</TableCell>
                     </TableRow>
                     <TableRow className="bg-slate-100 hover:bg-slate-100 border-b border-slate-200">
-                      <TableCell className="py-2 pl-5 font-bold">Birim Maliyetler Toplamı</TableCell>
+                      <TableCell className="py-2 pl-5 font-bold flex items-center gap-2">
+                        Birim Maliyetler Toplamı
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Birim alış + birim komisyon + birim kargo + birim platform + birim stopaj + birim sabit gider</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right font-bold">{formatCurrency(aggregateCalc.birimMaliyetlerToplam)}</TableCell>
                     </TableRow>
                     <TableRow className="hover:bg-transparent">
-                      <TableCell className="py-2 pl-5 font-medium">Birim Vergi</TableCell>
+                      <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                        Birim Vergi
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Toplam vergi ÷ satış adedi</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className="py-2 pr-5 text-right">{formatCurrency(aggregateCalc.birimVergi)}</TableCell>
                     </TableRow>
                     <TableRow className={cn("border-t hover:bg-transparent", aggregateCalc.birimNetKar >= 0 ? "bg-[#d1e7dd] border-green-200" : "bg-[#ffe6e6] border-red-200")}>
-                      <TableCell className={cn("py-2 pl-5 font-bold", aggregateCalc.birimNetKar >= 0 ? "text-green-900" : "text-red-900")}>Birim Net Kâr</TableCell>
+                      <TableCell className={cn("py-2 pl-5 font-bold flex items-center gap-2", aggregateCalc.birimNetKar >= 0 ? "text-green-900" : "text-red-900")}>
+                        Birim Net Kâr
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="w-3.5 h-3.5 cursor-help" style={{ color: aggregateCalc.birimNetKar >= 0 ? '#065f46' : '#7f1d1d' }} />
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                            <p className="text-xs">Birim satış - birim toplam maliyet - birim vergi</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell className={cn("py-2 pr-5 text-right font-bold", aggregateCalc.birimNetKar >= 0 ? "text-green-900" : "text-red-900")}>{formatCurrency(aggregateCalc.birimNetKar)}</TableCell>
                     </TableRow>
                   </TableBody>

@@ -773,43 +773,143 @@ export default function Simulator() {
                     <Table>
                       <TableBody className="text-[0.9em]">
                         <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Satış Fiyatı (Net)</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Satış Fiyatı (Net)
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Satış fiyatından KDV çıkartılan net tutarı</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={values.satisFiyat / (1 + values.kdvOrani / 100)} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Alış Maliyeti (Net)</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Alış Maliyeti (Net)
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Ürün maliyetinden KDV çıkartılan net tutarı</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimAlisMaliyet} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Komisyon (Net)</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Komisyon (Net)
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Toplam komisyon ÷ satış adedi</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimKomisyonNet} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Kargo (Net)</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Kargo (Net)
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Toplam kargo gideri ÷ satış adedi</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimKargoNet} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Platform Bedeli (Net)</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Platform Bedeli (Net)
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Platform hizmet bedeli ÷ satış adedi</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimPlatformFeeNet} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Stopaj (Net)</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Stopaj (Net)
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Satış fiyatı × %1 stopaj oranı</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimStopajNet} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="border-b border-slate-50 hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Sabit Gider Payı</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Sabit Gider Payı
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Toplam sabit giderler ÷ satış adedi</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimSabitGiderler} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="bg-slate-100 hover:bg-slate-100 border-b border-slate-200">
-                          <TableCell className="py-2 pl-5 font-bold">Birim Katkı Payı</TableCell>
+                          <TableCell className="py-2 pl-5 font-bold flex items-center gap-2">
+                            Birim Katkı Payı
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Birim satış - birim değişken maliyetler</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right font-bold"><MoneyDisplay value={results.katkiPayiBirim} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className="hover:bg-transparent">
-                          <TableCell className="py-2 pl-5 font-medium">Birim Vergi</TableCell>
+                          <TableCell className="py-2 pl-5 font-medium flex items-center gap-2">
+                            Birim Vergi
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Toplam vergi ÷ satış adedi</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className="py-2 pr-5 text-right"><MoneyDisplay value={results.birimVergi} className="text-slate-700" /></TableCell>
                         </TableRow>
                         <TableRow className={cn("border-t", results.netKarBirim < 0 ? "bg-[#ffe6e6] border-red-200" : "bg-[#d1e7dd] border-green-200")}>
-                          <TableCell className={cn("py-2 pl-5 font-bold", results.netKarBirim < 0 ? "text-red-900" : "text-green-900")}>Birim Net Kâr</TableCell>
+                          <TableCell className={cn("py-2 pl-5 font-bold flex items-center gap-2", results.netKarBirim < 0 ? "text-red-900" : "text-green-900")}>
+                            Birim Net Kâr
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="w-3.5 h-3.5 cursor-help" style={{ color: results.netKarBirim < 0 ? '#7f1d1d' : '#065f46' }} />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs bg-white text-slate-900">
+                                <p className="text-xs">Birim satış - birim toplam maliyet - birim vergi</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell className={cn("py-2 pr-5 text-right font-bold", results.netKarBirim < 0 ? "text-red-900" : "text-green-900")}><MoneyDisplay value={results.netKarBirim} className={results.netKarBirim < 0 ? "text-red-900" : "text-green-900"} /></TableCell>
                         </TableRow>
                       </TableBody>

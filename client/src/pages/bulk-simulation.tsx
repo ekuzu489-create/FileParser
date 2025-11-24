@@ -1179,27 +1179,27 @@ export default function BulkSimulation() {
                     <TableRow className="bg-slate-100 hover:bg-slate-100 font-bold">
                       <TableCell className="py-3 pl-6 text-slate-800">TOPLAM</TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(resultsTotals.totalRevenue)}
+                        {formatCurrency(excelTotals.totalRevenue)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(resultsTotals.netSatisHasilatiKDVHariç)}
+                        {formatCurrency(aggregateCalc?.netSatisHasilati || 0)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
                         {formatNumber(excelTotals.totalQuantity)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(excelTotals.totalCost)}
+                        {formatCurrency(aggregateCalc?.smToplam || 0)}
                       </TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">-</TableCell>
                       <TableCell className="py-3 pr-6 text-right text-slate-800">
-                        {formatCurrency(resultsTotals.totalExpenses)}
+                        {formatCurrency(aggregateCalc ? (aggregateCalc.smToplam + aggregateCalc.faaliyetGiderleriToplam + aggregateCalc.vergi) : 0)}
                       </TableCell>
                       <TableCell
                         className={`py-3 pr-6 text-right ${
-                          resultsTotals.totalNetProfit >= 0 ? 'text-emerald-600' : 'text-red-600'
+                          aggregateCalc && aggregateCalc.netKar >= 0 ? 'text-emerald-600' : 'text-red-600'
                         }`}
                       >
-                        {formatCurrency(resultsTotals.totalNetProfit)}
+                        {formatCurrency(aggregateCalc?.netKar || 0)}
                       </TableCell>
                       <TableCell
                         className={`py-3 pr-6 text-right font-semibold ${

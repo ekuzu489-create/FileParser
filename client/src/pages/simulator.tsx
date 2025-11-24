@@ -157,6 +157,11 @@ export default function Simulator() {
         birimStopajNet: 0,
         birimSabitGiderler: 0,
         birimVergi: 0,
+        personelNet: 0,
+        depoNet: 0,
+        muhasebeNet: 0,
+        pazarlamaNet: 0,
+        digerGiderlerNet: 0,
       };
     }
 
@@ -319,6 +324,11 @@ export default function Simulator() {
       kargoToplam,
       platformFeeToplam,
       stopajToplam,
+      personelNet,
+      depoNet: depo.net,
+      muhasebeNet: muhasebe.net,
+      pazarlamaNet: pazarlama.net,
+      digerGiderlerNet: digerGiderler.net,
       sabitGiderlerToplamNet,
       faaliyetGiderleriToplam,
       faaliyetKar,
@@ -644,6 +654,28 @@ export default function Simulator() {
                       <TableRow className="border-b border-slate-50 hover:bg-transparent">
                         <TableCell className="py-2 pl-6 text-slate-600">(-) Stopaj Gideri (Değişken)</TableCell>
                         <TableCell className="py-2 pr-6 text-right text-slate-600"><MoneyDisplay value={results.stopajToplam} className="text-slate-600" /></TableCell>
+                      </TableRow>
+
+                      {/* Fixed Expenses Breakdown */}
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Personel</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]"><MoneyDisplay value={results.personelNet} className="text-slate-500" /></TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Depo / Kira</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]"><MoneyDisplay value={results.depoNet} className="text-slate-500" /></TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Muhasebe</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]"><MoneyDisplay value={results.muhasebeNet} className="text-slate-500" /></TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Pazarlama</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]"><MoneyDisplay value={results.pazarlamaNet} className="text-slate-500" /></TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50 hover:bg-transparent">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Diğer Giderler</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]"><MoneyDisplay value={results.digerGiderlerNet} className="text-slate-500" /></TableCell>
                       </TableRow>
                       <TableRow className="border-b border-slate-50 hover:bg-transparent">
                         <TableCell className="py-2 pl-6 text-slate-600">(-) Toplam Sabit Giderler</TableCell>

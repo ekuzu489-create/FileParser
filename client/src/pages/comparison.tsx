@@ -252,6 +252,15 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
   return {
     netSatisHasilati,
     brutKar,
+    komisyonToplam,
+    kargoToplam,
+    platformFeeToplam,
+    stopajToplam,
+    personelNet,
+    depoNet: depo.net,
+    muhasebeNet: muhasebe.net,
+    pazarlamaNet: pazarlama.net,
+    digerGiderlerNet: digerGiderler.net,
     faaliyetKar,
     faaliyetGiderleriToplam,
     odenecekKDV,
@@ -272,7 +281,8 @@ const calculateScenario = (data: ScenarioData, hedefKarTL: number) => {
     marginBrut,
     marginFaaliyet,
     marginNet,
-    marginIade
+    marginIade,
+    sabitGiderlerToplamNet
   };
 };
 

@@ -75,6 +75,11 @@ interface AggregateCalculation {
   kargoToplam: number;
   platformFeeToplam: number;
   stopajToplam: number;
+  personelNet: number;
+  depoNet: number;
+  muhasebeNet: number;
+  pazarlamaNet: number;
+  digerGiderlerNet: number;
   sabitGiderlerToplamNet: number;
   faaliyetGiderleriToplam: number;
   faaliyetKar: number;
@@ -429,6 +434,11 @@ export default function BulkSimulation() {
       kargoToplam,
       platformFeeToplam,
       stopajToplam,
+      personelNet: personelNetAm,
+      depoNet: depoNetAm,
+      muhasebeNet: muhasebeNetAm,
+      pazarlamaNet: pazarlamaNetAm,
+      digerGiderlerNet: digerGiderlerNetAm,
       sabitGiderlerToplamNet,
       faaliyetGiderleriToplam,
       faaliyetKar,
@@ -785,6 +795,38 @@ export default function BulkSimulation() {
                         <TableCell className="py-2 pl-6 text-slate-600">(-) Stopaj Gideri (Değişken)</TableCell>
                         <TableCell className="py-2 pr-6 text-right text-slate-600">
                           {formatCurrency(aggregateCalc.stopajToplam)}
+                        </TableCell>
+                      </TableRow>
+
+                      {/* Fixed Expenses Breakdown */}
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Personel</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]">
+                          {formatCurrency(aggregateCalc.personelNet)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Depo / Kira</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]">
+                          {formatCurrency(aggregateCalc.depoNet)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Muhasebe</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]">
+                          {formatCurrency(aggregateCalc.muhasebeNet)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Pazarlama</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]">
+                          {formatCurrency(aggregateCalc.pazarlamaNet)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow className="border-b border-slate-50">
+                        <TableCell className="py-2 pl-9 text-slate-500 text-[0.85em]">    (-) Diğer Giderler</TableCell>
+                        <TableCell className="py-2 pr-6 text-right text-slate-500 text-[0.85em]">
+                          {formatCurrency(aggregateCalc.digerGiderlerNet)}
                         </TableCell>
                       </TableRow>
                       <TableRow className="border-b border-slate-50">

@@ -732,13 +732,11 @@ export default function BulkSimulation() {
                 </CardContent>
               </Card>
             </div>
-          </div>
-        )}
 
-        {/* Financial Analysis & Recommendations - Full Width */}
-        {aggregateCalc && (
-          <div className="space-y-6">
-            <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
+            {/* Right Column: P&L & Financial Analysis */}
+            {aggregateCalc && (
+              <div className="space-y-6">
+                <Card className="border-0 shadow-[0_8px_24px_rgba(0,0,0,0.15)] overflow-hidden">
                   <CardHeader className="bg-white border-b border-slate-100 pb-3 pt-5">
                     <CardTitle className="text-[1.1em] font-semibold text-blue-600 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5" />
@@ -1072,6 +1070,8 @@ export default function BulkSimulation() {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            )}
           </div>
         )}
 

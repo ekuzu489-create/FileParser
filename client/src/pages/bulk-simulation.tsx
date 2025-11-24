@@ -905,16 +905,16 @@ export default function BulkSimulation() {
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="space-y-6">
-                      {/* Profitability Status */}
+                      {/* Mevcut Durum - Expanded */}
                       <div className={cn(
-                        "p-4 rounded-lg border-2",
+                        "p-4 rounded-lg border-2 space-y-4",
                         aggregateCalc.netKar > 0
                           ? "bg-emerald-50 border-emerald-200"
                           : aggregateCalc.netKar === 0
                           ? "bg-amber-50 border-amber-200"
                           : "bg-red-50 border-red-200"
                       )}>
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-3 pb-4 border-b border-current border-opacity-10">
                           <div className={cn(
                             "rounded-full p-2 mt-0.5",
                             aggregateCalc.netKar > 0
@@ -943,7 +943,7 @@ export default function BulkSimulation() {
                                 : "✗ İşletme Zararlı"}
                             </p>
                             <p className={cn(
-                              "text-sm mt-1",
+                              "text-xs mt-2",
                               aggregateCalc.netKar > 0
                                 ? "text-emerald-800"
                                 : aggregateCalc.netKar === 0
@@ -951,118 +951,221 @@ export default function BulkSimulation() {
                                 : "text-red-800"
                             )}>
                               {aggregateCalc.netKar > 0
-                                ? `Aylık net kâr marjı ${(aggregateCalc.marginNet * 100).toFixed(2)}% ile sağlıklı bir düzeydir.`
+                                ? `Aylık net kâr ${formatCurrency(aggregateCalc.netKar)} olup marjınız ${(aggregateCalc.marginNet * 100).toFixed(2)}%. Bu sağlıklı bir düzeydir.`
                                 : aggregateCalc.netKar === 0
-                                ? "Gelirler giderlere eşit. Büyüme için yatırım yapabilirsiniz."
-                                : `Aylık kayıp ${Math.abs(aggregateCalc.netKar).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺. Acil iyileştirme gereklidir.`}
+                                ? "Gelirler giderlere tam olarak eşit. Çok hafif bir kar baskısı veya büyüme yatırımı yapılabilir."
+                                : `Aylık kayıp ${formatCurrency(Math.abs(aggregateCalc.netKar))}. Acil iyileştirme gereklidir.`}
                             </p>
                           </div>
                         </div>
-                      </div>
-
-                      {/* Cost Structure Analysis */}
-                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <p className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-blue-600" />
-                          Gider Yapısı Analizi
-                        </p>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-600">Satılan Malın Maliyeti (SMM)</span>
-                            <span className="font-medium text-slate-900">
-                              {((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%
-                            </span>
+                        
+                        {/* KPI Metrics Grid */}
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="bg-white/50 p-2 rounded">
+                            <p className="text-slate-600 font-medium">Brüt Marj</p>
+                            <p className="text-base font-bold text-slate-900">{((aggregateCalc.brutKar / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</p>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div 
-                              className="bg-orange-500 h-1.5 rounded-full" 
-                              style={{ width: `${Math.min(((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100), 100)}%` }}
-                            ></div>
+                          <div className="bg-white/50 p-2 rounded">
+                            <p className="text-slate-600 font-medium">Net Marj</p>
+                            <p className="text-base font-bold text-slate-900">{(aggregateCalc.marginNet * 100).toFixed(2)}%</p>
                           </div>
-
-                          <div className="flex justify-between items-center mt-4">
-                            <span className="text-slate-600">Değişken Giderler (Komisyon, Kargo, Platform, Stopaj)</span>
-                            <span className="font-medium text-slate-900">
-                              {(((aggregateCalc.komisyonToplam + aggregateCalc.kargoToplam + aggregateCalc.platformFeeToplam + aggregateCalc.stopajToplam) / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%
-                            </span>
+                          <div className="bg-white/50 p-2 rounded">
+                            <p className="text-slate-600 font-medium">Faaliyet Kar Oranı</p>
+                            <p className="text-base font-bold text-slate-900">{((aggregateCalc.faaliyetKar / aggregateCalc.netSatisHasilati) * 100).toFixed(2)}%</p>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div 
-                              className="bg-blue-500 h-1.5 rounded-full" 
-                              style={{ width: `${Math.min((((aggregateCalc.komisyonToplam + aggregateCalc.kargoToplam + aggregateCalc.platformFeeToplam + aggregateCalc.stopajToplam) / aggregateCalc.netSatisHasilati) * 100), 100)}%` }}
-                            ></div>
-                          </div>
-
-                          <div className="flex justify-between items-center mt-4">
-                            <span className="text-slate-600">Sabit Giderler (Personel, Depo, Muhasebe, Pazarlama, Diğer)</span>
-                            <span className="font-medium text-slate-900">
-                              {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div 
-                              className="bg-purple-500 h-1.5 rounded-full" 
-                              style={{ width: `${Math.min(((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100), 100)}%` }}
-                            ></div>
+                          <div className="bg-white/50 p-2 rounded">
+                            <p className="text-slate-600 font-medium">Toplam Satış Adedi</p>
+                            <p className="text-base font-bold text-slate-900">{formatNumber(excelTotals.totalQuantity)}</p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Dynamic Recommendations */}
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <p className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                      {/* Gider Yapısı Analizi - Detailed */}
+                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                        <p className="font-semibold text-slate-700 flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-blue-600" />
+                          Gider Yapısı Analizi (Detaylı)
+                        </p>
+                        
+                        {/* SMM Analysis */}
+                        <div className="bg-white p-3 rounded border border-slate-100">
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <p className="text-xs font-medium text-slate-600">Satılan Malın Maliyeti (SMM)</p>
+                              <p className="text-xs text-slate-500 mt-0.5">{formatCurrency(aggregateCalc.smToplam)}</p>
+                            </div>
+                            <span className="font-bold text-lg text-orange-600">
+                              {((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${Math.min(((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100), 100)}%` }}></div>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-2">
+                            {((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100) > 55 
+                              ? "⚠ Yüksek: Ürün maliyetini azaltma veya fiyat artırma düşünün" 
+                              : ((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100) > 45
+                              ? "→ Orta-Yüksek: Tedarikçi müzakereleri önerilir"
+                              : "✓ Sağlıklı: Maliyetler kontrol altında"}
+                          </p>
+                        </div>
+
+                        {/* Variable Expenses Breakdown */}
+                        <div className="bg-white p-3 rounded border border-slate-100">
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <p className="text-xs font-medium text-slate-600">Değişken Giderler (Toplam)</p>
+                              <p className="text-xs text-slate-500 mt-0.5">Komisyon + Kargo + Platform + Stopaj</p>
+                            </div>
+                            <span className="font-bold text-lg text-blue-600">
+                              {(((aggregateCalc.komisyonToplam + aggregateCalc.kargoToplam + aggregateCalc.platformFeeToplam + aggregateCalc.stopajToplam) / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${Math.min((((aggregateCalc.komisyonToplam + aggregateCalc.kargoToplam + aggregateCalc.platformFeeToplam + aggregateCalc.stopajToplam) / aggregateCalc.netSatisHasilati) * 100), 100)}%` }}></div>
+                          </div>
+                          <div className="text-xs mt-3 space-y-1 text-slate-600">
+                            <div className="flex justify-between">
+                              <span>  • Komisyon</span>
+                              <span>{((aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>  • Kargo</span>
+                              <span>{((aggregateCalc.kargoToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>  • Platform</span>
+                              <span>{((aggregateCalc.platformFeeToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>  • Stopaj</span>
+                              <span>{((aggregateCalc.stopajToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Fixed Expenses Breakdown */}
+                        <div className="bg-white p-3 rounded border border-slate-100">
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <p className="text-xs font-medium text-slate-600">Sabit Giderler (Toplam)</p>
+                              <p className="text-xs text-slate-500 mt-0.5">{formatCurrency(aggregateCalc.sabitGiderlerToplamNet)}</p>
+                            </div>
+                            <span className="font-bold text-lg text-purple-600">
+                              {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${Math.min(((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100), 100)}%` }}></div>
+                          </div>
+                          <div className="text-xs mt-3 space-y-1 text-slate-600">
+                            <div className="flex justify-between">
+                              <span>  • Personel</span>
+                              <span>{((aggregateCalc.personelNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>  • Depo/Kira</span>
+                              <span>{((aggregateCalc.depoNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>  • Muhasebe</span>
+                              <span>{((aggregateCalc.muhasebeNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>  • Pazarlama</span>
+                              <span>{((aggregateCalc.pazarlamaNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>  • Diğer</span>
+                              <span>{((aggregateCalc.digerGiderlerNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dynamic Recommendations - Comprehensive */}
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                        <p className="font-semibold text-blue-900 flex items-center gap-2">
                           <Target className="w-4 h-4" />
-                          Dinamik Öneriler
+                          Kapsamlı Öneriler & Eylem Planı
                         </p>
                         <ul className="space-y-2 text-sm text-blue-900">
+                          {/* Profitability Recommendations */}
                           {aggregateCalc.netKar < 0 && (
                             <>
-                              <li className="flex gap-2">
-                                <span className="text-red-600 font-bold">!</span>
-                                <span><strong>Acil Müdahale Gerekli:</strong> İşletme zararlı durumda. Gider azaltma veya fiyat artırımı düşünün.</span>
+                              <li className="flex gap-2 bg-red-50 p-2 rounded border border-red-200">
+                                <span className="text-red-600 font-bold text-lg">!</span>
+                                <div>
+                                  <strong>Acil Müdahale Gerekli:</strong> İşletme {formatCurrency(Math.abs(aggregateCalc.netKar))} zararlı. 
+                                  <br/><span className="text-xs mt-1">Gider azaltma veya satış hacmi/fiyat artırımı acil uygulanmalı.</span>
+                                </div>
                               </li>
                               {((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) > 0.50) && (
                                 <li className="flex gap-2">
                                   <span className="text-orange-600 font-bold">→</span>
-                                  <span><strong>SMM Yüksek:</strong> Ürün maliyetini azaltmak veya fiyat artırmak öneri verilir.</span>
+                                  <span><strong>SMM Tedarik Sorunu:</strong> {((aggregateCalc.smToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}% ile çok yüksek. Tedarikçi fiyat müzakeresi veya ürün maliyeti optimizasyonu yapın.</span>
                                 </li>
                               )}
-                              {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) > 0.25) && (
+                              {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) > 0.30) && (
                                 <li className="flex gap-2">
                                   <span className="text-purple-600 font-bold">→</span>
-                                  <span><strong>Sabit Giderler Yüksek:</strong> Personel, depo veya pazarlama giderlerini gözden geçirin.</span>
+                                  <span><strong>Sabit Giderler İncelenmeli:</strong> {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}% ile çok yüksek. Personel veya depo giderlerini optimize edin.</span>
                                 </li>
                               )}
                             </>
                           )}
+
                           {aggregateCalc.netKar > 0 && aggregateCalc.marginNet < 0.08 && (
-                            <li className="flex gap-2">
+                            <li className="flex gap-2 bg-amber-50 p-2 rounded border border-amber-200">
                               <span className="text-amber-600 font-bold">▲</span>
-                              <span><strong>İyileştirme Fırsatı:</strong> Marj {(aggregateCalc.marginNet * 100).toFixed(2)}% ile sınırdadır. Giderler optimize edilebilir.</span>
+                              <div>
+                                <strong>Marj Sınırda:</strong> Net marjınız {(aggregateCalc.marginNet * 100).toFixed(2)}% - çok dar. 
+                                <br/><span className="text-xs mt-1">Giderler optimize edilebilir veya satış hacmi artırımı hedeflenebilir.</span>
+                              </div>
                             </li>
                           )}
+
                           {aggregateCalc.netKar > 0 && aggregateCalc.marginNet >= 0.15 && (
-                            <li className="flex gap-2">
+                            <li className="flex gap-2 bg-green-50 p-2 rounded border border-green-200">
                               <span className="text-green-600 font-bold">✓</span>
-                              <span><strong>Güçlü Performans:</strong> {(aggregateCalc.marginNet * 100).toFixed(2)}% marj ile iyi durumdasınız. Satış hacmi artırımı düşünebilirsiniz.</span>
+                              <div>
+                                <strong>Güçlü Performans:</strong> {(aggregateCalc.marginNet * 100).toFixed(2)}% net marj ile başarılı durumdasınız. 
+                                <br/><span className="text-xs mt-1">Satış hacmi artırımı veya yeni ürün yelpazesi expansion'ı düşünebilirsiniz.</span>
+                              </div>
                             </li>
                           )}
+
                           {aggregateCalc.netKar > 0 && aggregateCalc.marginNet >= 0.08 && aggregateCalc.marginNet < 0.15 && (
-                            <li className="flex gap-2">
-                              <span className="text-blue-600 font-bold">✓</span>
-                              <span><strong>Sağlıklı Performans:</strong> {(aggregateCalc.marginNet * 100).toFixed(2)}% marj kabul edilebilir düzeydedir.</span>
+                            <li className="flex gap-2 bg-sky-50 p-2 rounded border border-sky-200">
+                              <span className="text-sky-600 font-bold">✓</span>
+                              <div>
+                                <strong>Sağlıklı Performans:</strong> {(aggregateCalc.marginNet * 100).toFixed(2)}% net marj kabul edilebilir. 
+                                <br/><span className="text-xs mt-1">Mevcut operasyonlar optimal, mikro-optimization fırsatları araştırın.</span>
+                              </div>
                             </li>
                           )}
-                          {(aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) > 0.15 && (
+
+                          {/* Commission Alert */}
+                          {(aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) > 0.18 && (
                             <li className="flex gap-2">
                               <span className="text-indigo-600 font-bold">→</span>
-                              <span><strong>Komisyon Yüksek:</strong> Pazaryeri komisyon oranları yüksek. Alternatif pazaryerler araştırabilirsiniz.</span>
+                              <span><strong>Yüksek Komisyon Yükü:</strong> Satışların {((aggregateCalc.komisyonToplam / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}'i komisyona gidiyor. Alternatif pazaryerler veya doğrudan satış kanalları araştırın.</span>
                             </li>
                           )}
-                          {(aggregateCalc.vergi / aggregateCalc.netSatisHasilati) > 0.10 && (
+
+                          {/* Tax Load Alert */}
+                          {aggregateCalc.netKar > 0 && (aggregateCalc.vergi / aggregateCalc.netKar) > 0.35 && (
                             <li className="flex gap-2">
                               <span className="text-rose-600 font-bold">→</span>
-                              <span><strong>Vergi Yükü:</strong> Kâr üzerindeki vergi yükü yüksek. Muhasebeci ile vergi planlama yapabilirsiniz.</span>
+                              <span><strong>Vergi Yükü Yüksek:</strong> Karınızın {((aggregateCalc.vergi / aggregateCalc.netKar) * 100).toFixed(0)}'i vergi. Muhasebeci ile vergi planlama ve optimizasyon stratejileri geliştirebilirsiniz.</span>
+                            </li>
+                          )}
+
+                          {/* Scaling Opportunity */}
+                          {aggregateCalc.netKar > 0 && (aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) > 0.15 && (
+                            <li className="flex gap-2">
+                              <span className="text-teal-600 font-bold">📈</span>
+                              <span><strong>Ölçek Fırsatı:</strong> Sabit giderleriniz net satışların {((aggregateCalc.sabitGiderlerToplamNet / aggregateCalc.netSatisHasilati) * 100).toFixed(1)}'i. Satış hacmi %20-30 arttırıldığında marjınız önemli ölçüde iyileşecektir.</span>
                             </li>
                           )}
                         </ul>
